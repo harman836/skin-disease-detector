@@ -31,6 +31,11 @@ def capture():
     return render_template('capture.html')
 
 
+@app.route('/results')
+def results():
+    return render_template('results.html')
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     # Check if file is in request

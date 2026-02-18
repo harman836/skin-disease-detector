@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results | Skin Disease Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="results-page">
+    <div class="app-container">
+        <div class="results-container">
+            <!-- Header -->
+            <div class="results-header">
+                <button class="back-btn" id="back-btn" title="Go Back">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>Analysis Results</h1>
+                <div class="spacer"></div>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="results-image-section">
+                <img id="result-image" src="" alt="Analyzed Image" class="result-image">
+            </div>
+
+            <!-- Confidence Scores -->
+            <div class="confidence-section">
+                <h2>Confidence Scores</h2>
+                
+                <div class="disease-results">
+                    <!-- Disease 1 -->
+                    <div class="disease-card">
+                        <div class="disease-header">
+                            <span class="disease-name">Melanoma</span>
+                            <span class="disease-score" id="score-1">--</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="fill-1" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disease 2 -->
+                    <div class="disease-card">
+                        <div class="disease-header">
+                            <span class="disease-name">Nevus</span>
+                            <span class="disease-score" id="score-2">--</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="fill-2" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disease 3 -->
+                    <div class="disease-card">
+                        <div class="disease-header">
+                            <span class="disease-name">Basal Cell Carcinoma</span>
+                            <span class="disease-score" id="score-3">--</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="fill-3" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disease 4 -->
+                    <div class="disease-card">
+                        <div class="disease-header">
+                            <span class="disease-name">Actinic Keratosis</span>
+                            <span class="disease-score" id="score-4">--</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="fill-4" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disease 5 -->
+                    <div class="disease-card">
+                        <div class="disease-header">
+                            <span class="disease-name">Benign Keratosis</span>
+                            <span class="disease-score" id="score-5">--</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="fill-5" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="results-actions">
+                <button class="btn btn-secondary" id="upload-new-btn">
+                    <i class="fas fa-plus"></i>
+                    Upload New
+                </button>
+                <button class="btn btn-primary" id="download-btn">
+                    <i class="fas fa-download"></i>
+                    Download Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('back-btn').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        document.getElementById('upload-new-btn').addEventListener('click', () => {
+            window.location.href = '/capture';
+        });
+
+        document.getElementById('download-btn').addEventListener('click', () => {
+            alert('Download report feature coming soon!');
+        });
+
+        // Example: Set confidence scores (replace with actual data from backend)
+        function setConfidenceScores(scores) {
+            const scoreIds = ['score-1', 'score-2', 'score-3', 'score-4', 'score-5'];
+            const fillIds = ['fill-1', 'fill-2', 'fill-3', 'fill-4', 'fill-5'];
+            
+            scores.forEach((score, index) => {
+                if (score !== null && score !== undefined) {
+                    const percentage = Math.round(score * 100);
+                    document.getElementById(scoreIds[index]).textContent = `${percentage}%`;
+                    document.getElementById(fillIds[index]).style.width = `${percentage}%`;
+                }
+            });
+        }
+
+        // Set result image from query parameter (optional)
+        const params = new URLSearchParams(window.location.search);
+        const imagePath = params.get('image');
+        if (imagePath) {
+            document.getElementById('result-image').src = imagePath;
+        }
+    </script>
+</body>
+</html>
