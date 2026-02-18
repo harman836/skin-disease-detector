@@ -127,7 +127,7 @@
                 if (data.success) {
                     statusText.textContent = 'Uploaded!';
                     setTimeout(() => {
-                        window.location.href = '/';
+                        window.location.href = `/results?image=${encodeURIComponent(data.filepath)}`;
                     }, 1500);
                 } else {
                     statusText.textContent = 'Upload Failed';
