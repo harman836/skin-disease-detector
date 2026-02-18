@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload | Skin Disease Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="index-page">
+    <div class="container">
+        <h1>Upload Image</h1>
+        <p class="subtitle">Share your image for analysis</p>
+
+        <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <p class="upload-text">Drag and drop your image here</p>
+            <p class="upload-hint">or click to select</p>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*">
+        <a href="/capture" class="btn-upload" style="text-decoration: none;">
+            <i class="fas fa-camera"></i>
+            <span>Take a Picture</span>
+        </a>
+        <button class="btn-upload secondary" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-image"></i>
+            <span>Choose from Files</span>
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Uploading your image...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
+
+        <div class="image-container" id="imageContainer">
+            <h2>Uploaded Image</h2>
+            <img id="uploadedImage" src="" alt="Uploaded image">
+            <div class="btn-group">
+                <button class="btn-clear" onclick="clearImage()">
+                    <i class="fas fa-trash-alt"></i>
+                    Clear
+                </button>
+                <button class="btn-download" id="downloadBtn" onclick="downloadImage()">
+                    <i class="fas fa-download"></i>
+                    Download
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const imageContainer = document.getElementById('imageContainer');
+        const uploadedImage = document.getElementById('uploadedImage');
+        let currentFilename = '';
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                uploadFile();
+            }
+        });
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                uploadFile();
+            }
+        });
+
+        const cameraInput = document.getElementById('cameraInput');
+        cameraInput.addEventListener('change', () => {
+            if (cameraInput.files.length > 0) {
+                fileInput.files = cameraInput.files;
+                uploadFile();
+            }
+        });
+
+        function uploadFile() {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError('No file selected');
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            // Validate file size (max 16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size exceeds 16MB limit');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loading.style.display = 'block';
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+
+                if (data.success) {
+                    currentFilename = data.filename;
+                    uploadedImage.src = data.filepath;
+                    imageContainer.classList.add('show');
+                    showSuccess('Image uploaded successfully!');
+                } else {
+                    showError(data.error || 'Upload failed');
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                showError('Error uploading file: ' + error);
+                console.error('Error:', error);
+            });
+        }
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+        }
+
+        function clearImage() {
+            uploadedImage.src = '';
+            imageContainer.classList.remove('show');
+            fileInput.value = '';
+            currentFilename = '';
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+        }
+
+        function downloadImage() {
+            if (currentFilename) {
+                const link = document.createElement('a');
+                link.href = `/uploads/${currentFilename}`;
+                link.download = currentFilename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>
