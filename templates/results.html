@@ -1,285 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analysis Results | Skin Disease Detector</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% block title %}Analysis Results | Skin Disease Detector{% endblock %}
 
-<body class="results-page">
-    <div class="container animate-fade-in" style="max-width: 1260px;">
+{% block body_class %}results-page{% endblock %}
 
-        <!-- Header (Internal to Grid/Design) -->
-        <header style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-            <button class="btn btn-secondary" id="back-btn" style="width: auto;">
-                <i data-lucide="arrow-left"></i>
-                <span>Back</span>
-            </button>
-            <h2 class="heading-serif" style="font-size: 24px;">Analysis Results</h2>
-            <div id="timestamp" style="font-size: 13px; color: #8A8A8A;"></div>
-        </header>
+{% block extra_styles %}
+<style>
+    .container {
+        max-width: 1260px;
+    }
+</style>
+{% endblock %}
 
-        <div class="results-grid">
-            <!-- LEFT COLUMN (pmiFy) -->
-            <div style="display: flex; flex-direction: column; gap: 24px;">
-                <div class="image-container">
-                    <div class="result-image-box">
-                        <img id="result-image" src="" alt="Analyzed Image">
-                        <div id="heatmapOverlay"
-                            style="display: none; position: absolute; inset: 0; pointer-events: none;"></div>
+{% block content %}
+<div class="container animate-fade-in">
+
+    <!-- Header -->
+    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-secondary" id="back-btn" style="width: auto;">
+            <i data-lucide="arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <h2 class="heading-serif" style="font-size: 24px;">Analysis Results</h2>
+        <div id="timestamp" style="font-size: 13px; color: #8A8A8A;"></div>
+    </header>
+
+    <div class="results-grid">
+        <!-- LEFT COLUMN -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="image-container">
+                <div class="result-image-box">
+                    <img id="result-image" src="" alt="Analyzed Image">
+                    <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none;">
                     </div>
                 </div>
+            </div>
 
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button class="btn btn-secondary" id="toggleHeatmap">
-                        <i data-lucide="microscope"></i>
-                        <span>Show AI Focus Area</span>
-                    </button>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-secondary" id="toggleHeatmap">
+                    <i data-lucide="microscope"></i>
+                    <span>Show AI Focus Area</span>
+                </button>
 
-                    <!-- About This Model (About Accordion) -->
-                    <details class="health-accordion" style="width: 100%;">
-                        <summary class="accordion-trigger">
-                            <span>About This Model</span>
-                            <i data-lucide="chevron-down"></i>
-                        </summary>
-                        <div class="accordion-content">
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                    <span style="color: #8A8A8A;">Architecture</span>
-                                    <span>CNN (EfficientNet)</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                    <span style="color: #8A8A8A;">Training Data</span>
-                                    <span>Medical Imaging Dataset</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                    <span style="color: #8A8A8A;">Accuracy</span>
-                                    <span>Optimized for Screening</span>
-                                </div>
+                <!-- About This Model -->
+                <details class="health-accordion" style="width: 100%;">
+                    <summary class="accordion-trigger">
+                        <span>About This Model</span>
+                        <i data-lucide="chevron-down"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Architecture</span>
+                                <span>CNN (EfficientNet)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Training Data</span>
+                                <span>Medical Imaging Dataset</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Accuracy</span>
+                                <span>Optimized for Screening</span>
                             </div>
                         </div>
-                    </details>
-                </div>
-            </div>
-
-            <!-- RIGHT COLUMN (tHSm0) -->
-            <div style="display: flex; flex-direction: column; gap: 24px;">
-
-                <!-- Main Prediction Card (Cz7Xy) -->
-                <div class="card main-prediction-card">
-                    <p class="section-label">MOST LIKELY CONDITION</p>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 class="prediction-name" id="topCondition">--</h3>
-                        <div class="risk-pill" id="riskBadge"><span id="riskBadgeText">--</span></div>
                     </div>
-
-                    <div style="display: flex; gap: 40px;">
-                        <div class="stat-item">
-                            <span class="stat-label">Confidence</span>
-                            <span class="stat-value" id="topConfidence">--%</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Risk Level</span>
-                            <span class="stat-value" id="topRiskLevel">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- What This Means (TjhwH) -->
-                <div class="card desc-card">
-                    <p class="section-label">WHAT THIS MEANS</p>
-                    <p id="explanationText" style="font-size: 14px; color: var(--muted-foreground); line-height: 1.5;">
-                        Loading explanation...
-                    </p>
-                </div>
-
-                <!-- Recommended Action (XUPYO) -->
-                <div class="card action-card">
-                    <i data-lucide="stethoscope" style="color: #7C9082; width: 24px; height: 24px; flex-shrink: 0;"></i>
-                    <div id="recommendationContent" style="font-size: 14px; color: var(--foreground);">
-                        Loading recommended action...
-                    </div>
-                </div>
-
-                <!-- Confidence Breakdown (3RHBa) -->
-                <div class="card">
-                    <p class="section-label">CONFIDENCE BREAKDOWN</p>
-                    <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
-                        <!-- Breakdown items injected here -->
-                    </div>
-                </div>
-
-                <!-- Final Actions (DRLAZ) -->
-                <div style="display: flex; gap: 16px;">
-                    <button class="btn btn-primary" id="download-btn">
-                        <i data-lucide="download"></i>
-                        <span>Download Report</span>
-                    </button>
-                    <button class="btn btn-secondary" id="upload-new-btn">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Analyze Another</span>
-                    </button>
-                </div>
-
-                <!-- Disclaimer (QwDV5) -->
-                <p style="font-size: 11px; color: #ADADAD; text-align: center;">
-                    Important: This tool provides screening support only and does not replace professional medical
-                    diagnosis.
-                </p>
+                </details>
             </div>
         </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- Main Prediction Card -->
+            <div class="card main-prediction-card">
+                <p class="section-label">MOST LIKELY CONDITION</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="prediction-name" id="topCondition">--</h3>
+                    <div class="risk-pill" id="riskBadge"><span id="riskBadgeText">--</span></div>
+                </div>
+
+                <div style="display: flex; gap: 40px;">
+                    <div class="stat-item">
+                        <span class="stat-label">Confidence</span>
+                        <span class="stat-value" id="topConfidence">--%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Risk Level</span>
+                        <span class="stat-value" id="topRiskLevel">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What This Means -->
+            <div class="card desc-card">
+                <p class="section-label">WHAT THIS MEANS</p>
+                <p id="explanationText" style="font-size: 14px; color: var(--muted-foreground); line-height: 1.5;">
+                    Loading explanation...
+                </p>
+            </div>
+
+            <div class="card action-card">
+                <i data-lucide="stethoscope"
+                    style="color: var(--primary); width: 24px; height: 24px; flex-shrink: 0;"></i>
+                <div id="recommendationContent" style="font-size: 14px; color: var(--foreground);">
+                    Loading recommended action...
+                </div>
+            </div>
+
+            <!-- Confidence Breakdown -->
+            <div class="card">
+                <p class="section-label">CONFIDENCE BREAKDOWN</p>
+                <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Breakdown items injected here -->
+                </div>
+            </div>
+
+            <!-- Final Actions -->
+            <div style="display: flex; gap: 16px;">
+                <button class="btn btn-primary" id="download-btn">
+                    <i data-lucide="download"></i>
+                    <span>Download Report</span>
+                </button>
+                <button class="btn btn-secondary" id="upload-new-btn">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Analyze Another</span>
+                </button>
+            </div>
+
+            <!-- Disclaimer -->
+            <p style="font-size: 11px; color: #ADADAD; text-align: center;">
+                Important: This tool provides screening support only and does not replace professional medical
+                diagnosis.
+            </p>
+        </div>
     </div>
+</div>
+{% endblock %}
 
-    <script>
-        lucide.createIcons();
+{% block scripts %}
+const diseaseInfo = {
+'Melanoma': {
+explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not
+detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
+highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+},
+'Basal Cell Carcinoma': {
+explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a
+high cure rate when treated early.',
+highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+},
+'Eczema': {
+explanation: 'Eczema is a chronic inflammatory skin condition characterised by itching, redness, and flaking. It is not
+contagious and requires proper skin care and management.',
+highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+},
+'Psoriasis': {
+explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. While there is no cure,
+various treatments can help manage symptoms.',
+highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+},
+'Fungal Infections': {
+explanation: 'Fungal skin infections can appear as rings, patches, or discoloration. They are often contagious and
+require antifungal treatment.',
+highRiskThreshold: 0.55, mediumRiskThreshold: 0.25
+}
+};
 
-        // Data and Logic (Preserved and updated for new IDs)
-        const diseaseInfo = {
-            'Melanoma': {
-                explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
-                highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
-            },
-            'Basal Cell Carcinoma': {
-                explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a high cure rate when treated early.',
-                highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
-            },
-            'Eczema': {
-                explanation: 'Eczema is a chronic inflammatory skin condition characterised by itching, redness, and flaking. It is not contagious and requires proper skin care and management.',
-                highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
-            },
-            'Psoriasis': {
-                explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. While there is no cure, various treatments can help manage symptoms.',
-                highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
-            },
-            'Fungal Infections': {
-                explanation: 'Fungal skin infections can appear as rings, patches, or discoloration. They are often contagious and require antifungal treatment.',
-                highRiskThreshold: 0.55, mediumRiskThreshold: 0.25
-            }
-        };
+const mockScores = {
+'Melanoma': 0.30,
+'Basal Cell Carcinoma': 0.18,
+'Eczema': 0.25,
+'Psoriasis': 0.15,
+'Fungal Infections': 0.12
+};
 
-        const mockScores = {
-            'Melanoma': 0.30,
-            'Basal Cell Carcinoma': 0.18,
-            'Eczema': 0.25,
-            'Psoriasis': 0.15,
-            'Fungal Infections': 0.12
-        };
+function getRiskLevel(condition, confidence) {
+const info = diseaseInfo[condition];
+if (!info) return 'Unknown';
+if (confidence >= info.highRiskThreshold) return 'High';
+if (confidence >= info.mediumRiskThreshold) return 'Medium';
+return 'Low';
+}
 
-        function getRiskLevel(condition, confidence) {
-            const info = diseaseInfo[condition];
-            if (!info) return 'Unknown';
-            if (confidence >= info.highRiskThreshold) return 'High';
-            if (confidence >= info.mediumRiskThreshold) return 'Medium';
-            return 'Low';
-        }
+function getRiskColor(riskLevel) {
+switch (riskLevel) {
+case 'High': return '#D89575'; // Terracotta
+case 'Medium': return '#D4A64A'; // Gold
+case 'Low': return '#4A7C7A'; // Updated Wellness Blue-Green
+default: return '#6D6C6A'; // Warm Gray
+}
+}
 
-        function getRiskColor(riskLevel) {
-            switch (riskLevel) {
-                case 'High': return '#8C1C00'; // Var color
-                case 'Medium': return '#804200';
-                case 'Low': return '#004D1A';
-                default: return '#666666';
-            }
-        }
+function displayResults(scores) {
+const sorted = Object.entries(scores).sort(([, a], [, b]) => b - a);
+const [topCondition, topConfidence] = sorted[0];
+const topRisk = getRiskLevel(topCondition, topConfidence);
+const topColor = getRiskColor(topRisk);
 
-        function displayResults(scores) {
-            const sorted = Object.entries(scores).sort(([, a], [, b]) => b - a);
-            const [topCondition, topConfidence] = sorted[0];
-            const topRisk = getRiskLevel(topCondition, topConfidence);
-            const topColor = getRiskColor(topRisk);
+document.getElementById('topCondition').textContent = topCondition;
+document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
+document.getElementById('topRiskLevel').textContent = topRisk;
+document.getElementById('topRiskLevel').style.color = topColor;
 
-            document.getElementById('topCondition').textContent = topCondition;
-            document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
-            document.getElementById('topRiskLevel').textContent = topRisk;
-            document.getElementById('topRiskLevel').style.color = topColor;
+const pill = document.getElementById('riskBadge');
+pill.style.color = topColor;
+pill.style.borderColor = topColor;
+document.getElementById('riskBadgeText').textContent = topRisk;
 
-            const pill = document.getElementById('riskBadge');
-            pill.style.color = topColor;
-            pill.style.borderColor = topColor;
-            document.getElementById('riskBadgeText').textContent = topRisk;
+document.getElementById('explanationText').textContent =
+diseaseInfo[topCondition]?.explanation || 'Information not available.';
 
-            document.getElementById('explanationText').textContent =
-                diseaseInfo[topCondition]?.explanation || 'Information not available.';
+const recEl = document.getElementById('recommendationContent');
+if (topRisk === 'High') {
+recEl.innerHTML = `<strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional
+medical evaluation.`;
+} else if (topRisk === 'Medium') {
+recEl.innerHTML = `<strong>Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and
+prevent progression.`;
+} else {
+recEl.innerHTML = `<strong>Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
+}
 
-            const recEl = document.getElementById('recommendationContent');
-            if (topRisk === 'High') {
-                recEl.innerHTML = `<strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation.`;
-            } else if (topRisk === 'Medium') {
-                recEl.innerHTML = `<strong>Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and prevent progression.`;
-            } else {
-                recEl.innerHTML = `<strong>Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
-            }
+const list = document.getElementById('diseaseResults');
+list.innerHTML = '';
+sorted.forEach(([disease, confidence], i) => {
+const pct = Math.round(confidence * 100);
+const risk = getRiskLevel(disease, confidence);
+const color = getRiskColor(risk);
 
-            const list = document.getElementById('diseaseResults');
-            list.innerHTML = '';
-            sorted.forEach(([disease, confidence], i) => {
-                const pct = Math.round(confidence * 100);
-                const risk = getRiskLevel(disease, confidence);
-                const color = getRiskColor(risk);
+const row = document.createElement('div');
+row.className = 'confidence-row';
+row.innerHTML = `
+<div class="confidence-header">
+    <span style="font-weight: 500;">${disease}</span>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <span>${pct}%</span>
+        <span class="risk-pill" style="font-size: 8px; color: ${color}; border-color: ${color}">${risk}</span>
+    </div>
+</div>
+<div class="confidence-bar-track">
+    <div class="confidence-bar-fill" style="width: 0%; background-color: ${color}" data-width="${pct}%"></div>
+</div>
+`;
+list.appendChild(row);
 
-                const row = document.createElement('div');
-                row.className = 'confidence-row';
-                row.innerHTML = `
-                    <div class="confidence-header">
-                        <span style="font-weight: 500;">${disease}</span>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <span>${pct}%</span>
-                            <span class="risk-pill" style="font-size: 8px; color: ${color}; border-color: ${color}">${risk}</span>
-                        </div>
-                    </div>
-                    <div class="confidence-bar-track">
-                        <div class="confidence-bar-fill" style="width: 0%; background-color: ${color}" data-width="${pct}%"></div>
-                    </div>
-                `;
-                list.appendChild(row);
+// Animate
+setTimeout(() => {
+row.querySelector('.confidence-bar-fill').style.width = `${pct}%`;
+}, 100 * i);
+});
+}
 
-                // Animate
-                setTimeout(() => {
-                    row.querySelector('.confidence-bar-fill').style.width = `${pct}%`;
-                }, 100 * i);
-            });
-        }
+// Heatmap toggle
+document.getElementById('toggleHeatmap').addEventListener('click', function () {
+const overlay = document.getElementById('heatmapOverlay');
+const showing = overlay.style.display !== 'none';
+if (showing) {
+overlay.style.display = 'none';
+this.classList.remove('btn-primary');
+this.classList.add('btn-secondary');
+this.querySelector('span').textContent = 'Show AI Focus Area';
+} else {
+overlay.style.display = 'block';
+overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%,
+transparent 70%)';
+this.classList.remove('btn-secondary');
+this.classList.add('btn-primary');
+this.querySelector('span').textContent = 'Hide AI Focus Area';
+}
+});
 
-        // Heatmap toggle
-        document.getElementById('toggleHeatmap').addEventListener('click', function () {
-            const overlay = document.getElementById('heatmapOverlay');
-            const showing = overlay.style.display !== 'none';
-            if (showing) {
-                overlay.style.display = 'none';
-                this.classList.remove('btn-primary');
-                this.classList.add('btn-secondary');
-                this.querySelector('span').textContent = 'Show AI Focus Area';
-            } else {
-                overlay.style.display = 'block';
-                overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%, transparent 70%)';
-                this.classList.remove('btn-secondary');
-                this.classList.add('btn-primary');
-                this.querySelector('span').textContent = 'Hide AI Focus Area';
-            }
-        });
+document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
+document.getElementById('upload-new-btn').addEventListener('click', () => window.location.href = '/');
+document.getElementById('download-btn').addEventListener('click', () => alert('PDF report is being generated...'));
 
-        document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
-        document.getElementById('upload-new-btn').addEventListener('click', () => window.location.href = '/');
-        document.getElementById('download-btn').addEventListener('click', () => alert('PDF report is being generated...'));
+// Set timestamp
+const now = new Date();
+document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
+year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+});
 
-        // Set timestamp
-        const now = new Date();
-        document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
+// Load image from localStorage
+const stored = localStorage.getItem('uploadedImageData');
+if (stored) document.getElementById('result-image').src = stored;
 
-        // Load image from localStorage
-        const stored = localStorage.getItem('uploadedImageData');
-        if (stored) document.getElementById('result-image').src = stored;
-
-        // Initialize results
-        displayResults(mockScores);
-    </script>
-</body>
-
-</html>
+// Initialize results
+displayResults(mockScores);
+{% endblock %}

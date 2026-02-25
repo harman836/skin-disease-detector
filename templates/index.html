@@ -1,231 +1,211 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin Wellness Analysis | Skin Disease Detector</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% block title %}Skin Wellness Analysis | Skin Disease Detector{% endblock %}
 
-<body class="index-page">
-    <div class="container animate-fade-in">
+{% block body_class %}index-page{% endblock %}
 
-        <!-- Header Group (u2KR3) -->
-        <header class="hero-group">
-            <i data-lucide="stethoscope" style="color: #7C9082; width: 40px; height: 40px;"></i>
-            <h1 class="hero-header">Skin Wellness Analysis</h1>
-            <p class="subtitle">A gentle, AI-powered assessment for your skin health.</p>
-        </header>
+{% block content %}
+<div class="container animate-fade-in">
 
-        <!-- Trust Upload Card (btcsQ) -->
-        <div class="upload-card">
+    <!-- Header Group -->
+    <header class="hero-group">
+        <i data-lucide="stethoscope" style="color: var(--primary); width: 40px; height: 40px;"></i>
+        <h1 class="hero-header">Skin Wellness Analysis</h1>
+        <p class="subtitle">An AI-powered assessment for your skin health.</p>
+    </header>
 
-            <!-- Upload Hit Area (cOoq8) -->
-            <div class="upload-hit-area" id="uploadArea">
-                <div class="upload-area-content" id="uploadContent"
-                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
-                    <i data-lucide="camera" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
-                    <p class="text-main">Place your image here</p>
-                    <p class="text-sub">Secure Review Active</p>
-                </div>
+    <!-- Trust Upload Card -->
+    <div class="upload-card">
 
-                <!-- Image Preview (Custom addition to match logic) -->
-                <div class="image-preview-wrapper hidden" id="previewWrapper">
-                    <div style="position: relative;">
-                        <img id="previewImage" src="" alt="Preview"
-                            style="max-width: 100%; border-radius: 12px; max-height: 250px;">
-                        <button class="remove-btn" onclick="removeImage(event)" title="Remove image"
-                            style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 50%; background: #CC6666; color: white; border: none; cursor: pointer;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
+        <!-- Upload Hit Area -->
+        <div class="upload-hit-area" id="uploadArea">
+            <div class="upload-area-content" id="uploadContent"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <i data-lucide="camera" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
+                <p class="text-main">Place your image here</p>
+                <p class="text-sub">Secure Review Active</p>
             </div>
 
-            <!-- Action Group (X9kZA) -->
-            <div class="action-group">
-                <!-- Status Messages -->
-                <div id="loading" class="hidden" style="text-align: center; color: #7C9082; font-size: 13px;">
-                    <p><i class="fas fa-spinner fa-spin"></i> Preparing your image...</p>
-                </div>
-                <div id="error" class="hidden" style="color: #8C1C00; font-size: 13px; text-align: center;"></div>
-                <div id="success" class="hidden" style="color: #004D1A; font-size: 13px; text-align: center;"></div>
-
-                <!-- Initial Buttons (SXnqv) -->
-                <div id="buttonGroup" class="action-group">
-                    <a href="/capture" class="btn btn-primary">
-                        <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
-                        <span>Take a Photo</span>
-                    </a>
-                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
-                        <i data-lucide="image" style="width: 16px; height: 16px;"></i>
-                        <span>Choose from Device</span>
-                    </button>
-                </div>
-
-                <!-- Analyze Container (shown after image selected) -->
-                <div id="analyzeContainer" class="action-group hidden">
-                    <button class="btn btn-primary" onclick="analyzeImage()">
-                        <i class="fas fa-wand-magic-sparkles"></i>
-                        <span>Analyze Image</span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="startOver()">
-                        <i class="fas fa-arrow-left"></i>
-                        <span>Change Image</span>
+            <!-- Image Preview -->
+            <div class="image-preview-wrapper hidden" id="previewWrapper">
+                <div style="position: relative;">
+                    <img id="previewImage" src="" alt="Preview"
+                        style="max-width: 100%; border-radius: 12px; max-height: 250px;">
+                    <button class="remove-btn" onclick="removeImage(event)" title="Remove image"
+                        style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 50%; background: var(--color-error-foreground); color: white; border: none; cursor: pointer;">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Health Accordion (JkhaK) -->
-        <details class="health-accordion">
-            <summary class="accordion-trigger">
-                <span>How to take a clear photo</span>
-                <i data-lucide="chevron-down"></i>
-            </summary>
-            <div class="accordion-content">
-                <p class="accordion-item">1. Ensure soft, natural lighting.</p>
-                <p class="accordion-item">2. Focus on the area of concern.</p>
-                <p class="accordion-item">3. Maintain a distance of 10-15cm.</p>
+        <!-- Action Group -->
+        <div class="action-group">
+            <!-- Status Messages -->
+            <div id="loading" class="hidden" style="text-align: center; color: var(--primary); font-size: 13px;">
+                <p><i class="fas fa-spinner fa-spin"></i> Preparing your image...</p>
             </div>
-        </details>
+            <div id="error" class="hidden"
+                style="color: var(--color-error-foreground); font-size: 13px; text-align: center;"></div>
+            <div id="success" class="hidden"
+                style="color: var(--color-success-foreground); font-size: 13px; text-align: center;"></div>
 
-        <!-- Medical Disclaimer (aCWx6) -->
-        <div class="medical-disclaimer">
-            <p>Our AI assists in detection but is not a clinical diagnosis. Please consult a specialist for professional
-                care.</p>
+            <!-- Initial Buttons -->
+            <div id="buttonGroup" class="action-group">
+                <a href="/capture" class="btn btn-primary">
+                    <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+                    <span>Take a Photo</span>
+                </a>
+                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                    <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+                    <span>Choose from Device</span>
+                </button>
+            </div>
+
+            <!-- Analyze Container (shown after image selected) -->
+            <div id="analyzeContainer" class="action-group hidden">
+                <button class="btn btn-primary" onclick="analyzeImage()">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>Analyze Image</span>
+                </button>
+                <button class="btn btn-secondary" onclick="startOver()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Change Image</span>
+                </button>
+            </div>
         </div>
-
-        <input type="file" id="fileInput" accept="image/*" class="hidden">
     </div>
 
-    <script>
-        lucide.createIcons();
+    <!-- Health Accordion -->
+    <details class="health-accordion">
+        <summary class="accordion-trigger">
+            <span>How to take a clear photo</span>
+            <i data-lucide="chevron-down"></i>
+        </summary>
+        <div class="accordion-content">
+            <p class="accordion-item">1. Ensure soft, natural lighting.</p>
+            <p class="accordion-item">2. Focus on the area of concern.</p>
+            <p class="accordion-item">3. Maintain a distance of 10-15cm.</p>
+        </div>
+    </details>
 
-        const uploadArea = document.getElementById('uploadArea');
-        const uploadContent = document.getElementById('uploadContent');
-        const previewWrapper = document.getElementById('previewWrapper');
-        const previewImage = document.getElementById('previewImage');
-        const fileInput = document.getElementById('fileInput');
-        const loading = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
-        const successDiv = document.getElementById('success');
-        const analyzeContainer = document.getElementById('analyzeContainer');
-        const buttonGroup = document.getElementById('buttonGroup');
-        let hasUploadedImage = false;
+    <!-- Medical Disclaimer -->
+    <div class="medical-disclaimer">
+        <p>Our AI assists in detection but is not a clinical diagnosis. Please consult a specialist for professional
+            care.</p>
+    </div>
 
-        // Drag and drop logic
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = '#E8F0EA';
-        });
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+</div>
+{% endblock %}
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = '#F0EDE8';
-        });
+{% block scripts %}
+const uploadArea = document.getElementById('uploadArea');
+const uploadContent = document.getElementById('uploadContent');
+const previewWrapper = document.getElementById('previewWrapper');
+const previewImage = document.getElementById('previewImage');
+const fileInput = document.getElementById('fileInput');
+const loading = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const successDiv = document.getElementById('success');
+const analyzeContainer = document.getElementById('analyzeContainer');
+const buttonGroup = document.getElementById('buttonGroup');
+let hasUploadedImage = false;
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = '#F0EDE8';
-            const files = e.dataTransfer.files;
-            if (files.length > 0 && validateFile(files[0])) {
-                uploadFile(files[0]);
-            }
-        });
+// Drag and drop logic
+uploadArea.addEventListener('dragover', (e) => {
+e.preventDefault();
+uploadArea.style.background = 'var(--color-success)';
+});
 
-        uploadArea.addEventListener('click', (e) => {
-            if (!hasUploadedImage && e.target.closest('#uploadArea')) {
-                fileInput.click();
-            }
-        });
+uploadArea.addEventListener('dragleave', () => {
+uploadArea.style.background = 'var(--secondary)';
+});
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0 && validateFile(fileInput.files[0])) {
-                uploadFile(fileInput.files[0]);
-            }
-        });
+uploadArea.addEventListener('drop', (e) => {
+e.preventDefault();
+uploadArea.style.background = 'var(--secondary)';
+const files = e.dataTransfer.files;
+if (files.length > 0 && validateFile(files[0])) {
+uploadFile(files[0]);
+}
+});
 
-        function validateFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showError('Please select a valid image file');
-                return false;
-            }
-            if (file.size > 16 * 1024 * 1024) {
-                showError('File size exceeds 16MB limit');
-                return false;
-            }
-            return true;
-        }
+uploadArea.addEventListener('click', (e) => {
+if (!hasUploadedImage && e.target.closest('#uploadArea')) {
+fileInput.click();
+}
+});
 
-        function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+fileInput.addEventListener('change', () => {
+if (fileInput.files.length > 0 && validateFile(fileInput.files[0])) {
+uploadFile(fileInput.files[0]);
+}
+});
 
-            loading.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
+function validateFile(file) {
+if (!file.type.startsWith('image/')) {
+showError('error', 'Please select a valid image file');
+return false;
+}
+if (file.size > 16 * 1024 * 1024) {
+showError('error', 'File size exceeds 16MB limit');
+return false;
+}
+return true;
+}
 
-            fetch('/upload', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    loading.classList.add('hidden');
-                    if (data.success) {
-                        localStorage.setItem('uploadedImageData', data.imageData);
-                        showImagePreview(data.imageData);
-                        hasUploadedImage = true;
-                        analyzeContainer.classList.remove('hidden');
-                        buttonGroup.classList.add('hidden');
-                        showSuccess('Image ready for analysis');
-                    } else {
-                        showError(data.error || 'Upload failed');
-                    }
-                })
-                .catch(err => {
-                    loading.classList.add('hidden');
-                    showError('Error uploading file: ' + err);
-                });
-        }
+function uploadFile(file) {
+const formData = new FormData();
+formData.append('file', file);
 
-        function showImagePreview(src) {
-            previewImage.src = src;
-            uploadContent.classList.add('hidden');
-            previewWrapper.classList.remove('hidden');
-        }
+loading.classList.remove('hidden');
+errorDiv.classList.add('hidden');
+successDiv.classList.add('hidden');
 
-        function removeImage(event) {
-            if (event) event.stopPropagation();
-            previewImage.src = '';
-            uploadContent.classList.remove('hidden');
-            previewWrapper.classList.add('hidden');
-            fileInput.value = '';
-            hasUploadedImage = false;
-            analyzeContainer.classList.add('hidden');
-            buttonGroup.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-        }
+fetch('/upload', { method: 'POST', body: formData })
+.then(r => r.json())
+.then(data => {
+loading.classList.add('hidden');
+if (data.success) {
+localStorage.setItem('uploadedImageData', data.imageData);
+showImagePreview(data.imageData);
+hasUploadedImage = true;
+analyzeContainer.classList.remove('hidden');
+buttonGroup.classList.add('hidden');
+showSuccess('success', 'Image ready for analysis');
+} else {
+showError('error', data.error || 'Upload failed');
+}
+})
+.catch(err => {
+loading.classList.add('hidden');
+showError('error', 'Error uploading file: ' + err);
+});
+}
 
-        function analyzeImage() {
-            if (hasUploadedImage) window.location.href = '/results';
-        }
+function showImagePreview(src) {
+previewImage.src = src;
+uploadContent.classList.add('hidden');
+previewWrapper.classList.remove('hidden');
+}
 
-        function startOver() { removeImage(); }
+function removeImage(event) {
+if (event) event.stopPropagation();
+previewImage.src = '';
+uploadContent.classList.remove('hidden');
+previewWrapper.classList.add('hidden');
+fileInput.value = '';
+hasUploadedImage = false;
+analyzeContainer.classList.add('hidden');
+buttonGroup.classList.remove('hidden');
+errorDiv.classList.add('hidden');
+successDiv.classList.add('hidden');
+}
 
-        function showError(msg) {
-            errorDiv.textContent = msg;
-            errorDiv.classList.remove('hidden');
-            successDiv.classList.add('hidden');
-        }
+function analyzeImage() {
+if (hasUploadedImage) window.location.href = '/results';
+}
 
-        function showSuccess(msg) {
-            successDiv.textContent = msg;
-            successDiv.classList.remove('hidden');
-            errorDiv.classList.add('hidden');
-        }
-    </script>
-</body>
-
-</html>
+function startOver() { removeImage(); }
+{% endblock %}

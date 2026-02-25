@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Skin Disease Detector{% endblock %}</title>
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    {% block extra_styles %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    {% block content %}{% endblock %}
+
+    <!-- Shared Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+    <script>
+        // Internal page-specific scripts can be placed here via blocks
+        {% block scripts %} {% endblock %}
+    </script>
+</body>
+
+</html>

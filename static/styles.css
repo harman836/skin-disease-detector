@@ -1,34 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-    /* Colors - Scandinavian Minimal */
-    --background: #FAF8F5;
-    --foreground: #2D2D2D;
-    --muted-foreground: #5A5A5A;
-    --primary: #7C9082;
-    /* Sage Green */
+    /* Colors - Modern Wellness */
+    --background: #F5F4F1;
+    --foreground: #1A1918;
+    --muted-foreground: #6D6C6A;
+    --primary: #4A7C7A;
+    /* Updated Wellness Blue-Green */
     --primary-foreground: #FFFFFF;
-    --secondary: #F0EDE8;
-    --secondary-foreground: #2D2D2D;
-    --border: #E8E4DF;
+    --secondary: #EDECEA;
+    --secondary-foreground: #1A1918;
+    --border: #E5E4E1;
     --card: #FFFFFF;
-    --accent: #E8F0EA;
+    --accent: #D89575;
+    /* Terracotta */
 
     /* Semantic Colors */
-    --color-success: #DFE6E1;
-    --color-success-foreground: #004D1A;
-    --color-error: #E5DCDA;
-    --color-error-foreground: #8C1C00;
-    --color-warning: #E9E3D8;
-    --color-warning-foreground: #804200;
+    --color-success: #C8F0D8;
+    --color-success-foreground: #3D8A5A;
+    --color-error: #FAD2C1;
+    --color-error-foreground: #D89575;
+    --color-warning: #F9EBC7;
+    --color-warning-foreground: #D4A64A;
 
     /* Layout */
-    --radius-m: 16px;
-    --radius-l: 24px;
+    --radius-m: 8px;
+    --radius-l: 12px;
     --radius-pill: 999px;
     --container-max-width: 1200px;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-sm: 0 1px 2px 0 rgba(26, 25, 24, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(26, 25, 24, 0.08), 0 2px 4px -1px rgba(26, 25, 24, 0.05);
 }
 
 /* Base Styles */
@@ -112,7 +113,7 @@ h3,
 }
 
 .upload-card {
-    width: 600px;
+    width: 440px;
     max-width: 100%;
     padding: 40px;
     display: flex;
@@ -126,9 +127,9 @@ h3,
 
 .upload-hit-area {
     width: 100%;
-    height: 180px;
+    height: 240px;
     background: var(--secondary);
-    border-radius: 20px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -164,8 +165,8 @@ h3,
 .action-group {
     width: 100%;
     display: flex;
-    flex-direction: column;
-    gap: 16px;
+    flex-direction: row;
+    gap: 12px;
 }
 
 .btn {

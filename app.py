@@ -29,6 +29,41 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def prepare_image(file_stream):
+    """Resizes and crops image to 224x224, returns base64 data and raw JPEG bytes."""
+    img = Image.open(file_stream)
+
+    # Convert to RGB
+    if img.mode in ('RGBA', 'LA', 'P'):
+        rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+        rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+        img = rgb_img
+    elif img.mode != 'RGB':
+        img = img.convert('RGB')
+
+    # Center crop to square
+    width, height = img.size
+    if width > height:
+        left = (width - height) // 2
+        img = img.crop((left, 0, left + height, height))
+    elif height > width:
+        top = (height - width) // 2
+        img = img.crop((0, top, width, top + width))
+
+    # Resize to exactly 224x224
+    img = img.resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
+
+    # Encode as JPEG
+    buffer = BytesIO()
+    img.save(buffer, format='JPEG', quality=90)
+    jpeg_bytes = buffer.getvalue()
+    
+    img_base64 = base64.b64encode(jpeg_bytes).decode('utf-8')
+    data_url = f'data:image/jpeg;base64,{img_base64}'
+    
+    return data_url, jpeg_bytes
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -51,70 +86,31 @@ def loading():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    # Check if file is in request
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['file']
-
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({'error': 'File type not allowed. Allowed types: ' + ', '.join(ALLOWED_EXTENSIONS)}), 400
+        return jsonify({'error': 'File type not allowed'}), 400
 
     try:
-        # Open and resize the image
-        img = Image.open(file.stream)
+        data_url, jpeg_bytes = prepare_image(file.stream)
 
-        # Convert RGBA to RGB if necessary (for PNG files)
-        if img.mode in ('RGBA', 'LA', 'P'):
-            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
-            rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-            img = rgb_img
-        elif img.mode != 'RGB':
-            img = img.convert('RGB')
-
-        # Calculate the crop box to maintain aspect ratio and fill 224x224
-        width, height = img.size
-        if width > height:
-            # Landscape - crop width
-            new_width = height
-            left = (width - new_width) // 2
-            img = img.crop((left, 0, left + new_width, height))
-        elif height > width:
-            # Portrait - crop height
-            new_height = width
-            top = (height - new_height) // 2
-            img = img.crop((0, top, width, top + new_height))
-
-        # Resize to exactly 224x224
-        img = img.resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
-
-        # Encode as base64 to send back to the client (no file stored on disk)
-        buffer = BytesIO()
-        img.save(buffer, format='JPEG', quality=90)
-        buffer.seek(0)
-        img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-        data_url = f'data:image/jpeg;base64,{img_base64}'
-
-        # Also save the file for the background processing task
+        # Save for background processing
         filename = secure_filename(file.filename)
         filename = os.path.splitext(filename)[0] + '.jpg'
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         with open(filepath, 'wb') as f:
-            buffer.seek(0)
-            f.write(buffer.read())
-
-        print(f'Base64 encoded image length: {len(img_base64)}')
-        print(f'Data URL length: {len(data_url)}')
+            f.write(jpeg_bytes)
 
         # Start analysis in background
         thread = threading.Thread(target=process_image, args=(filename,))
         thread.daemon = True
         thread.start()
 
-        # Return the base64 data URL
         return jsonify({
             'success': True,
             'imageData': data_url,
@@ -132,35 +128,22 @@ def download_file(filename):
 
 
 def process_image(filename):
-    """
-    Simulates the image analysis process.
-    This is where the CNN model implementation will go later.
-    """
     task_id = filename
     TASKS[task_id] = {'progress': 0, 'status': 'Starting...', 'completed': False}
 
     try:
-        # Step 1: Preprocessing
-        TASKS[task_id]['status'] = 'Preprocessing image...'
-        time.sleep(1.0)
-        TASKS[task_id]['progress'] = 20
+        steps = [
+            ('Preprocessing image...', 20, 1.0),
+            ('Loading model...', 40, 1.0),
+            ('Analyzing patterns...', 70, 1.5),
+            ('Finalizing results...', 90, 0.5)
+        ]
 
-        # Step 2: Model Loading
-        TASKS[task_id]['status'] = 'Loading model...'
-        time.sleep(1.0)
-        TASKS[task_id]['progress'] = 40
+        for status, progress, duration in steps:
+            TASKS[task_id]['status'] = status
+            time.sleep(duration)
+            TASKS[task_id]['progress'] = progress
 
-        # Step 3: Inference
-        TASKS[task_id]['status'] = 'Analyzing patterns...'
-        time.sleep(1.5)
-        TASKS[task_id]['progress'] = 70
-
-        # Step 4: Post-processing
-        TASKS[task_id]['status'] = 'Finalizing results...'
-        time.sleep(0.5)
-        TASKS[task_id]['progress'] = 90
-
-        # Complete
         time.sleep(0.5)
         TASKS[task_id]['progress'] = 100
         TASKS[task_id]['status'] = 'Analysis complete!'
