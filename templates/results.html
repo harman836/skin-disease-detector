@@ -15,15 +15,15 @@
 </head>
 
 <body class="results-page">
-    <div class="app-container">
+    <div class="results-wrapper">
         <div class="results-container">
             <!-- Header -->
             <div class="results-header">
                 <button class="back-btn" id="back-btn" title="Go Back">
-                    <i class="fas fa-arrow-left"></i>
+                    <i class="fas fa-arrow-left"></i> Back
                 </button>
-                <h1>Analysis Results</h1>
-                <div class="spacer"></div>
+                <h1>🩺 Analysis Results</h1>
+                <div class="timestamp" id="timestamp"></div>
             </div>
 
             <!-- Image Preview -->
@@ -41,101 +41,344 @@
                         <div class="disease-header">
                             <span class="disease-name">Melanoma</span>
                             <span class="disease-score" id="score-1">--</span>
-                        </div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="fill-1" style="width: 0%"></div>
+                            <!-- Two Column Layout -->
+                            <div class="results-content">
+                                <!-- LEFT COLUMN -->
+                                <div class="results-left">
+                                    <!-- Image Section -->
+                                    <div class="image-section">
+                                        <div class="image-label">Uploaded Image</div>
+                                        <div class="image-container">
+                                            <img id="result-image" src="" alt="Analyzed Image" class="result-image">
+                                            <div class="heatmap-overlay" id="heatmapOverlay" style="display: none;">
+                                            </div>
+                                        </div>
+                                        <button class="toggle-heatmap" id="toggleHeatmap">
+                                            <i class="fas fa-microscope"></i>
+                                            Show AI Focus Area
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- RIGHT COLUMN -->
+                                <div class="results-right">
+                                    <!-- AI Analysis Summary Card -->
+                                    <div class="ai-summary-card" id="summaryCard">
+                                        <div class="summary-header">
+                                            <h2>
+                                                <i class="fas fa-brain"></i>
+                                                AI Analysis Summary
+                                            </h2>
+                                        </div>
+
+                                        <div class="summary-body">
+                                            <div class="summary-label">Most Likely Condition</div>
+                                            <div class="top-prediction">
+                                                <div class="prediction-name" id="topCondition">--</div>
+                                                <div class="risk-badge" id="riskBadge">
+                                                    <span class="risk-level">--</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="summary-stats">
+                                                <div class="stat-item">
+                                                    <span class="stat-label">Confidence</span>
+                                                    <span class="stat-value" id="topConfidence">--%</span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-label">Risk Level</span>
+                                                    <span class="stat-value risk-text" id="topRiskLevel">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- What This Means Section -->
+                                    <div class="what-means-card">
+                                        <h3>📖 What This Means</h3>
+                                        <p id="explanationText" class="explanation-text">
+                                            Loading explanation...
+                                        </p>
+                                    </div>
+
+                                    <!-- Recommended Action -->
+                                    <div class="recommendation-card" id="recommendationCard">
+                                        <h3>🚨 Recommended Action</h3>
+                                        <div class="recommendation-content" id="recommendationContent">
+                                            Loading recommendation...
+                                        </div>
+                                    </div>
+
+                                    <!-- Confidence Breakdown -->
+                                    <div class="confidence-section">
+                                        <h3>📊 Confidence Breakdown</h3>
+                                        <p class="confidence-hint">
+                                            <i class="fas fa-info-circle"></i>
+                                            Confidence reflects model certainty, not diagnosis probability
+                                        </p>
+
+                                        <div class="disease-results" id="diseaseResults">
+                                            <!-- Dynamically populated -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Model Transparency -->
+                                    <details class="model-info">
+                                        <summary class="model-info-title">
+                                            <i class="fas fa-microchip"></i>
+                                            About This AI Model
+                                        </summary>
+                                        <div class="model-info-content">
+                                            <p><strong>Architecture:</strong></p>
+                                            <p><strong>Model:</strong></p>
+                                            <p><strong>Conditions Detected:</strong></p>
+                                            <p><strong>Model Accuracy:</strong></p>
+                                            <p><strong>Training Data:</strong></p>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="results-actions">
+                                <button class="btn btn-primary" id="download-btn">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Download Professional Report
+                                </button>
+                                <button class="btn btn-secondary" id="upload-new-btn">
+                                    <i class="fas fa-redo-alt"></i>
+                                    Analyze Another Image
+                                </button>
+                            </div>
+
+                            <!-- Medical Disclaimer -->
+                            <div class="medical-disclaimer">
+                                <i class="fas fa-shield-alt"></i>
+                                <p>
+                                    <strong>Important:</strong> This AI tool provides screening support only and does
+                                    not replace professional medical diagnosis.
+                                    Always consult with a licensed dermatologist before making any medical decisions.
+                                    For urgent concerns, seek immediate medical attention.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Disease 2 -->
-                    <div class="disease-card">
-                        <div class="disease-header">
-                            <span class="disease-name">Nevus</span>
-                            <span class="disease-score" id="score-2">--</span>
-                        </div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="fill-2" style="width: 0%"></div>
-                        </div>
+                    <script>
+                        // Disease information with explanations and risk assessments
+                        const diseaseInfo = {
+                            'Melanoma': {
+                                explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
+                                highRiskThreshold: 0.50,
+                                mediumRiskThreshold: 0.20,
+                                icon: '🔴'
+                            },
+                            'Basal Cell Carcinoma': {
+                                explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a high cure rate when treated early. Sun protection and regular skin checks are important.',
+                                highRiskThreshold: 0.50,
+                                mediumRiskThreshold: 0.20,
+                                icon: '🟠'
+                            },
+                            'Eczema': {
+                                explanation: 'Eczema (dermatitis) is a chronic inflammatory skin condition characterized by itching, redness, and flaking. While not contagious, it can be uncomfortable and requires proper skin care and management. Triggers vary by individual.',
+                                highRiskThreshold: 0.60,
+                                mediumRiskThreshold: 0.30,
+                                icon: '🟡'
+                            },
+                            'Psoriasis': {
+                                explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. It is not contagious and varies in severity. While there is no cure, various treatments can help manage symptoms and improve quality of life.',
+                                highRiskThreshold: 0.60,
+                                mediumRiskThreshold: 0.30,
+                                icon: '🟠'
+                            },
+                            'Fungal Infections': {
+                                explanation: 'Fungal skin infections are caused by fungal organisms and can appear as rings, patches, or discoloration. They are often contagious and require antifungal treatment. Good hygiene and keeping skin dry helps prevent spread.',
+                                highRiskThreshold: 0.55,
+                                mediumRiskThreshold: 0.25,
+                                icon: '🟡'
+                            }
+                        };
+
+                        // Mock test data (in production, this would come from backend)
+                        const mockScores = {
+                            'Melanoma': 0.30,
+                            'Basal Cell Carcinoma': 0.18,
+                            'Eczema': 0.25,
+                            'Psoriasis': 0.15,
+                            'Fungal Infections': 0.12
+                        };
+
+                        function getRiskLevel(condition, confidence) {
+                            const info = diseaseInfo[condition];
+                            if (!info) return 'Unknown';
+
+                            if (confidence >= info.highRiskThreshold) return 'High';
+                            if (confidence >= info.mediumRiskThreshold) return 'Medium';
+                            return 'Low';
+                        }
+
+                        function getRiskColor(riskLevel) {
+                            switch (riskLevel) {
+                                case 'High': return '#dc2626';
+                                case 'Medium': return '#f97316';
+                                case 'Low': return '#22c55e';
+                                default: return '#6b7280';
+                            }
+                        }
+
+                        function setTimestamp() {
+                            const now = new Date();
+                            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                            document.getElementById('timestamp').textContent = `📅 ${now.toLocaleDateString('en-US', options)}`;
+                        }
+
+                        function displayResults(scores) {
+                            // Sort by confidence (highest first)
+                            const sortedScores = Object.entries(scores)
+                                .sort(([, a], [, b]) => b - a)
+                                .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+                            // Display top prediction
+                            const [topCondition, topConfidence] = Object.entries(sortedScores)[0];
+                            const topRiskLevel = getRiskLevel(topCondition, topConfidence);
+                            const topRiskColor = getRiskColor(topRiskLevel);
+
+                            document.getElementById('topCondition').textContent = `${diseaseInfo[topCondition]?.icon || ''} ${topCondition}`;
+                            document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
+                            document.getElementById('topRiskLevel').textContent = topRiskLevel;
+
+                            const riskBadge = document.getElementById('riskBadge');
+                            riskBadge.style.borderColor = topRiskColor;
+                            riskBadge.style.backgroundColor = `${topRiskColor}20`;
+                            riskBadge.querySelector('.risk-level').textContent = topRiskLevel;
+                            riskBadge.querySelector('.risk-level').style.color = topRiskColor;
+
+                            // Display explanation
+                            document.getElementById('explanationText').textContent = diseaseInfo[topCondition]?.explanation || 'Information not available.';
+
+                            // Display recommendation
+                            const recommendationContent = document.getElementById('recommendationContent');
+                            if (topRiskLevel === 'High') {
+                                recommendationContent.innerHTML = `
+                    <div class="recommendation-high">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p><strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation and may need immediate treatment.</p>
                     </div>
-
-                    <!-- Disease 3 -->
-                    <div class="disease-card">
-                        <div class="disease-header">
-                            <span class="disease-name">Basal Cell Carcinoma</span>
-                            <span class="disease-score" id="score-3">--</span>
-                        </div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="fill-3" style="width: 0%"></div>
-                        </div>
+                `;
+                            } else if (topRiskLevel === 'Medium') {
+                                recommendationContent.innerHTML = `
+                    <div class="recommendation-medium">
+                        <i class="fas fa-calendar-check"></i>
+                        <p><strong>Schedule a medical evaluation.</strong> While not urgent, professional assessment is recommended to monitor and prevent progression.</p>
                     </div>
-
-                    <!-- Disease 4 -->
-                    <div class="disease-card">
-                        <div class="disease-header">
-                            <span class="disease-name">Actinic Keratosis</span>
-                            <span class="disease-score" id="score-4">--</span>
-                        </div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="fill-4" style="width: 0%"></div>
-                        </div>
+                `;
+                            } else {
+                                recommendationContent.innerHTML = `
+                    <div class="recommendation-low">
+                        <i class="fas fa-check-circle"></i>
+                        <p><strong>Monitor and rescan in 4 weeks.</strong> Low-risk findings should be monitored regularly. Contact a healthcare provider if changes occur.</p>
                     </div>
+                `;
+                            }
 
-                    <!-- Disease 5 -->
-                    <div class="disease-card">
-                        <div class="disease-header">
-                            <span class="disease-name">Benign Keratosis</span>
-                            <span class="disease-score" id="score-5">--</span>
+                            // Display all confidence scores
+                            const diseaseResults = document.getElementById('diseaseResults');
+                            diseaseResults.innerHTML = '';
+
+                            Object.entries(sortedScores).forEach(([disease, confidence], index) => {
+                                const percentage = Math.round(confidence * 100);
+                                const riskLevel = getRiskLevel(disease, confidence);
+                                const riskColor = getRiskColor(riskLevel);
+
+                                const card = document.createElement('div');
+                                card.className = 'disease-card';
+                                if (index === 0) card.classList.add('top-result');
+
+                                card.innerHTML = `
+                    <div class="disease-header">
+                        <div class="disease-info">
+                            <span class="disease-name">${diseaseInfo[disease]?.icon || ''} ${disease}</span>
+                            <span class="disease-conf">${percentage}%</span>
                         </div>
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" id="fill-5" style="width: 0%"></div>
-                        </div>
+                        <span class="risk-tag" style="color: ${riskColor}; border-color: ${riskColor};">${riskLevel}</span>
                     </div>
-                </div>
-            </div>
+                    <div class="confidence-bar-container">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="background: ${riskColor}; width: 0%; animation: fillBar 1s ease-out forwards; animation-delay: ${index * 0.1}s;"></div>
+                        </div>
+                        <span class="percentage-text">${percentage}%</span>
+                    </div>
+                `;
+                                diseaseResults.appendChild(card);
+                            });
 
-            <!-- Action Buttons -->
-            <div class="results-actions">
-                <button class="btn btn-secondary" id="upload-new-btn">
-                    <i class="fas fa-plus"></i>
-                    Upload New
-                </button>
+                            // Trigger animation for summary card
+                            const summaryCard = document.getElementById('summaryCard');
+                            summaryCard.style.animation = 'slideInUp 0.6s ease-out forwards';
+                        }
 
-            </div>
-        </div>
-    </div>
+                        // Heatmap toggle
+                        document.getElementById('toggleHeatmap').addEventListener('click', function () {
+                            const overlay = document.getElementById('heatmapOverlay');
+                            const isShowing = overlay.style.display !== 'none';
 
-    <script>
-        document.getElementById('back-btn').addEventListener('click', () => {
-            window.location.href = '/';
-        });
+                            if (isShowing) {
+                                overlay.style.display = 'none';
+                                this.classList.remove('active');
+                                this.innerHTML = '<i class="fas fa-microscope"></i> Show AI Focus Area';
+                            } else {
+                                overlay.style.display = 'block';
+                                this.classList.add('active');
+                                this.innerHTML = '<i class="fas fa-eye"></i> Hide AI Focus Area';
+                                // Generate simulated heatmap
+                                generateHeatmap();
+                            }
+                        });
 
-        document.getElementById('upload-new-btn').addEventListener('click', () => {
-            window.location.href = '/capture';
-        });
+                        function generateHeatmap() {
+                            const overlay = document.getElementById('heatmapOverlay');
+                            // Create a radial gradient to simulate Grad-CAM heatmap
+                            const gradient = 'radial-gradient(circle at 50% 45%, rgba(255, 0, 0, 0.5) 0%, rgba(255, 165, 0, 0.3) 30%, transparent 70%)';
+                            overlay.style.background = gradient;
+                            overlay.style.animation = 'fadeIn 0.5s ease-out';
+                        }
 
+                        // Back button
+                        document.getElementById('back-btn').addEventListener('click', () => {
+                            window.location.href = '/';
+                        });
 
+                        // Upload new button
+                        document.getElementById('upload-new-btn').addEventListener('click', () => {
+                            window.location.href = '/';
+                        });
 
-        // Example: Set confidence scores (replace with actual data from backend)
-        function setConfidenceScores(scores) {
-            const scoreIds = ['score-1', 'score-2', 'score-3', 'score-4', 'score-5'];
-            const fillIds = ['fill-1', 'fill-2', 'fill-3', 'fill-4', 'fill-5'];
+                        // Download report button
+                        document.getElementById('download-btn').addEventListener('click', () => {
+                            alert('PDF download feature coming soon! This will generate a professional medical report with all analysis data.');
+                        });
 
-            scores.forEach((score, index) => {
-                if (score !== null && score !== undefined) {
-                    const percentage = Math.round(score * 100);
-                    document.getElementById(scoreIds[index]).textContent = `${percentage}%`;
-                    document.getElementById(fillIds[index]).style.width = `${percentage}%`;
-                }
-            });
-        }
+                        // Example: Set confidence scores (replace with actual data from backend)
+                        function setConfidenceScores(scores) {
+                            const scoreIds = ['score-1', 'score-2', 'score-3', 'score-4', 'score-5'];
+                            const fillIds = ['fill-1', 'fill-2', 'fill-3', 'fill-4', 'fill-5'];
 
-        // Set result image from query parameter (optional)
-        const params = new URLSearchParams(window.location.search);
-        const imagePath = params.get('image');
-        if (imagePath) {
-            document.getElementById('result-image').src = imagePath;
-        }
-    </script>
+                            scores.forEach((score, index) => {
+                                if (score !== null && score !== undefined) {
+                                    const percentage = Math.round(score * 100);
+                                    document.getElementById(scoreIds[index]).textContent = `${percentage}%`;
+                                    document.getElementById(fillIds[index]).style.width = `${percentage}%`;
+                                }
+                            });
+                        }
+
+                        // Set result image from query parameter (optional)
+                        const params = new URLSearchParams(window.location.search);
+                        const imagePath = params.get('image');
+                        if (imagePath) {
+                            document.getElementById('result-image').src = imagePath;
+                        }
+                    </script>
 </body>
 
 </html>
