@@ -39,6 +39,11 @@ def results():
     return render_template('results.html')
 
 
+@app.route('/loading')
+def loading():
+    return render_template('loading.html')
+
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     # Check if file is in request
@@ -90,6 +95,11 @@ def upload_file():
         # Save as JPEG
         img.save(filepath, 'JPEG', quality=95)
 
+        # Start analysis in background
+        thread = threading.Thread(target=process_image, args=(filename,))
+        thread.daemon = True
+        thread.start()
+
         # Return the file path to display
         return jsonify({
             'success': True,
@@ -106,6 +116,62 @@ def download_file(filename):
     filename = secure_filename(filename)
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
+import threading
+import time
+
+# Global dictionary to store task progress
+# In a production app, use Redis or a database
+TASKS = {}
+
+def process_image(filename):
+    """
+    Simulates the image analysis process.
+    This is where the CNN model implementation will go later.
+    """
+    task_id = filename
+    TASKS[task_id] = {'progress': 0, 'status': 'Starting...', 'completed': False}
+    
+    try:
+        # Step 1: Preprocessing
+        # When CNN is implemented: Load image, resize, normalize
+        TASKS[task_id]['status'] = 'Preprocessing image...'
+        time.sleep(1.0) # Simulate work
+        TASKS[task_id]['progress'] = 20
+        
+        # Step 2: Model Loading (if not cached)
+        # When CNN is implemented: Ensure model is loaded to device
+        TASKS[task_id]['status'] = 'Loading model...'
+        time.sleep(1.0)
+        TASKS[task_id]['progress'] = 40
+        
+        # Step 3: Inference
+        # When CNN is implemented: model.predict(image)
+        TASKS[task_id]['status'] = 'Analyzing patterns...'
+        time.sleep(1.5)
+        TASKS[task_id]['progress'] = 70
+        
+        # Step 4: Post-processing
+        # When CNN is implemented: Format results, calculate confidence
+        TASKS[task_id]['status'] = 'Finalizing results...'
+        time.sleep(0.5)
+        TASKS[task_id]['progress'] = 90
+        
+        # Complete
+        time.sleep(0.5)
+        TASKS[task_id]['progress'] = 100
+        TASKS[task_id]['status'] = 'Analysis complete!'
+        TASKS[task_id]['completed'] = True
+        
+    except Exception as e:
+        TASKS[task_id]['status'] = f'Error: {str(e)}'
+        TASKS[task_id]['error'] = True
+
+@app.route('/progress/<filename>')
+def progress(filename):
+    if filename in TASKS:
+        return jsonify(TASKS[filename])
+    return jsonify({'progress': 0, 'status': 'Waiting...', 'completed': False})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body class="index-page">
     <div class="container">
         <h1>Upload Image</h1>
@@ -137,24 +139,22 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
 
-                if (data.success) {
-                    currentFilename = data.filename;
-                    uploadedImage.src = data.filepath;
-                    imageContainer.classList.add('show');
-                    showSuccess('Image uploaded successfully!');
-                } else {
-                    showError(data.error || 'Upload failed');
-                }
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                showError('Error uploading file: ' + error);
-                console.error('Error:', error);
-            });
+                    if (data.success) {
+                        // Redirect to loading page
+                        window.location.href = `/loading?image=${encodeURIComponent(data.filepath)}`;
+                    } else {
+                        showError(data.error || 'Upload failed');
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    showError('Error uploading file: ' + error);
+                    console.error('Error:', error);
+                });
         }
 
         function showError(message) {
@@ -190,4 +190,5 @@
         }
     </script>
 </body>
+
 </html>

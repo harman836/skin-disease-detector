@@ -198,8 +198,13 @@ input[type="file"] {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .error {
@@ -238,6 +243,7 @@ input[type="file"] {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -439,8 +445,15 @@ body.capture-page {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
 }
 
 .status-text {
@@ -491,30 +504,32 @@ body.capture-page {
     color: var(--foreground);
 }
 
-        .capture-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--foreground);
-            background: transparent;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-            flex-shrink: 0;
-        }
+.capture-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--foreground);
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    flex-shrink: 0;
+}
 
-        .capture-btn::before {
-            content: '';
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: var(--foreground);
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-        }.capture-btn:hover {
+.capture-btn::before {
+    content: '';
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--foreground);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.capture-btn:hover {
     transform: scale(1.05);
 }
 
@@ -1106,8 +1121,13 @@ body.camera-page {
 }
 
 @keyframes scanMove {
-    0% { top: 0; }
-    100% { top: 100%; }
+    0% {
+        top: 0;
+    }
+
+    100% {
+        top: 100%;
+    }
 }
 
 .live-overlay {
@@ -1344,7 +1364,7 @@ body.results-page {
     width: 100%;
     max-width: 600px;
     background: linear-gradient(135deg, var(--primary-dim) 0%, transparent 100%),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
     border: 1px solid var(--border-bright);
     border-radius: 20px;
     padding: 32px 24px;
@@ -1538,4 +1558,77 @@ body.results-page {
         padding: 12px 16px;
         font-size: 0.85rem;
     }
+}
+
+/* ============================================
+   LOADING PAGE
+   ============================================ */
+
+body.loading-page {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    color: #fff;
+}
+
+.loading-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.loading-container h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.progress-circle-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.progress-circle {
+    transform: rotate(-90deg);
+}
+
+.progress-background {
+    fill: none;
+    stroke: #333;
+    /* Dark grey track */
+    stroke-width: 4;
+}
+
+.progress-bar {
+    fill: none;
+    stroke: var(--primary);
+    /* Green color from root */
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.1s linear;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.loading-status {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #666;
+    margin-top: 20px;
 }

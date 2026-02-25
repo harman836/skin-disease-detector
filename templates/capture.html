@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body class="capture-page">
     <div class="app-container">
         <div class="camera-viewport">
@@ -90,7 +92,7 @@
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0);
-            
+
             canvas.toBlob((blob) => {
                 capturedImageBlob = blob;
                 const reader = new FileReader();
@@ -127,7 +129,7 @@
                 if (data.success) {
                     statusText.textContent = 'Uploaded!';
                     setTimeout(() => {
-                        window.location.href = `/results?image=${encodeURIComponent(data.filepath)}`;
+                        window.location.href = `/loading?image=${encodeURIComponent(data.filepath)}`;
                     }, 1500);
                 } else {
                     statusText.textContent = 'Upload Failed';
@@ -154,4 +156,5 @@
         });
     </script>
 </body>
+
 </html>

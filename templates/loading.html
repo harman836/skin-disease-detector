@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading | Skin Disease Detector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body class="loading-page">
+    <div class="loading-container">
+        <h1>Skin Disease Detector</h1>
+
+        <div class="progress-circle-container">
+            <svg class="progress-circle" width="120" height="120" viewBox="0 0 120 120">
+                <circle class="progress-background" cx="60" cy="60" r="54"></circle>
+                <circle class="progress-bar" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <div class="progress-text" id="progress-text">0%</div>
+        </div>
+
+        <p class="loading-status">ANALYZING IMAGE</p>
+    </div>
+
+    <script>
+        // get image path from query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const imagePath = urlParams.get('image');
+
+        if (!imagePath) {
+            // If no image, maybe redirect back to home?
+            console.error("No image provided");
+        }
+
+        let progress = 0;
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.querySelector('.progress-bar');
+
+        // Calculate the circumference of the circle
+        const radius = 54;
+        const circumference = 2 * Math.PI * radius;
+
+        // Set the initial dasharray and dashoffset
+        progressBar.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressBar.style.strokeDashoffset = circumference;
+
+        function setProgress(percent) {
+            const offset = circumference - (percent / 100) * circumference;
+            progressBar.style.strokeDashoffset = offset;
+            progressText.textContent = `${Math.round(percent)}%`;
+        }
+
+        // Simulate progress
+        const interval = setInterval(() => {
+            progress += 1; // Increment by 1%
+
+            // Non-linear speed simulation (slow down near end)
+            let speed = 20;
+            if (progress > 80) speed = 50;
+            if (progress > 90) speed = 100;
+
+            setProgress(progress);
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    if (imagePath) {
+                        window.location.href = `/results?image=${encodeURIComponent(imagePath)}`;
+                    } else {
+                        window.location.href = '/results'; // Fallback
+                    }
+                }, 500);
+            }
+        }, 25); // 25ms * 100 = 2.5 seconds total roughly
+    </script>
+</body>
+
+</html>
