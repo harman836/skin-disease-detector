@@ -5,67 +5,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Capture | Skin Disease Detector</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body class="capture-page">
-    <div class="app-container">
-        <div class="camera-viewport">
-            <video id="camera-feed" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
+    <div class="container animate-fade-in">
 
-            <div class="camera-top-bar">
-                <div class="top-bar-left">
-                    <button class="menu-btn" id="menu-btn">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="status-indicator">
-                        <div class="status-dot" id="status-dot"></div>
-                        <span class="status-text" id="status-text">Ready</span>
+        <!-- Header Group -->
+        <header class="hero-group">
+            <i data-lucide="camera" style="color: #7C9082; width: 40px; height: 40px;"></i>
+            <h1 class="hero-header">Capture Image</h1>
+            <p class="subtitle">Focus on the area of concern under natural lighting.</p>
+        </header>
+
+        <!-- Camera Card -->
+        <div class="card camera-card">
+
+            <!-- Camera Viewport -->
+            <div class="camera-viewport">
+                <video id="camera-feed" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+
+                <!-- Overlay Guides -->
+                <div class="camera-overlay">
+                    <div class="camera-guide"></div>
+                </div>
+
+                <!-- Preview Overlay (hidden by default) -->
+                <div class="preview-overlay" id="preview-container">
+                    <img id="preview-image" src="" alt="Preview">
+                    <div class="preview-actions">
+                        <button class="btn btn-secondary" id="retake-btn">
+                            <i data-lucide="rotate-ccw"></i>
+                            <span>Retake</span>
+                        </button>
+                        <button class="btn btn-primary" id="confirm-btn">
+                            <i data-lucide="check"></i>
+                            <span>Use Photo</span>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="camera-controls">
-                <button class="back-btn" id="back-btn" title="Retake">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button class="capture-btn" id="capture-btn" title="Capture"></button>
-                <button class="control-btn" style="display:none;" id="upload-btn" title="Upload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </button>
-            </div>
-
-            <div class="preview-container" id="preview-container">
-                <img id="preview-image" class="preview-image" src="" alt="Preview">
-                <div class="preview-controls">
-                    <button class="preview-btn" id="retake-btn" title="Retake">
-                        <i class="fas fa-redo"></i>
-                    </button>
-                    <button class="preview-btn confirm" id="confirm-btn" title="Use Photo">
-                        <i class="fas fa-check"></i>
-                    </button>
+                <!-- Status Top Bar -->
+                <div
+                    style="position: absolute; top: 16px; left: 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 99px; backdrop-filter: blur(4px);">
+                    <div id="status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e;">
+                    </div>
+                    <span id="status-text"
+                        style="color: white; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Ready</span>
                 </div>
             </div>
+
+            <!-- Controls -->
+            <div class="camera-controls">
+                <button class="btn btn-secondary" id="back-btn" style="width: auto; border: none; background: none;"
+                    title="Go back">
+                    <i data-lucide="arrow-left"></i>
+                </button>
+
+                <button class="capture-trigger" id="capture-btn" title="Capture">
+                    <i data-lucide="camera"></i>
+                </button>
+
+                <div style="width: 44px;"></div> <!-- Spacer for symmetry -->
+            </div>
+        </div>
+
+        <!-- Warning Disclaimer -->
+        <div class="medical-disclaimer" style="width: 600px; max-width: 100%;">
+            <p>Ensure the lens is clean and the lesion is centered for the best analysis results.</p>
         </div>
     </div>
 
     <script>
+        lucide.createIcons();
+
         const video = document.getElementById('camera-feed');
         const canvas = document.getElementById('canvas');
         const captureBtn = document.getElementById('capture-btn');
-        const backBtn = document.getElementById('menu-btn');
+        const backBtn = document.getElementById('back-btn');
         const previewContainer = document.getElementById('preview-container');
         const previewImage = document.getElementById('preview-image');
         const retakeBtn = document.getElementById('retake-btn');
         const confirmBtn = document.getElementById('confirm-btn');
-        const uploadBtn = document.getElementById('upload-btn');
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
 
@@ -79,6 +103,7 @@
                 });
                 video.srcObject = stream;
                 statusText.textContent = 'Ready';
+                statusDot.style.background = '#22c55e';
             } catch (error) {
                 console.error('Error accessing camera:', error);
                 statusText.textContent = 'Camera Error';
@@ -128,9 +153,10 @@
 
                 if (data.success) {
                     statusText.textContent = 'Uploaded!';
+                    localStorage.setItem('uploadedImageData', data.imageData);
                     setTimeout(() => {
-                        window.location.href = `/loading?image=${encodeURIComponent(data.filepath)}`;
-                    }, 1500);
+                        window.location.href = '/results';
+                    }, 1000);
                 } else {
                     statusText.textContent = 'Upload Failed';
                     alert('Upload failed: ' + (data.error || 'Unknown error'));
