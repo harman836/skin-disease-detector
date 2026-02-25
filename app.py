@@ -1,22 +1,18 @@
-from flask import Flask, render_template, request, send_from_directory, jsonify
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
 import os
 from pathlib import Path
 from io import BytesIO
+import base64
 
 app = Flask(__name__)
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 IMAGE_SIZE = (224, 224)  # Target image size
 
-# Create uploads folder if it doesn't exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
@@ -63,9 +59,9 @@ def upload_file():
             rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
             img = rgb_img
         
-        # Calculate the crop box to maintain aspect ratio and fill 614x614
+        # Calculate the crop box to maintain aspect ratio and fill 224x224
         width, height = img.size
-        target_size = IMAGE_SIZE[0]  # 614
+        target_size = IMAGE_SIZE[0]  # 224
         
         if width > height:
             # Landscape - crop width
@@ -78,33 +74,26 @@ def upload_file():
             top = (height - new_height) // 2
             img = img.crop((0, top, width, top + new_height))
         
-        # Resize to exactly 614x614
+        # Resize to exactly 224x224
         img = img.resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
         
-        # Save the file with a secure filename
-        filename = secure_filename(file.filename)
-        # Change extension to .jpg for consistency
-        filename = os.path.splitext(filename)[0] + '.jpg'
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # Convert to base64 without saving to disk
+        buffer = BytesIO()
+        img.save(buffer, format='JPEG', quality=95)
+        buffer.seek(0)
+        img_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        data_url = f'data:image/jpeg;base64,{img_base64}'
         
-        # Save as JPEG
-        img.save(filepath, 'JPEG', quality=95)
+        print(f'Base64 encoded image length: {len(img_base64)}')
+        print(f'Data URL length: {len(data_url)}')
 
-        # Return the file path to display
+        # Return the base64 data URL (no file stored on disk)
         return jsonify({
             'success': True,
-            'filename': filename,
-            'filepath': f'/uploads/{filename}'
+            'imageData': data_url
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-@app.route('/uploads/<filename>')
-def download_file(filename):
-    # Secure the filename to prevent directory traversal attacks
-    filename = secure_filename(filename)
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == '__main__':

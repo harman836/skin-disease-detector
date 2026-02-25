@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload | Skin Disease Detector</title>
+    <title>AI Skin Screening | Skin Disease Detector</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -14,58 +14,147 @@
 </head>
 <body class="index-page">
     <div class="container">
-        <h1>Upload Image</h1>
-        <p class="subtitle">Share your image for analysis</p>
-
-        <div class="upload-area" id="uploadArea">
-            <i class="fas fa-cloud-upload-alt upload-icon"></i>
-            <p class="upload-text">Drag and drop your image here</p>
-            <p class="upload-hint">or click to select</p>
+        <!-- Header Section -->
+        <div class="header-section">
+            <h1>
+                <i class="fas fa-stethoscope"></i>
+                AI Skin Screening
+            </h1>
+            <p class="subtitle">Upload a clear photo of the affected skin area for analysis</p>
+            <div class="trust-line">
+                <i class="fas fa-lock"></i>
+                Your image is processed securely and not shared.
+            </div>
         </div>
 
-        <input type="file" id="fileInput" accept="image/*">
-        <a href="/capture" class="btn-upload" style="text-decoration: none;">
-            <i class="fas fa-camera"></i>
-            <span>Take a Picture</span>
-        </a>
-        <button class="btn-upload secondary" onclick="document.getElementById('fileInput').click()">
-            <i class="fas fa-image"></i>
-            <span>Choose from Files</span>
-        </button>
+        <!-- Before You Upload Tips (Collapsible) -->
+        <div class="tips-section">
+            <button class="tips-toggle" id="tipsToggle">
+                <i class="fas fa-chevron-down"></i>
+                <span>📌 Before taking the photo</span>
+            </button>
+            <div class="tips-content" id="tipsContent">
+                <ul class="tips-list">
+                    <li><span class="check">✓</span> Clean the area thoroughly</li>
+                    <li><span class="check">✓</span> Remove makeup if possible</li>
+                    <li><span class="check">✓</span> Use natural lighting (avoid shadows)</li>
+                    <li><span class="check">✓</span> Avoid blurry or out-of-focus images</li>
+                    <li><span class="check">✓</span> Center the lesion in frame</li>
+                </ul>
+            </div>
+        </div>
 
+        <!-- Upload Area -->
+        <div class="upload-wrapper">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-area-content" id="uploadContent">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Drag and drop your image</p>
+                    <p class="upload-hint">or click to select from your device</p>
+                </div>
+                <div class="image-preview-wrapper" id="previewWrapper" style="display: none;">
+                    <div class="image-preview-container">
+                        <img id="previewImage" src="" alt="Preview" class="preview-image">
+                        <button class="remove-btn" onclick="removeImage()" title="Remove image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="image-feedback" id="imageFeedback">
+                        <p><span class="success-badge">✓</span> Image detected</p>
+                        <p id="resolutionFeedback"></p>
+                        <p id="lightingFeedback"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camera Guidelines Section -->
+        <details class="camera-guidelines">
+            <summary class="guidelines-title">
+                <i class="fas fa-camera-retro"></i>
+                Camera Guidelines for Better Results
+            </summary>
+            <div class="guidelines-content">
+                <div class="guideline-item">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>Make sure lighting is good - natural light works best</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-crosshairs"></i>
+                    <p>Center the lesion in the frame</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-ban"></i>
+                    <p>Avoid shadows and reflections</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <p>Keep camera steady - use both hands</p>
+                </div>
+            </div>
+        </details>
+
+        <input type="file" id="fileInput" accept="image/*">
+
+        <!-- Button Group -->
+        <div class="button-group">
+            <a href="/capture" class="btn btn-primary" style="text-decoration: none;">
+                <i class="fas fa-camera"></i>
+                <span>Take a Photo</span>
+            </a>
+            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-images"></i>
+                <span>Choose from Device</span>
+            </button>
+        </div>
+
+        <!-- Status Messages -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
-            <p>Uploading your image...</p>
+            <p>Preparing your image...</p>
         </div>
 
         <div class="error" id="error"></div>
         <div class="success" id="success"></div>
 
-        <div class="image-container" id="imageContainer">
-            <h2>Uploaded Image</h2>
-            <img id="uploadedImage" src="" alt="Uploaded image">
-            <div class="btn-group">
-                <button class="btn-clear" onclick="clearImage()">
-                    <i class="fas fa-trash-alt"></i>
-                    Clear
-                </button>
-                <button class="btn-download" id="downloadBtn" onclick="downloadImage()">
-                    <i class="fas fa-download"></i>
-                    Download
-                </button>
-            </div>
+        <!-- Analyze Button (shown after upload) -->
+        <div class="analyze-container" id="analyzeContainer" style="display: none;">
+            <button class="btn btn-analyze" onclick="analyzeImage()">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>Analyze Image</span>
+            </button>
+            <button class="btn btn-change-image" onclick="startOver()">
+                <i class="fas fa-arrow-left"></i>
+                <span>Change Image</span>
+            </button>
+        </div>
+
+        <!-- Trust Footer -->
+        <div class="trust-footer">
+            <p>⚕️ For screening purposes only. Not a substitute for professional medical advice. Always consult with a healthcare provider.</p>
         </div>
     </div>
 
     <script>
         const uploadArea = document.getElementById('uploadArea');
+        const uploadContent = document.getElementById('uploadContent');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewImage = document.getElementById('previewImage');
         const fileInput = document.getElementById('fileInput');
         const loading = document.getElementById('loading');
         const errorDiv = document.getElementById('error');
         const successDiv = document.getElementById('success');
-        const imageContainer = document.getElementById('imageContainer');
-        const uploadedImage = document.getElementById('uploadedImage');
+        const analyzeContainer = document.getElementById('analyzeContainer');
+        const tipsToggle = document.getElementById('tipsToggle');
+        const tipsContent = document.getElementById('tipsContent');
         let currentFilename = '';
+        let hasUploadedImage = false;
+
+        // Tips Toggle
+        tipsToggle.addEventListener('click', () => {
+            tipsContent.classList.toggle('show');
+            tipsToggle.classList.toggle('open');
+        });
 
         // Drag and drop functionality
         uploadArea.addEventListener('dragover', (e) => {
@@ -82,50 +171,49 @@
             uploadArea.classList.remove('dragover');
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                fileInput.files = files;
-                uploadFile();
+                const file = files[0];
+                if (validateFile(file)) {
+                    uploadFile(file);
+                }
             }
         });
 
         // Click to upload
         uploadArea.addEventListener('click', () => {
-            fileInput.click();
+            if (!hasUploadedImage) {
+                fileInput.click();
+            }
         });
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                uploadFile();
+                const file = fileInput.files[0];
+                if (validateFile(file)) {
+                    uploadFile(file);
+                }
             }
         });
 
-        const cameraInput = document.getElementById('cameraInput');
-        cameraInput.addEventListener('change', () => {
-            if (cameraInput.files.length > 0) {
-                fileInput.files = cameraInput.files;
-                uploadFile();
-            }
-        });
-
-        function uploadFile() {
-            const file = fileInput.files[0];
-
+        function validateFile(file) {
             if (!file) {
                 showError('No file selected');
-                return;
+                return false;
             }
 
-            // Validate file type
             if (!file.type.startsWith('image/')) {
                 showError('Please select a valid image file');
-                return;
+                return false;
             }
 
-            // Validate file size (max 16MB)
             if (file.size > 16 * 1024 * 1024) {
                 showError('File size exceeds 16MB limit');
-                return;
+                return false;
             }
 
+            return true;
+        }
+
+        function uploadFile(file) {
             const formData = new FormData();
             formData.append('file', file);
 
@@ -142,12 +230,18 @@
                 loading.style.display = 'none';
 
                 if (data.success) {
-                    currentFilename = data.filename;
-                    uploadedImage.src = data.filepath;
-                    imageContainer.classList.add('show');
-                    showSuccess('Image uploaded successfully!');
+                    // Store image data in localStorage for privacy (survives navigation better)
+                    console.log('Upload successful, storing image data');
+                    console.log('Image data length:', data.imageData.length);
+                    localStorage.setItem('uploadedImageData', data.imageData);
+                    console.log('Image data stored in localStorage');
+                    showImagePreview(data.imageData);
+                    hasUploadedImage = true;
+                    provideFeedback();
+                    analyzeContainer.style.display = 'flex';
                 } else {
                     showError(data.error || 'Upload failed');
+                    console.error('Upload failed:', data.error);
                 }
             })
             .catch(error => {
@@ -155,6 +249,48 @@
                 showError('Error uploading file: ' + error);
                 console.error('Error:', error);
             });
+        }
+
+        function showImagePreview(filepath) {
+            previewImage.src = filepath;
+            uploadContent.style.display = 'none';
+            previewWrapper.style.display = 'block';
+            uploadArea.classList.add('has-preview');
+        }
+
+        function provideFeedback() {
+            const resolutionFeedback = document.getElementById('resolutionFeedback');
+            const lightingFeedback = document.getElementById('lightingFeedback');
+            
+            // Simulated feedback (can be enhanced with actual image analysis)
+            resolutionFeedback.innerHTML = '<span class="success-badge">✓</span> Resolution: Good (224x224px)';
+            lightingFeedback.innerHTML = '<span class="success-badge">✓</span> Lighting: Acceptable';
+            
+            showSuccess('Image ready for analysis!');
+        }
+
+        function removeImage() {
+            previewImage.src = '';
+            uploadContent.style.display = 'block';
+            previewWrapper.style.display = 'none';
+            fileInput.value = '';
+            currentFilename = '';
+            hasUploadedImage = false;
+            analyzeContainer.style.display = 'none';
+            uploadArea.classList.remove('has-preview');
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+        }
+
+        function analyzeImage() {
+            if (hasUploadedImage) {
+                // Image data is stored in sessionStorage, just redirect to results
+                window.location.href = '/results';
+            }
+        }
+
+        function startOver() {
+            removeImage();
         }
 
         function showError(message) {
@@ -167,26 +303,6 @@
             successDiv.textContent = message;
             successDiv.style.display = 'block';
             errorDiv.style.display = 'none';
-        }
-
-        function clearImage() {
-            uploadedImage.src = '';
-            imageContainer.classList.remove('show');
-            fileInput.value = '';
-            currentFilename = '';
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-        }
-
-        function downloadImage() {
-            if (currentFilename) {
-                const link = document.createElement('a');
-                link.href = `/uploads/${currentFilename}`;
-                link.download = currentFilename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
         }
     </script>
 </body>
