@@ -1,33 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-    /* Colors - Modern Wellness */
-    --background: #F5F4F1;
-    --foreground: #1A1918;
-    --muted-foreground: #6D6C6A;
-    --primary: #4A7C7A;
-    /* Updated Wellness Blue-Green */
-    --primary-foreground: #FFFFFF;
-    --secondary: #EDECEA;
-    --secondary-foreground: #1A1918;
-    --border: #E5E4E1;
-    --card: #FFFFFF;
-    --accent: #D89575;
-    /* Terracotta */
+    /* Colors - Organic Health */
+    --background: #f4f1ea;
+    --foreground: #2d4f3e;
+    --muted-foreground: #4a5d4e;
+    --primary: #2d4f3e;
+    --primary-foreground: #ffffff;
+    --secondary: #e8e4d9;
+    --secondary-foreground: #2d4f3e;
+    --border: #e8e4df;
+    --card: #ffffff;
+    --accent: #c16a5a;
 
     /* Semantic Colors */
-    --color-success: #C8F0D8;
-    --color-success-foreground: #3D8A5A;
-    --color-error: #FAD2C1;
-    --color-error-foreground: #D89575;
-    --color-warning: #F9EBC7;
-    --color-warning-foreground: #D4A64A;
+    --color-success: #d6ead9;
+    --color-success-foreground: #2d4f3e;
+    --color-error: #f0d8d4;
+    --color-error-foreground: #c16a5a;
+    --color-warning: #f5ecd4;
+    --color-warning-foreground: #9a6b2e;
 
     /* Layout */
     --radius-m: 8px;
     --radius-l: 12px;
     --radius-pill: 999px;
-    --container-max-width: 1200px;
+    --container-max-width: 900px;
     --shadow-sm: 0 1px 2px 0 rgba(26, 25, 24, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(26, 25, 24, 0.08), 0 2px 4px -1px rgba(26, 25, 24, 0.05);
 }
@@ -113,8 +111,7 @@ h3,
 }
 
 .upload-card {
-    width: 440px;
-    max-width: 100%;
+    width: 100%;
     padding: 40px;
     display: flex;
     flex-direction: column;
@@ -208,8 +205,7 @@ h3,
 
 /* Accordion */
 .health-accordion {
-    width: 600px;
-    max-width: 100%;
+    width: 100%;
     border-bottom: 1px solid var(--border);
 }
 
@@ -377,16 +373,15 @@ h3,
 }
 
 .action-card {
-    background: rgba(124, 144, 130, 0.08);
-    /* --primary with low opacity */
-    border: 1px solid rgba(124, 144, 130, 0.2);
+    background: rgba(45, 79, 62, 0.06);
+    border: 1px solid rgba(45, 79, 62, 0.15);
     display: flex;
     gap: 16px;
     padding: 20px;
 }
 
 .medical-disclaimer {
-    background: #F0EDE8;
+    background: #f0ede8;
     padding: 20px;
     border-radius: 16px;
     font-size: 12px;
@@ -401,8 +396,7 @@ h3,
 
 /* Camera Page Specific */
 .camera-card {
-    width: 600px;
-    max-width: 100%;
+    width: 100%;
     padding: 24px;
     display: flex;
     flex-direction: column;

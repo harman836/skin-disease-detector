@@ -30,6 +30,19 @@
             <!-- Preview Overlay (hidden by default) -->
             <div class="preview-overlay" id="preview-container">
                 <img id="preview-image" src="" alt="Preview">
+
+                <!-- Quality Warning Banner (hidden until a warning exists) -->
+                <div id="quality-warning-banner" style="display: none; margin: 8px 12px 0; background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 10px 14px; text-align: left;">
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <i data-lucide="triangle-alert" style="width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--color-warning-foreground);"></i>
+                        <div>
+                            <p style="margin: 0 0 2px; font-weight: 600; font-size: 12px; color: var(--color-warning-foreground);">Image quality issue</p>
+                            <p id="quality-warning-text" style="margin: 0 0 2px; font-size: 11px; color: var(--color-warning-foreground);"></p>
+                            <p style="margin: 0; font-size: 11px; color: var(--color-warning-foreground); opacity: 0.85;">Retake for better accuracy, or continue anyway.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="preview-actions">
                     <button class="btn btn-secondary" id="retake-btn">
                         <i data-lucide="rotate-ccw"></i>
@@ -69,7 +82,7 @@
     </div>
 
     <!-- Warning Disclaimer -->
-    <div class="medical-disclaimer" style="width: 600px; max-width: 100%;">
+    <div class="medical-disclaimer" style="width: 100%;">
         <p>Ensure the lens is clean and the lesion is centered for the best analysis results.</p>
     </div>
 </div>
@@ -86,9 +99,12 @@ const retakeBtn = document.getElementById('retake-btn');
 const confirmBtn = document.getElementById('confirm-btn');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
+const qualityWarningBanner = document.getElementById('quality-warning-banner');
+const qualityWarningText = document.getElementById('quality-warning-text');
 
 let stream = null;
 let capturedImageBlob = null;
+let uploadedFilename = null;
 
 async function startCamera() {
 try {
@@ -127,37 +143,59 @@ reader.readAsDataURL(blob);
 function retakeImage() {
 previewContainer.classList.remove('show');
 capturedImageBlob = null;
+uploadedFilename = null;
+qualityWarningBanner.style.display = 'none';
 statusText.textContent = 'Ready';
 }
 
 async function uploadImage() {
 if (!capturedImageBlob) return;
 
+// If already uploaded (warning shown), proceed to results
+if (uploadedFilename) {
+window.location.href = '/results';
+return;
+}
+
 const formData = new FormData();
 formData.append('file', capturedImageBlob, 'capture.jpg');
 
 try {
 statusText.textContent = 'Uploading...';
-const response = await fetch('/upload', {
-method: 'POST',
-body: formData
-});
+confirmBtn.disabled = true;
 
+const response = await fetch('/upload', { method: 'POST', body: formData });
 const data = await response.json();
 
 if (data.success) {
-statusText.textContent = 'Uploaded!';
 localStorage.setItem('uploadedImageData', data.imageData);
-setTimeout(() => {
+uploadedFilename = data.filename;
+
+if (data.qualityWarning) {
+// Show warning — don't redirect yet
+qualityWarningText.textContent = data.qualityWarning;
+qualityWarningBanner.style.display = 'block';
+lucide.createIcons();
+statusText.textContent = 'Quality Warning';
+statusDot.style.background = '#D4A64A';
+confirmBtn.innerHTML = '<i data-lucide="arrow-right"></i><span>Continue Anyway</span>';
+lucide.createIcons();
+confirmBtn.disabled = false;
+} else {
+statusText.textContent = 'Uploaded!';
 window.location.href = '/results';
-}, 1000);
+}
 } else {
 statusText.textContent = 'Upload Failed';
+statusDot.style.background = '#D89575';
+confirmBtn.disabled = false;
 alert('Upload failed: ' + (data.error || 'Unknown error'));
 }
 } catch (error) {
 console.error('Upload error:', error);
 statusText.textContent = 'Error';
+statusDot.style.background = '#D89575';
+confirmBtn.disabled = false;
 alert('Error uploading image');
 }
 }

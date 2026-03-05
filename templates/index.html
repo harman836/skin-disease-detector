@@ -40,7 +40,7 @@
         </div>
 
         <!-- Action Group -->
-        <div class="action-group">
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
             <!-- Status Messages -->
             <div id="loading" class="hidden" style="text-align: center; color: var(--primary); font-size: 13px;">
                 <p><i class="fas fa-spinner fa-spin"></i> Preparing your image...</p>
@@ -72,6 +72,17 @@
                     <i class="fas fa-arrow-left"></i>
                     <span>Change Image</span>
                 </button>
+            </div>
+
+            <!-- Quality Warning (shown below buttons when issue detected) -->
+            <div id="qualityWarning" class="hidden"
+                style="background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;">
+                <i data-lucide="triangle-alert" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--color-warning-foreground);"></i>
+                <div>
+                    <p style="margin: 0 0 2px; font-weight: 600; font-size: 13px; color: var(--color-warning-foreground);">Image quality issue detected</p>
+                    <p id="qualityWarningText" style="margin: 0; font-size: 12px; color: var(--color-warning-foreground);"></p>
+                    <p style="margin: 4px 0 0; font-size: 12px; color: var(--color-warning-foreground); opacity: 0.85;">You can still analyze this image, but results may be less accurate.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -108,6 +119,8 @@ const fileInput = document.getElementById('fileInput');
 const loading = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const successDiv = document.getElementById('success');
+const qualityWarningDiv = document.getElementById('qualityWarning');
+const qualityWarningText = document.getElementById('qualityWarningText');
 const analyzeContainer = document.getElementById('analyzeContainer');
 const buttonGroup = document.getElementById('buttonGroup');
 let hasUploadedImage = false;
@@ -173,7 +186,15 @@ showImagePreview(data.imageData);
 hasUploadedImage = true;
 analyzeContainer.classList.remove('hidden');
 buttonGroup.classList.add('hidden');
+if (data.qualityWarning) {
+qualityWarningText.textContent = data.qualityWarning;
+qualityWarningDiv.classList.remove('hidden');
+lucide.createIcons();
+successDiv.classList.add('hidden');
+} else {
+qualityWarningDiv.classList.add('hidden');
 showSuccess('success', 'Image ready for analysis');
+}
 } else {
 showError('error', data.error || 'Upload failed');
 }
@@ -201,6 +222,7 @@ analyzeContainer.classList.add('hidden');
 buttonGroup.classList.remove('hidden');
 errorDiv.classList.add('hidden');
 successDiv.classList.add('hidden');
+qualityWarningDiv.classList.add('hidden');
 }
 
 function analyzeImage() {
