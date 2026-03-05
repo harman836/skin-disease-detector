@@ -12,6 +12,16 @@ from io import BytesIO
 import base64
 import onnxruntime as ort
 
+# --- ADDED FOR CHATBOT ---
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Force Python to find the .env file exactly where app.py is located
+basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(basedir, '.env')
+load_dotenv(env_path)
+# -------------------------
+
 app = Flask(__name__)
 
 # Configuration
@@ -20,6 +30,22 @@ MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 IMAGE_SIZE = (224, 224)  # Target image size
 
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+# --- ADDED FOR CHATBOT ---
+api_key = os.getenv("GEMINI_API_KEY")
+
+# Let's print this to the terminal so we can see if it worked!
+print(f"--- DEBUG: Looking for .env file at: {env_path} ---")
+if api_key:
+    print(f"--- DEBUG: API Key found! It starts with: {api_key[:5]}... ---")
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(
+        model_name="gemini-2.5-flash",
+        system_instruction="You are a helpful skin health assistant. Remind users that you are an AI, not a doctor."
+    )
+else:
+    print("--- 🚨 CRITICAL ERROR: API Key is STILL None. Python cannot read the .env file! ---")
+# -------------------------
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 
 # Ensure uploads folder exists
@@ -128,11 +154,9 @@ def prepare_image(file_stream):
 def index():
     return render_template('index.html')
 
-
 @app.route('/capture')
 def capture():
     return render_template('capture.html')
-
 
 @app.route('/results')
 def results():
@@ -259,6 +283,26 @@ def progress(filename):
     if filename in TASKS:
         return jsonify(TASKS[filename])
     return jsonify({'progress': 0, 'status': 'Waiting...', 'completed': False})
+
+
+# --- ADDED FOR CHATBOT ---
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.json.get('message')
+    if not user_input:
+        return jsonify({'error': 'No message'}), 400
+    
+    # Check if the model actually loaded
+    if 'model' not in globals():
+        return jsonify({'error': "Python can't find the .env file or the key inside it."}), 500
+        
+    try:
+        response = model.generate_content(user_input)
+        return jsonify({'reply': response.text})
+    except Exception as e:
+        # This will send Google's EXACT error message to your screen
+        return jsonify({'error': f"Google AI Error: {str(e)}"}), 500
+# -------------------------
 
 
 if __name__ == '__main__':

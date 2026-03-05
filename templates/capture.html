@@ -207,9 +207,11 @@ backBtn.addEventListener('click', () => window.location.href = '/');
 
 startCamera();
 
-window.addEventListener('beforeunload', () => {
-if (stream) {
-stream.getTracks().forEach(track => track.stop());
-}
-});
-{% endblock %}
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+    </script>
+</body>
+</html>
