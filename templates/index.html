@@ -1,309 +1,233 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Skin Screening | Skin Disease Detector</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="index-page">
-    <div class="container">
-        <!-- Header Section -->
-        <div class="header-section">
-            <h1>
-                <i class="fas fa-stethoscope"></i>
-                AI Skin Screening
-            </h1>
-            <p class="subtitle">Upload a clear photo of the affected skin area for analysis</p>
-            <div class="trust-line">
-                <i class="fas fa-lock"></i>
-                Your image is processed securely and not shared.
-            </div>
-        </div>
+{% extends "base.html" %}
 
-        <!-- Before You Upload Tips (Collapsible) -->
-        <div class="tips-section">
-            <button class="tips-toggle" id="tipsToggle">
-                <i class="fas fa-chevron-down"></i>
-                <span>📌 Before taking the photo</span>
-            </button>
-            <div class="tips-content" id="tipsContent">
-                <ul class="tips-list">
-                    <li><span class="check">✓</span> Clean the area thoroughly</li>
-                    <li><span class="check">✓</span> Remove makeup if possible</li>
-                    <li><span class="check">✓</span> Use natural lighting (avoid shadows)</li>
-                    <li><span class="check">✓</span> Avoid blurry or out-of-focus images</li>
-                    <li><span class="check">✓</span> Center the lesion in frame</li>
-                </ul>
-            </div>
-        </div>
+{% block title %}Skin Wellness Analysis | Skin Disease Detector{% endblock %}
 
-        <!-- Upload Area -->
-        <div class="upload-wrapper">
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-area-content" id="uploadContent">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <p class="upload-text">Drag and drop your image</p>
-                    <p class="upload-hint">or click to select from your device</p>
-                </div>
-                <div class="image-preview-wrapper" id="previewWrapper" style="display: none;">
-                    <div class="image-preview-container">
-                        <img id="previewImage" src="" alt="Preview" class="preview-image">
-                        <button class="remove-btn" onclick="removeImage()" title="Remove image">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="image-feedback" id="imageFeedback">
-                        <p><span class="success-badge">✓</span> Image detected</p>
-                        <p id="resolutionFeedback"></p>
-                        <p id="lightingFeedback"></p>
-                    </div>
+{% block body_class %}index-page{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in">
+
+    <!-- Header Group -->
+    <header class="hero-group">
+        <i data-lucide="stethoscope" style="color: var(--primary); width: 40px; height: 40px;"></i>
+        <h1 class="hero-header">Skin Wellness Analysis</h1>
+        <p class="subtitle">An AI-powered assessment for your skin health.</p>
+    </header>
+
+    <!-- Trust Upload Card -->
+    <div class="upload-card">
+
+        <!-- Upload Hit Area -->
+        <div class="upload-hit-area" id="uploadArea">
+            <div class="upload-area-content" id="uploadContent"
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <i data-lucide="camera" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
+                <p class="text-main">Place your image here</p>
+                <p class="text-sub">Secure Review Active</p>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="image-preview-wrapper hidden" id="previewWrapper">
+                <div style="position: relative;">
+                    <img id="previewImage" src="" alt="Preview"
+                        style="max-width: 100%; border-radius: 12px; max-height: 250px;">
+                    <button class="remove-btn" onclick="removeImage(event)" title="Remove image"
+                        style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 50%; background: var(--color-error-foreground); color: white; border: none; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Camera Guidelines Section -->
-        <details class="camera-guidelines">
-            <summary class="guidelines-title">
-                <i class="fas fa-camera-retro"></i>
-                Camera Guidelines for Better Results
-            </summary>
-            <div class="guidelines-content">
-                <div class="guideline-item">
-                    <i class="fas fa-lightbulb"></i>
-                    <p>Make sure lighting is good - natural light works best</p>
-                </div>
-                <div class="guideline-item">
-                    <i class="fas fa-crosshairs"></i>
-                    <p>Center the lesion in the frame</p>
-                </div>
-                <div class="guideline-item">
-                    <i class="fas fa-ban"></i>
-                    <p>Avoid shadows and reflections</p>
-                </div>
-                <div class="guideline-item">
-                    <i class="fas fa-mobile-alt"></i>
-                    <p>Keep camera steady - use both hands</p>
+        <!-- Action Group -->
+        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+            <!-- Status Messages -->
+            <div id="loading" class="hidden" style="text-align: center; color: var(--primary); font-size: 13px;">
+                <p><i class="fas fa-spinner fa-spin"></i> Preparing your image...</p>
+            </div>
+            <div id="error" class="hidden"
+                style="color: var(--color-error-foreground); font-size: 13px; text-align: center;"></div>
+            <div id="success" class="hidden"
+                style="color: var(--color-success-foreground); font-size: 13px; text-align: center;"></div>
+
+            <!-- Initial Buttons -->
+            <div id="buttonGroup" class="action-group">
+                <a href="/capture" class="btn btn-primary">
+                    <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+                    <span>Take a Photo</span>
+                </a>
+                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                    <i data-lucide="image" style="width: 16px; height: 16px;"></i>
+                    <span>Choose from Device</span>
+                </button>
+            </div>
+
+            <!-- Analyze Container (shown after image selected) -->
+            <div id="analyzeContainer" class="action-group hidden">
+                <button class="btn btn-primary" onclick="analyzeImage()">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>Analyze Image</span>
+                </button>
+                <button class="btn btn-secondary" onclick="startOver()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Change Image</span>
+                </button>
+            </div>
+
+            <!-- Quality Warning (shown below buttons when issue detected) -->
+            <div id="qualityWarning" class="hidden"
+                style="background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;">
+                <i data-lucide="triangle-alert" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--color-warning-foreground);"></i>
+                <div>
+                    <p style="margin: 0 0 2px; font-weight: 600; font-size: 13px; color: var(--color-warning-foreground);">Image quality issue detected</p>
+                    <p id="qualityWarningText" style="margin: 0; font-size: 12px; color: var(--color-warning-foreground);"></p>
+                    <p style="margin: 4px 0 0; font-size: 12px; color: var(--color-warning-foreground); opacity: 0.85;">You can still analyze this image, but results may be less accurate.</p>
                 </div>
             </div>
-        </details>
-
-        <input type="file" id="fileInput" accept="image/*">
-
-        <!-- Button Group -->
-        <div class="button-group">
-            <a href="/capture" class="btn btn-primary" style="text-decoration: none;">
-                <i class="fas fa-camera"></i>
-                <span>Take a Photo</span>
-            </a>
-            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-images"></i>
-                <span>Choose from Device</span>
-            </button>
-        </div>
-
-        <!-- Status Messages -->
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Preparing your image...</p>
-        </div>
-
-        <div class="error" id="error"></div>
-        <div class="success" id="success"></div>
-
-        <!-- Analyze Button (shown after upload) -->
-        <div class="analyze-container" id="analyzeContainer" style="display: none;">
-            <button class="btn btn-analyze" onclick="analyzeImage()">
-                <i class="fas fa-wand-magic-sparkles"></i>
-                <span>Analyze Image</span>
-            </button>
-            <button class="btn btn-change-image" onclick="startOver()">
-                <i class="fas fa-arrow-left"></i>
-                <span>Change Image</span>
-            </button>
-        </div>
-
-        <!-- Trust Footer -->
-        <div class="trust-footer">
-            <p>⚕️ For screening purposes only. Not a substitute for professional medical advice. Always consult with a healthcare provider.</p>
         </div>
     </div>
 
-    <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const uploadContent = document.getElementById('uploadContent');
-        const previewWrapper = document.getElementById('previewWrapper');
-        const previewImage = document.getElementById('previewImage');
-        const fileInput = document.getElementById('fileInput');
-        const loading = document.getElementById('loading');
-        const errorDiv = document.getElementById('error');
-        const successDiv = document.getElementById('success');
-        const analyzeContainer = document.getElementById('analyzeContainer');
-        const tipsToggle = document.getElementById('tipsToggle');
-        const tipsContent = document.getElementById('tipsContent');
-        let currentFilename = '';
-        let hasUploadedImage = false;
+    <!-- Health Accordion -->
+    <details class="health-accordion">
+        <summary class="accordion-trigger">
+            <span>How to take a clear photo</span>
+            <i data-lucide="chevron-down"></i>
+        </summary>
+        <div class="accordion-content">
+            <p class="accordion-item">1. Ensure soft, natural lighting.</p>
+            <p class="accordion-item">2. Focus on the area of concern.</p>
+            <p class="accordion-item">3. Maintain a distance of 10-15cm.</p>
+        </div>
+    </details>
 
-        // Tips Toggle
-        tipsToggle.addEventListener('click', () => {
-            tipsContent.classList.toggle('show');
-            tipsToggle.classList.toggle('open');
-        });
+    <!-- Medical Disclaimer -->
+    <div class="medical-disclaimer">
+        <p>Our AI assists in detection but is not a clinical diagnosis. Please consult a specialist for professional
+            care.</p>
+    </div>
 
-        // Drag and drop functionality
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+</div>
+{% endblock %}
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
+{% block scripts %}
+const uploadArea = document.getElementById('uploadArea');
+const uploadContent = document.getElementById('uploadContent');
+const previewWrapper = document.getElementById('previewWrapper');
+const previewImage = document.getElementById('previewImage');
+const fileInput = document.getElementById('fileInput');
+const loading = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const successDiv = document.getElementById('success');
+const qualityWarningDiv = document.getElementById('qualityWarning');
+const qualityWarningText = document.getElementById('qualityWarningText');
+const analyzeContainer = document.getElementById('analyzeContainer');
+const buttonGroup = document.getElementById('buttonGroup');
+let hasUploadedImage = false;
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const file = files[0];
-                if (validateFile(file)) {
-                    uploadFile(file);
-                }
-            }
-        });
+// Drag and drop logic
+uploadArea.addEventListener('dragover', (e) => {
+e.preventDefault();
+uploadArea.style.background = 'var(--color-success)';
+});
 
-        // Click to upload
-        uploadArea.addEventListener('click', () => {
-            if (!hasUploadedImage) {
-                fileInput.click();
-            }
-        });
+uploadArea.addEventListener('dragleave', () => {
+uploadArea.style.background = 'var(--secondary)';
+});
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                if (validateFile(file)) {
-                    uploadFile(file);
-                }
-            }
-        });
+uploadArea.addEventListener('drop', (e) => {
+e.preventDefault();
+uploadArea.style.background = 'var(--secondary)';
+const files = e.dataTransfer.files;
+if (files.length > 0 && validateFile(files[0])) {
+uploadFile(files[0]);
+}
+});
 
-        function validateFile(file) {
-            if (!file) {
-                showError('No file selected');
-                return false;
-            }
+uploadArea.addEventListener('click', (e) => {
+if (!hasUploadedImage && e.target.closest('#uploadArea')) {
+fileInput.click();
+}
+});
 
-            if (!file.type.startsWith('image/')) {
-                showError('Please select a valid image file');
-                return false;
-            }
+fileInput.addEventListener('change', () => {
+if (fileInput.files.length > 0 && validateFile(fileInput.files[0])) {
+uploadFile(fileInput.files[0]);
+}
+});
 
-            if (file.size > 16 * 1024 * 1024) {
-                showError('File size exceeds 16MB limit');
-                return false;
-            }
+function validateFile(file) {
+if (!file.type.startsWith('image/')) {
+showError('error', 'Please select a valid image file');
+return false;
+}
+if (file.size > 16 * 1024 * 1024) {
+showError('error', 'File size exceeds 16MB limit');
+return false;
+}
+return true;
+}
 
-            return true;
-        }
+function uploadFile(file) {
+const formData = new FormData();
+formData.append('file', file);
 
-        function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+loading.classList.remove('hidden');
+errorDiv.classList.add('hidden');
+successDiv.classList.add('hidden');
 
-            loading.style.display = 'block';
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
+fetch('/upload', { method: 'POST', body: formData })
+.then(r => r.json())
+.then(data => {
+loading.classList.add('hidden');
+if (data.success) {
+localStorage.setItem('uploadedImageData', data.imageData);
+showImagePreview(data.imageData);
+hasUploadedImage = true;
+analyzeContainer.classList.remove('hidden');
+buttonGroup.classList.add('hidden');
+if (data.qualityWarning) {
+qualityWarningText.textContent = data.qualityWarning;
+qualityWarningDiv.classList.remove('hidden');
+lucide.createIcons();
+successDiv.classList.add('hidden');
+} else {
+qualityWarningDiv.classList.add('hidden');
+showSuccess('success', 'Image ready for analysis');
+}
+} else {
+showError('error', data.error || 'Upload failed');
+}
+})
+.catch(err => {
+loading.classList.add('hidden');
+showError('error', 'Error uploading file: ' + err);
+});
+}
 
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
+function showImagePreview(src) {
+previewImage.src = src;
+uploadContent.classList.add('hidden');
+previewWrapper.classList.remove('hidden');
+}
 
-                if (data.success) {
-                    // Store image data in localStorage for privacy (survives navigation better)
-                    console.log('Upload successful, storing image data');
-                    console.log('Image data length:', data.imageData.length);
-                    localStorage.setItem('uploadedImageData', data.imageData);
-                    console.log('Image data stored in localStorage');
-                    showImagePreview(data.imageData);
-                    hasUploadedImage = true;
-                    provideFeedback();
-                    analyzeContainer.style.display = 'flex';
-                } else {
-                    showError(data.error || 'Upload failed');
-                    console.error('Upload failed:', data.error);
-                }
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                showError('Error uploading file: ' + error);
-                console.error('Error:', error);
-            });
-        }
+function removeImage(event) {
+if (event) event.stopPropagation();
+previewImage.src = '';
+uploadContent.classList.remove('hidden');
+previewWrapper.classList.add('hidden');
+fileInput.value = '';
+hasUploadedImage = false;
+analyzeContainer.classList.add('hidden');
+buttonGroup.classList.remove('hidden');
+errorDiv.classList.add('hidden');
+successDiv.classList.add('hidden');
+qualityWarningDiv.classList.add('hidden');
+}
 
-        function showImagePreview(filepath) {
-            previewImage.src = filepath;
-            uploadContent.style.display = 'none';
-            previewWrapper.style.display = 'block';
-            uploadArea.classList.add('has-preview');
-        }
+function analyzeImage() {
+if (hasUploadedImage) window.location.href = '/results';
+}
 
-        function provideFeedback() {
-            const resolutionFeedback = document.getElementById('resolutionFeedback');
-            const lightingFeedback = document.getElementById('lightingFeedback');
-            
-            // Simulated feedback (can be enhanced with actual image analysis)
-            resolutionFeedback.innerHTML = '<span class="success-badge">✓</span> Resolution: Good (224x224px)';
-            lightingFeedback.innerHTML = '<span class="success-badge">✓</span> Lighting: Acceptable';
-            
-            showSuccess('Image ready for analysis!');
-        }
-
-        function removeImage() {
-            previewImage.src = '';
-            uploadContent.style.display = 'block';
-            previewWrapper.style.display = 'none';
-            fileInput.value = '';
-            currentFilename = '';
-            hasUploadedImage = false;
-            analyzeContainer.style.display = 'none';
-            uploadArea.classList.remove('has-preview');
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-        }
-
-        function analyzeImage() {
-            if (hasUploadedImage) {
-                // Image data is stored in sessionStorage, just redirect to results
-                window.location.href = '/results';
-            }
-        }
-
-        function startOver() {
-            removeImage();
-        }
-
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            successDiv.style.display = 'none';
-        }
-
-        function showSuccess(message) {
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+function startOver() { removeImage(); }
+{% endblock %}

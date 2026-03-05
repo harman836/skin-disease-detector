@@ -1,123 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results | Skin Disease Detector</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="results-page">
-    <div class="results-wrapper">
-        <div class="results-container">
-            <div class="results-header">
-                <button class="back-btn" id="back-btn" title="Go Back">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <h1>🩺 Analysis Results</h1>
-                <div class="timestamp" id="timestamp"></div>
-            </div>
+{% extends "base.html" %}
 
-            <div class="results-content">
-                <div class="results-left">
-                    <div class="image-section">
-                        <div class="image-label">Uploaded Image</div>
-                        <div class="image-container">
-                            <img id="result-image" src="" alt="Analyzed Image" class="result-image">
-                            <div class="heatmap-overlay" id="heatmapOverlay" style="display: none;"></div>
-                        </div>
-                        <button class="toggle-heatmap" id="toggleHeatmap">
-                            <i class="fas fa-microscope"></i>
-                            Show AI Focus Area
-                        </button>
+{% block title %}Analysis Results | Skin Disease Detector{% endblock %}
+
+{% block body_class %}results-page{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .container {
+        max-width: 1260px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in">
+
+    <!-- Header -->
+    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-secondary" id="back-btn" style="width: auto;">
+            <i data-lucide="arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <h2 class="heading-serif" style="font-size: 24px;">Analysis Results</h2>
+        <div id="timestamp" style="font-size: 13px; color: #8A8A8A;"></div>
+    </header>
+
+    <div class="results-grid">
+        <!-- LEFT COLUMN -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="image-container">
+                <div class="result-image-box">
+                    <img id="result-image" src="" alt="Analyzed Image">
+                    <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none;">
                     </div>
                 </div>
+            </div>
 
-                <div class="results-right">
-                    <div class="ai-summary-card" id="summaryCard">
-                        <div class="summary-header">
-                            <h2>
-                                <i class="fas fa-brain"></i>
-                                AI Analysis Summary
-                            </h2>
-                        </div>
-                        
-                        <div class="summary-body">
-                            <div class="summary-label">Most Likely Condition</div>
-                            <div class="top-prediction">
-                                <div class="prediction-name" id="topCondition">--</div>
-                                <div class="risk-badge" id="riskBadge">
-                                    <span class="risk-level">--</span>
-                                </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-secondary" id="toggleHeatmap">
+                    <i data-lucide="microscope"></i>
+                    <span>Show AI Focus Area</span>
+                </button>
+
+                <!-- About This Model -->
+                <details class="health-accordion" style="width: 100%;">
+                    <summary class="accordion-trigger">
+                        <span>About This Model</span>
+                        <i data-lucide="chevron-down"></i>
+                    </summary>
+                    <div class="accordion-content">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Architecture</span>
+                                <span>CNN (EfficientNet)</span>
                             </div>
-                            
-                            <div class="summary-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Confidence</span>
-                                    <span class="stat-value" id="topConfidence">--%</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Risk Level</span>
-                                    <span class="stat-value risk-text" id="topRiskLevel">--</span>
-                                </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Training Data</span>
+                                <span>Medical Imaging Dataset</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Accuracy</span>
+                                <span>Optimized for Screening</span>
                             </div>
                         </div>
                     </div>
+                </details>
+            </div>
+        </div>
 
-                    <div class="what-means-card">
-                        <h3>📖 What This Means</h3>
-                        <p id="explanationText" class="explanation-text">
-                            Loading explanation...
-                        </p>
+        <!-- RIGHT COLUMN -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- Main Prediction Card -->
+            <div class="card main-prediction-card">
+                <p class="section-label">MOST LIKELY CONDITION</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 class="prediction-name" id="topCondition">--</h3>
+                    <div class="risk-pill" id="riskBadge"><span id="riskBadgeText">--</span></div>
+                </div>
+
+                <div style="display: flex; gap: 40px;">
+                    <div class="stat-item">
+                        <span class="stat-label">Confidence</span>
+                        <span class="stat-value" id="topConfidence">--%</span>
                     </div>
-
-                    <div class="recommendation-card" id="recommendationCard">
-                        <h3>🚨 Recommended Action</h3>
-                        <div class="recommendation-content" id="recommendationContent">
-                            Loading recommendation...
-                        </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Risk Level</span>
+                        <span class="stat-value" id="topRiskLevel">--</span>
                     </div>
+                </div>
+            </div>
 
-                    <div class="confidence-section">
-                        <h3>📊 Confidence Breakdown</h3>
-                        <p class="confidence-hint">
-                            <i class="fas fa-info-circle"></i>
-                            Confidence reflects model certainty, not diagnosis probability
-                        </p>
-                        
-                        <div class="disease-results" id="diseaseResults">
-                            </div>
-                    </div>
+            <!-- What This Means -->
+            <div class="card desc-card">
+                <p class="section-label">WHAT THIS MEANS</p>
+                <p id="explanationText" style="font-size: 14px; color: var(--muted-foreground); line-height: 1.5;">
+                    Loading explanation...
+                </p>
+            </div>
 
-                    <details class="model-info">
-                        <summary class="model-info-title">
-                            <i class="fas fa-microchip"></i>
-                            About This AI Model
-                        </summary>
-                        <div class="model-info-content">
-                            <p><strong>Architecture:</strong></p>
-                            <p><strong>Model:</strong></p>
-                            <p><strong>Conditions Detected:</strong></p>
-                            <p><strong>Model Accuracy:</strong></p>
-                            <p><strong>Training Data:</strong></p>
-                        </div>
-                    </details>
+            <div class="card action-card">
+                <i data-lucide="stethoscope"
+                    style="color: var(--primary); width: 24px; height: 24px; flex-shrink: 0;"></i>
+                <div id="recommendationContent" style="font-size: 14px; color: var(--foreground);">
+                    Loading recommended action...
+                </div>
+            </div>
+
+            <!-- Confidence Breakdown -->
+            <div class="card">
+                <p class="section-label">CONFIDENCE BREAKDOWN</p>
+                <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Breakdown items injected here -->
                 </div>
             </div>
 
             <div class="results-actions">
                 <button class="btn btn-primary" id="download-btn">
-                    <i class="fas fa-file-pdf"></i>
-                    Download Professional Report
+                    <i data-lucide="download"></i>
+                    <span>Download Report</span>
                 </button>
                 <button class="btn btn-secondary" id="upload-new-btn">
-                    <i class="fas fa-redo-alt"></i>
-                    Analyze Another Image
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Analyze Another</span>
                 </button>
             </div>
 
@@ -150,273 +155,153 @@
             </div>
     </div>
 
-    <script>
-        // Disease information with explanations and risk assessments
-        const diseaseInfo = {
-            'Melanoma': {
-                explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
-                highRiskThreshold: 0.50,
-                mediumRiskThreshold: 0.20,
-                icon: '🔴'
-            },
-            'Basal Cell Carcinoma': {
-                explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a high cure rate when treated early. Sun protection and regular skin checks are important.',
-                highRiskThreshold: 0.50,
-                mediumRiskThreshold: 0.20,
-                icon: '🟠'
-            },
-            'Eczema': {
-                explanation: 'Eczema (dermatitis) is a chronic inflammatory skin condition characterized by itching, redness, and flaking. While not contagious, it can be uncomfortable and requires proper skin care and management. Triggers vary by individual.',
-                highRiskThreshold: 0.60,
-                mediumRiskThreshold: 0.30,
-                icon: '🟡'
-            },
-            'Psoriasis': {
-                explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. It is not contagious and varies in severity. While there is no cure, various treatments can help manage symptoms and improve quality of life.',
-                highRiskThreshold: 0.60,
-                mediumRiskThreshold: 0.30,
-                icon: '🟠'
-            },
-            'Fungal Infections': {
-                explanation: 'Fungal skin infections are caused by fungal organisms and can appear as rings, patches, or discoloration. They are often contagious and require antifungal treatment. Good hygiene and keeping skin dry helps prevent spread.',
-                highRiskThreshold: 0.55,
-                mediumRiskThreshold: 0.25,
-                icon: '🟡'
-            }
-        };
+{% block scripts %}
+const diseaseInfo = {
+'Melanoma': {
+explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not
+detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
+highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+},
+'Basal Cell Carcinoma': {
+explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a
+high cure rate when treated early.',
+highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+},
+'Eczema': {
+explanation: 'Eczema is a chronic inflammatory skin condition characterised by itching, redness, and flaking. It is not
+contagious and requires proper skin care and management.',
+highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+},
+'Psoriasis': {
+explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. While there is no cure,
+various treatments can help manage symptoms.',
+highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+},
+'Fungal Infections': {
+explanation: 'Fungal skin infections can appear as rings, patches, or discoloration. They are often contagious and
+require antifungal treatment.',
+highRiskThreshold: 0.55, mediumRiskThreshold: 0.25
+}
+};
 
-        // Mock test data (in production, this would come from backend)
-        const mockScores = {
-            'Melanoma': 0.30,
-            'Basal Cell Carcinoma': 0.18,
-            'Eczema': 0.25,
-            'Psoriasis': 0.15,
-            'Fungal Infections': 0.12
-        };
+const mockScores = {
+'Melanoma': 0.30,
+'Basal Cell Carcinoma': 0.18,
+'Eczema': 0.25,
+'Psoriasis': 0.15,
+'Fungal Infections': 0.12
+};
 
-        function getRiskLevel(condition, confidence) {
-            const info = diseaseInfo[condition];
-            if (!info) return 'Unknown';
-            
-            if (confidence >= info.highRiskThreshold) return 'High';
-            if (confidence >= info.mediumRiskThreshold) return 'Medium';
-            return 'Low';
-        }
+function getRiskLevel(condition, confidence) {
+const info = diseaseInfo[condition];
+if (!info) return 'Unknown';
+if (confidence >= info.highRiskThreshold) return 'High';
+if (confidence >= info.mediumRiskThreshold) return 'Medium';
+return 'Low';
+}
 
-        function getRiskColor(riskLevel) {
-            switch(riskLevel) {
-                case 'High': return '#dc2626';
-                case 'Medium': return '#f97316';
-                case 'Low': return '#22c55e';
-                default: return '#6b7280';
-            }
-        }
+function getRiskColor(riskLevel) {
+switch (riskLevel) {
+case 'High': return '#D89575'; // Terracotta
+case 'Medium': return '#D4A64A'; // Gold
+case 'Low': return '#4A7C7A'; // Updated Wellness Blue-Green
+default: return '#6D6C6A'; // Warm Gray
+}
+}
 
-        function setTimestamp() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-            document.getElementById('timestamp').textContent = `📅 ${now.toLocaleDateString('en-US', options)}`;
-        }
+function displayResults(scores) {
+const sorted = Object.entries(scores).sort(([, a], [, b]) => b - a);
+const [topCondition, topConfidence] = sorted[0];
+const topRisk = getRiskLevel(topCondition, topConfidence);
+const topColor = getRiskColor(topRisk);
 
-        function displayResults(scores) {
-            // Sort by confidence (highest first)
-            const sortedScores = Object.entries(scores)
-                .sort(([, a], [, b]) => b - a)
-                .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+document.getElementById('topCondition').textContent = topCondition;
+document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
+document.getElementById('topRiskLevel').textContent = topRisk;
+document.getElementById('topRiskLevel').style.color = topColor;
 
-            // Display top prediction
-            const [topCondition, topConfidence] = Object.entries(sortedScores)[0];
-            const topRiskLevel = getRiskLevel(topCondition, topConfidence);
-            const topRiskColor = getRiskColor(topRiskLevel);
+const pill = document.getElementById('riskBadge');
+pill.style.color = topColor;
+pill.style.borderColor = topColor;
+document.getElementById('riskBadgeText').textContent = topRisk;
 
-            document.getElementById('topCondition').textContent = `${diseaseInfo[topCondition]?.icon || ''} ${topCondition}`;
-            document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
-            document.getElementById('topRiskLevel').textContent = topRiskLevel;
+document.getElementById('explanationText').textContent =
+diseaseInfo[topCondition]?.explanation || 'Information not available.';
 
-            const riskBadge = document.getElementById('riskBadge');
-            riskBadge.style.borderColor = topRiskColor;
-            riskBadge.style.backgroundColor = `${topRiskColor}20`;
-            riskBadge.querySelector('.risk-level').textContent = topRiskLevel;
-            riskBadge.querySelector('.risk-level').style.color = topRiskColor;
+const recEl = document.getElementById('recommendationContent');
+if (topRisk === 'High') {
+recEl.innerHTML = `<strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional
+medical evaluation.`;
+} else if (topRisk === 'Medium') {
+recEl.innerHTML = `<strong>Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and
+prevent progression.`;
+} else {
+recEl.innerHTML = `<strong>Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
+}
 
-            // Display explanation
-            document.getElementById('explanationText').textContent = diseaseInfo[topCondition]?.explanation || 'Information not available.';
+const list = document.getElementById('diseaseResults');
+list.innerHTML = '';
+sorted.forEach(([disease, confidence], i) => {
+const pct = Math.round(confidence * 100);
+const risk = getRiskLevel(disease, confidence);
+const color = getRiskColor(risk);
 
-            // Display recommendation
-            const recommendationContent = document.getElementById('recommendationContent');
-            if (topRiskLevel === 'High') {
-                recommendationContent.innerHTML = `
-                    <div class="recommendation-high">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p><strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation and may need immediate treatment.</p>
-                    </div>
-                `;
-            } else if (topRiskLevel === 'Medium') {
-                recommendationContent.innerHTML = `
-                    <div class="recommendation-medium">
-                        <i class="fas fa-calendar-check"></i>
-                        <p><strong>Schedule a medical evaluation.</strong> While not urgent, professional assessment is recommended to monitor and prevent progression.</p>
-                    </div>
-                `;
-            } else {
-                recommendationContent.innerHTML = `
-                    <div class="recommendation-low">
-                        <i class="fas fa-check-circle"></i>
-                        <p><strong>Monitor and rescan in 4 weeks.</strong> Low-risk findings should be monitored regularly. Contact a healthcare provider if changes occur.</p>
-                    </div>
-                `;
-            }
+const row = document.createElement('div');
+row.className = 'confidence-row';
+row.innerHTML = `
+<div class="confidence-header">
+    <span style="font-weight: 500;">${disease}</span>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <span>${pct}%</span>
+        <span class="risk-pill" style="font-size: 8px; color: ${color}; border-color: ${color}">${risk}</span>
+    </div>
+</div>
+<div class="confidence-bar-track">
+    <div class="confidence-bar-fill" style="width: 0%; background-color: ${color}" data-width="${pct}%"></div>
+</div>
+`;
+list.appendChild(row);
 
-            // Display all confidence scores
-            const diseaseResults = document.getElementById('diseaseResults');
-            diseaseResults.innerHTML = '';
+// Animate
+setTimeout(() => {
+row.querySelector('.confidence-bar-fill').style.width = `${pct}%`;
+}, 100 * i);
+});
+}
 
-            Object.entries(sortedScores).forEach(([disease, confidence], index) => {
-                const percentage = Math.round(confidence * 100);
-                const riskLevel = getRiskLevel(disease, confidence);
-                const riskColor = getRiskColor(riskLevel);
+// Heatmap toggle
+document.getElementById('toggleHeatmap').addEventListener('click', function () {
+const overlay = document.getElementById('heatmapOverlay');
+const showing = overlay.style.display !== 'none';
+if (showing) {
+overlay.style.display = 'none';
+this.classList.remove('btn-primary');
+this.classList.add('btn-secondary');
+this.querySelector('span').textContent = 'Show AI Focus Area';
+} else {
+overlay.style.display = 'block';
+overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%,
+transparent 70%)';
+this.classList.remove('btn-secondary');
+this.classList.add('btn-primary');
+this.querySelector('span').textContent = 'Hide AI Focus Area';
+}
+});
 
-                const card = document.createElement('div');
-                card.className = 'disease-card';
-                if (index === 0) card.classList.add('top-result');
-                
-                card.innerHTML = `
-                    <div class="disease-header">
-                        <div class="disease-info">
-                            <span class="disease-name">${diseaseInfo[disease]?.icon || ''} ${disease}</span>
-                            <span class="disease-conf">${percentage}%</span>
-                        </div>
-                        <span class="risk-tag" style="color: ${riskColor}; border-color: ${riskColor};">${riskLevel}</span>
-                    </div>
-                    <div class="confidence-bar-container">
-                        <div class="confidence-bar">
-                            <div class="confidence-fill" style="background: ${riskColor}; width: 0%; animation: fillBar 1s ease-out forwards; animation-delay: ${index * 0.1}s;"></div>
-                        </div>
-                        <span class="percentage-text">${percentage}%</span>
-                    </div>
-                `;
-                diseaseResults.appendChild(card);
-            });
+document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
+document.getElementById('upload-new-btn').addEventListener('click', () => window.location.href = '/');
+document.getElementById('download-btn').addEventListener('click', () => alert('PDF report is being generated...'));
 
-            // Trigger animation for summary card
-            const summaryCard = document.getElementById('summaryCard');
-            summaryCard.style.animation = 'slideInUp 0.6s ease-out forwards';
-        }
+// Set timestamp
+const now = new Date();
+document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
+year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+});
 
-        // Heatmap toggle
-        document.getElementById('toggleHeatmap').addEventListener('click', function() {
-            const overlay = document.getElementById('heatmapOverlay');
-            const isShowing = overlay.style.display !== 'none';
-            
-            if (isShowing) {
-                overlay.style.display = 'none';
-                this.classList.remove('active');
-                this.innerHTML = '<i class="fas fa-microscope"></i> Show AI Focus Area';
-            } else {
-                overlay.style.display = 'block';
-                this.classList.add('active');
-                this.innerHTML = '<i class="fas fa-eye"></i> Hide AI Focus Area';
-                // Generate simulated heatmap
-                generateHeatmap();
-            }
-        });
+// Load image from localStorage
+const stored = localStorage.getItem('uploadedImageData');
+if (stored) document.getElementById('result-image').src = stored;
 
-        function generateHeatmap() {
-            const overlay = document.getElementById('heatmapOverlay');
-            // Create a radial gradient to simulate Grad-CAM heatmap
-            const gradient = 'radial-gradient(circle at 50% 45%, rgba(255, 0, 0, 0.5) 0%, rgba(255, 165, 0, 0.3) 30%, transparent 70%)';
-            overlay.style.background = gradient;
-            overlay.style.animation = 'fadeIn 0.5s ease-out';
-        }
-
-        // Back button
-        document.getElementById('back-btn').addEventListener('click', () => {
-            window.location.href = '/';
-        });
-
-        // Upload new button
-        document.getElementById('upload-new-btn').addEventListener('click', () => {
-            window.location.href = '/';
-        });
-
-        // Download report button
-        document.getElementById('download-btn').addEventListener('click', () => {
-            alert('PDF download feature coming soon! This will generate a professional medical report with all analysis data.');
-        });
-
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimestamp();
-            displayResults(mockScores);
-            
-            // Get image from localStorage (survives page navigation)
-            const imageData = localStorage.getItem('uploadedImageData');
-            const resultImage = document.getElementById('result-image');
-            
-            console.log('Results page loaded');
-            console.log('Image data from localStorage:', imageData ? 'Found (' + imageData.length + ' chars)' : 'Not found');
-            
-            if (imageData) {
-                console.log('Setting image src');
-                resultImage.src = imageData;
-                console.log('Image src set');
-                
-                resultImage.onload = () => {
-                    console.log('✓ Image loaded successfully');
-                };
-                
-                resultImage.onerror = () => {
-                    console.error('✗ Failed to display image');
-                };
-            } else {
-                console.log('No image data found in localStorage');
-            }
-        });
-
-        // ==========================================
-        // CHATBOT JAVASCRIPT
-        // ==========================================
-        async function sendChat() {
-            const input = document.getElementById('chat-input');
-            const windowDiv = document.getElementById('chat-window');
-            const msg = input.value.trim();
-            if(!msg) return;
-
-            // Display user message
-            windowDiv.innerHTML += `<div style="background: #2F80ED; color: white; padding: 12px 16px; border-radius: 12px; border-bottom-right-radius: 4px; max-width: 80%; align-self: flex-end; font-size: 0.95rem; line-height: 1.5;">${msg}</div>`;
-            input.value = '';
-            windowDiv.scrollTop = windowDiv.scrollHeight;
-
-            // Display loading message
-            const loadingId = 'loading-' + Date.now();
-            windowDiv.innerHTML += `<div id="${loadingId}" style="background: rgba(47, 128, 237, 0.1); color: #2F80ED; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">Thinking...</div>`;
-            windowDiv.scrollTop = windowDiv.scrollHeight;
-
-            try {
-                const res = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message: msg})
-                });
-                const data = await res.json();
-                
-                document.getElementById(loadingId).remove();
-                
-                if (data.reply) {
-                    windowDiv.innerHTML += `<div style="background: rgba(47, 128, 237, 0.1); color: #2F80ED; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">${data.reply}</div>`;
-                } else {
-                    windowDiv.innerHTML += `<div style="background: rgba(220, 38, 38, 0.1); color: #dc2626; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">Error: ${data.error}</div>`;
-                }
-            } catch (e) {
-                document.getElementById(loadingId).remove();
-                windowDiv.innerHTML += `<div style="background: rgba(220, 38, 38, 0.1); color: #dc2626; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">Connection error. Please restart your python server.</div>`;
-            }
-            windowDiv.scrollTop = windowDiv.scrollHeight;
-        }
-
-        function clearChat() {
-            document.getElementById('chat-window').innerHTML = `<div style="background: rgba(47, 128, 237, 0.1); color: #2F80ED; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">Chat cleared! How else can I help you today?</div>`;
-        }
-    </script>
-</body>
-</html>
+// Initialize results
+displayResults(mockScores);
+{% endblock %}

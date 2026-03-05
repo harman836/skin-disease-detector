@@ -1,157 +1,211 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capture | Skin Disease Detector</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body class="capture-page">
-    <div class="app-container">
+{% extends "base.html" %}
+
+{% block title %}Capture | Skin Disease Detector{% endblock %}
+
+{% block body_class %}capture-page{% endblock %}
+
+{% block content %}
+<div class="container animate-fade-in">
+
+    <!-- Header Group -->
+    <header class="hero-group">
+        <i data-lucide="camera" style="color: var(--primary); width: 40px; height: 40px;"></i>
+        <h1 class="hero-header">Capture Image</h1>
+        <p class="subtitle">Focus on the area of concern under natural lighting.</p>
+    </header>
+
+    <!-- Camera Card -->
+    <div class="card camera-card">
+
+        <!-- Camera Viewport -->
         <div class="camera-viewport">
             <video id="camera-feed" autoplay playsinline></video>
             <canvas id="canvas"></canvas>
 
-            <div class="camera-top-bar">
-                <div class="top-bar-left">
-                    <button class="menu-btn" id="menu-btn">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="status-indicator">
-                        <div class="status-dot" id="status-dot"></div>
-                        <span class="status-text" id="status-text">Ready</span>
+            <!-- Overlay Guides -->
+            <div class="camera-overlay">
+                <div class="camera-guide"></div>
+            </div>
+
+            <!-- Preview Overlay (hidden by default) -->
+            <div class="preview-overlay" id="preview-container">
+                <img id="preview-image" src="" alt="Preview">
+
+                <!-- Quality Warning Banner (hidden until a warning exists) -->
+                <div id="quality-warning-banner" style="display: none; margin: 8px 12px 0; background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 10px 14px; text-align: left;">
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <i data-lucide="triangle-alert" style="width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--color-warning-foreground);"></i>
+                        <div>
+                            <p style="margin: 0 0 2px; font-weight: 600; font-size: 12px; color: var(--color-warning-foreground);">Image quality issue</p>
+                            <p id="quality-warning-text" style="margin: 0 0 2px; font-size: 11px; color: var(--color-warning-foreground);"></p>
+                            <p style="margin: 0; font-size: 11px; color: var(--color-warning-foreground); opacity: 0.85;">Retake for better accuracy, or continue anyway.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="camera-controls">
-                <button class="back-btn" id="back-btn" title="Retake">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button class="capture-btn" id="capture-btn" title="Capture"></button>
-                <button class="control-btn" style="display:none;" id="upload-btn" title="Upload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </button>
-            </div>
-
-            <div class="preview-container" id="preview-container">
-                <img id="preview-image" class="preview-image" src="" alt="Preview">
-                <div class="preview-controls">
-                    <button class="preview-btn" id="retake-btn" title="Retake">
-                        <i class="fas fa-redo"></i>
+                <div class="preview-actions">
+                    <button class="btn btn-secondary" id="retake-btn">
+                        <i data-lucide="rotate-ccw"></i>
+                        <span>Retake</span>
                     </button>
-                    <button class="preview-btn confirm" id="confirm-btn" title="Use Photo">
-                        <i class="fas fa-check"></i>
+                    <button class="btn btn-primary" id="confirm-btn">
+                        <i data-lucide="check"></i>
+                        <span>Use Photo</span>
                     </button>
                 </div>
             </div>
+
+            <!-- Status Top Bar -->
+            <div
+                style="position: absolute; top: 16px; left: 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 99px; backdrop-filter: blur(4px);">
+                <div id="status-dot"
+                    style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-success-foreground);">
+                </div>
+                <span id="status-text"
+                    style="color: white; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Ready</span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="camera-controls">
+            <button class="btn btn-secondary" id="back-btn" style="width: auto; border: none; background: none;"
+                title="Go back">
+                <i data-lucide="arrow-left"></i>
+            </button>
+
+            <button class="capture-trigger" id="capture-btn" title="Capture">
+                <i data-lucide="camera"></i>
+            </button>
+
+            <div style="width: 44px;"></div> <!-- Spacer for symmetry -->
         </div>
     </div>
 
-    <script>
-        const video = document.getElementById('camera-feed');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture-btn');
-        const backBtn = document.getElementById('menu-btn');
-        const previewContainer = document.getElementById('preview-container');
-        const previewImage = document.getElementById('preview-image');
-        const retakeBtn = document.getElementById('retake-btn');
-        const confirmBtn = document.getElementById('confirm-btn');
-        const uploadBtn = document.getElementById('upload-btn');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
+    <!-- Warning Disclaimer -->
+    <div class="medical-disclaimer" style="width: 100%;">
+        <p>Ensure the lens is clean and the lesion is centered for the best analysis results.</p>
+    </div>
+</div>
+{% endblock %}
 
-        let stream = null;
-        let capturedImageBlob = null;
+{% block scripts %}
+const video = document.getElementById('camera-feed');
+const canvas = document.getElementById('canvas');
+const captureBtn = document.getElementById('capture-btn');
+const backBtn = document.getElementById('back-btn');
+const previewContainer = document.getElementById('preview-container');
+const previewImage = document.getElementById('preview-image');
+const retakeBtn = document.getElementById('retake-btn');
+const confirmBtn = document.getElementById('confirm-btn');
+const statusDot = document.getElementById('status-dot');
+const statusText = document.getElementById('status-text');
+const qualityWarningBanner = document.getElementById('quality-warning-banner');
+const qualityWarningText = document.getElementById('quality-warning-text');
 
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
-                });
-                video.srcObject = stream;
-                statusText.textContent = 'Ready';
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-                statusText.textContent = 'Camera Error';
-                statusDot.style.background = '#ef4444';
-                alert('Unable to access camera. Please check permissions.');
-            }
-        }
+let stream = null;
+let capturedImageBlob = null;
+let uploadedFilename = null;
 
-        function captureImage() {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-            
-            canvas.toBlob((blob) => {
-                capturedImageBlob = blob;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    previewImage.src = e.target.result;
-                    previewContainer.classList.add('show');
-                    statusText.textContent = 'Preview';
-                };
-                reader.readAsDataURL(blob);
-            }, 'image/jpeg', 0.95);
-        }
+async function startCamera() {
+try {
+stream = await navigator.mediaDevices.getUserMedia({
+video: { facingMode: 'environment' }
+});
+video.srcObject = stream;
+statusText.textContent = 'Ready';
+statusDot.style.background = '#3D8A5A';
+} catch (error) {
+console.error('Error accessing camera:', error);
+statusText.textContent = 'Camera Error';
+statusDot.style.background = '#D89575';
+alert('Unable to access camera. Please check permissions.');
+}
+}
 
-        function retakeImage() {
-            previewContainer.classList.remove('show');
-            capturedImageBlob = null;
-            statusText.textContent = 'Ready';
-        }
+function captureImage() {
+canvas.width = video.videoWidth;
+canvas.height = video.videoHeight;
+const ctx = canvas.getContext('2d');
+ctx.drawImage(video, 0, 0);
 
-        async function uploadImage() {
-            if (!capturedImageBlob) return;
+canvas.toBlob((blob) => {
+capturedImageBlob = blob;
+const reader = new FileReader();
+reader.onload = (e) => {
+previewImage.src = e.target.result;
+previewContainer.classList.add('show');
+statusText.textContent = 'Preview';
+};
+reader.readAsDataURL(blob);
+}, 'image/jpeg', 0.95);
+}
 
-            const formData = new FormData();
-            formData.append('file', capturedImageBlob, 'capture.jpg');
+function retakeImage() {
+previewContainer.classList.remove('show');
+capturedImageBlob = null;
+uploadedFilename = null;
+qualityWarningBanner.style.display = 'none';
+statusText.textContent = 'Ready';
+}
 
-            try {
-                statusText.textContent = 'Uploading...';
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+async function uploadImage() {
+if (!capturedImageBlob) return;
 
-                const data = await response.json();
+// If already uploaded (warning shown), proceed to results
+if (uploadedFilename) {
+window.location.href = '/results';
+return;
+}
 
-                if (data.success) {
-                    statusText.textContent = 'Uploaded!';
-                    
-                    // ==========================================
-                    // THE FIX IS HERE: Save image to browser memory
-                    // ==========================================
-                    localStorage.setItem('uploadedImageData', data.imageData);
-                    
-                    setTimeout(() => {
-                        window.location.href = '/results';
-                    }, 1500);
-                } else {
-                    statusText.textContent = 'Upload Failed';
-                    alert('Upload failed: ' + (data.error || 'Unknown error'));
-                }
-            } catch (error) {
-                console.error('Upload error:', error);
-                statusText.textContent = 'Error';
-                alert('Error uploading image');
-            }
-        }
+const formData = new FormData();
+formData.append('file', capturedImageBlob, 'capture.jpg');
 
-        captureBtn.addEventListener('click', captureImage);
-        retakeBtn.addEventListener('click', retakeImage);
-        confirmBtn.addEventListener('click', uploadImage);
-        backBtn.addEventListener('click', () => window.location.href = '/');
+try {
+statusText.textContent = 'Uploading...';
+confirmBtn.disabled = true;
 
-        startCamera();
+const response = await fetch('/upload', { method: 'POST', body: formData });
+const data = await response.json();
+
+if (data.success) {
+localStorage.setItem('uploadedImageData', data.imageData);
+uploadedFilename = data.filename;
+
+if (data.qualityWarning) {
+// Show warning — don't redirect yet
+qualityWarningText.textContent = data.qualityWarning;
+qualityWarningBanner.style.display = 'block';
+lucide.createIcons();
+statusText.textContent = 'Quality Warning';
+statusDot.style.background = '#D4A64A';
+confirmBtn.innerHTML = '<i data-lucide="arrow-right"></i><span>Continue Anyway</span>';
+lucide.createIcons();
+confirmBtn.disabled = false;
+} else {
+statusText.textContent = 'Uploaded!';
+window.location.href = '/results';
+}
+} else {
+statusText.textContent = 'Upload Failed';
+statusDot.style.background = '#D89575';
+confirmBtn.disabled = false;
+alert('Upload failed: ' + (data.error || 'Unknown error'));
+}
+} catch (error) {
+console.error('Upload error:', error);
+statusText.textContent = 'Error';
+statusDot.style.background = '#D89575';
+confirmBtn.disabled = false;
+alert('Error uploading image');
+}
+}
+
+captureBtn.addEventListener('click', captureImage);
+retakeBtn.addEventListener('click', retakeImage);
+confirmBtn.addEventListener('click', uploadImage);
+backBtn.addEventListener('click', () => window.location.href = '/');
+
+startCamera();
 
         window.addEventListener('beforeunload', () => {
             if (stream) {
