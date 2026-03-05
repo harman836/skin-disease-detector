@@ -52,15 +52,15 @@
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; justify-content: space-between; font-size: 13px;">
                                 <span style="color: #8A8A8A;">Architecture</span>
-                                <span>CNN (EfficientNet)</span>
+                                <span>YOLOv8n-cls (ONNX)</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Training Data</span>
-                                <span>Medical Imaging Dataset</span>
+                                <span style="color: #8A8A8A;">Classes</span>
+                                <span>5 Skin Conditions</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Accuracy</span>
-                                <span>Optimized for Screening</span>
+                                <span style="color: #8A8A8A;">Input Size</span>
+                                <span>224 × 224 px</span>
                             </div>
                         </div>
                     </div>
@@ -140,38 +140,25 @@
 {% block scripts %}
 const diseaseInfo = {
 'Melanoma': {
-explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not
-detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
-highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+    explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
+    highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
 },
-'Basal Cell Carcinoma': {
-explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a
-high cure rate when treated early.',
-highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
+'Basic Cell Carcinoma': {
+    explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a high cure rate when treated early.',
+    highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
 },
 'Eczema': {
-explanation: 'Eczema is a chronic inflammatory skin condition characterised by itching, redness, and flaking. It is not
-contagious and requires proper skin care and management.',
-highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+    explanation: 'Eczema is a chronic inflammatory skin condition characterised by itching, redness, and flaking. It is not contagious and requires proper skin care and management.',
+    highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
 },
 'Psoriasis': {
-explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. While there is no cure,
-various treatments can help manage symptoms.',
-highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
+    explanation: 'Psoriasis is an autoimmune condition causing red, scaly patches on the skin. While there is no cure, various treatments can help manage symptoms.',
+    highRiskThreshold: 0.60, mediumRiskThreshold: 0.30
 },
-'Fungal Infections': {
-explanation: 'Fungal skin infections can appear as rings, patches, or discoloration. They are often contagious and
-require antifungal treatment.',
-highRiskThreshold: 0.55, mediumRiskThreshold: 0.25
+'Tinea Ringworm': {
+    explanation: 'Tinea (ringworm) is a fungal skin infection that appears as ring-shaped, scaly patches. It is contagious and responds well to antifungal treatment.',
+    highRiskThreshold: 0.55, mediumRiskThreshold: 0.25
 }
-};
-
-const mockScores = {
-'Melanoma': 0.30,
-'Basal Cell Carcinoma': 0.18,
-'Eczema': 0.25,
-'Psoriasis': 0.15,
-'Fungal Infections': 0.12
 };
 
 function getRiskLevel(condition, confidence) {
@@ -184,10 +171,10 @@ return 'Low';
 
 function getRiskColor(riskLevel) {
 switch (riskLevel) {
-case 'High': return '#D89575'; // Terracotta
-case 'Medium': return '#D4A64A'; // Gold
-case 'Low': return '#4A7C7A'; // Updated Wellness Blue-Green
-default: return '#6D6C6A'; // Warm Gray
+case 'High': return '#D89575';
+case 'Medium': return '#D4A64A';
+case 'Low': return '#4A7C7A';
+default: return '#6D6C6A';
 }
 }
 
@@ -208,17 +195,15 @@ pill.style.borderColor = topColor;
 document.getElementById('riskBadgeText').textContent = topRisk;
 
 document.getElementById('explanationText').textContent =
-diseaseInfo[topCondition]?.explanation || 'Information not available.';
+    diseaseInfo[topCondition]?.explanation || 'Information not available.';
 
 const recEl = document.getElementById('recommendationContent');
 if (topRisk === 'High') {
-recEl.innerHTML = `<strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional
-medical evaluation.`;
+    recEl.innerHTML = `<strong>Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation.`;
 } else if (topRisk === 'Medium') {
-recEl.innerHTML = `<strong>Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and
-prevent progression.`;
+    recEl.innerHTML = `<strong>Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and prevent progression.`;
 } else {
-recEl.innerHTML = `<strong>Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
+    recEl.innerHTML = `<strong>Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
 }
 
 const list = document.getElementById('diseaseResults');
@@ -243,10 +228,8 @@ row.innerHTML = `
 </div>
 `;
 list.appendChild(row);
-
-// Animate
 setTimeout(() => {
-row.querySelector('.confidence-bar-fill').style.width = `${pct}%`;
+    row.querySelector('.confidence-bar-fill').style.width = `${pct}%`;
 }, 100 * i);
 });
 }
@@ -256,17 +239,16 @@ document.getElementById('toggleHeatmap').addEventListener('click', function () {
 const overlay = document.getElementById('heatmapOverlay');
 const showing = overlay.style.display !== 'none';
 if (showing) {
-overlay.style.display = 'none';
-this.classList.remove('btn-primary');
-this.classList.add('btn-secondary');
-this.querySelector('span').textContent = 'Show AI Focus Area';
+    overlay.style.display = 'none';
+    this.classList.remove('btn-primary');
+    this.classList.add('btn-secondary');
+    this.querySelector('span').textContent = 'Show AI Focus Area';
 } else {
-overlay.style.display = 'block';
-overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%,
-transparent 70%)';
-this.classList.remove('btn-secondary');
-this.classList.add('btn-primary');
-this.querySelector('span').textContent = 'Hide AI Focus Area';
+    overlay.style.display = 'block';
+    overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%, transparent 70%)';
+    this.classList.remove('btn-secondary');
+    this.classList.add('btn-primary');
+    this.querySelector('span').textContent = 'Hide AI Focus Area';
 }
 });
 
@@ -277,13 +259,46 @@ document.getElementById('download-btn').addEventListener('click', () => alert('P
 // Set timestamp
 const now = new Date();
 document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
-year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
 });
 
 // Load image from localStorage
-const stored = localStorage.getItem('uploadedImageData');
-if (stored) document.getElementById('result-image').src = stored;
+const storedImage = localStorage.getItem('uploadedImageData');
+if (storedImage) document.getElementById('result-image').src = storedImage;
 
-// Initialize results
-displayResults(mockScores);
+// Load real analysis results from localStorage (set by loading page)
+const storedResult = localStorage.getItem('analysisResult');
+if (storedResult) {
+    try {
+        const result = JSON.parse(storedResult);
+        if (result && result.scores) {
+            displayResults(result.scores);
+        } else if (result && result.primary_diagnosis) {
+            // Fallback: build scores from top3 if full scores not available
+            const scores = {};
+            if (result.top3) {
+                result.top3.forEach(item => {
+                    scores[item.disease] = item.probability / 100;
+                });
+            }
+            displayResults(scores);
+        }
+    } catch (e) {
+        console.error('Failed to parse analysis result', e);
+    }
+} else {
+    // No result in storage — try fetching from backend using filename in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const imagePath = urlParams.get('image');
+    if (imagePath) {
+        fetch(`/progress/${encodeURIComponent(imagePath)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.result && data.result.scores) {
+                    displayResults(data.result.scores);
+                }
+            })
+            .catch(() => {});
+    }
+}
 {% endblock %}

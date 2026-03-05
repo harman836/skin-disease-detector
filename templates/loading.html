@@ -80,52 +80,60 @@
 {% endblock %}
 
 {% block scripts %}
-// get image path from query parameters
 const urlParams = new URLSearchParams(window.location.search);
 const imagePath = urlParams.get('image');
 
 if (!imagePath) {
-console.error("No image provided");
+    console.error("No image provided");
+    window.location.href = '/';
 }
 
-let progress = 0;
 const progressText = document.getElementById('progress-text');
 const progressBar = document.querySelector('.progress-bar');
+const statusEl = document.querySelector('.loading-status');
 
-// Calculate the circumference of the circle
 const radius = 54;
 const circumference = 2 * Math.PI * radius;
-
-// Set the initial dasharray and dashoffset
 progressBar.style.strokeDasharray = `${circumference} ${circumference}`;
 progressBar.style.strokeDashoffset = circumference;
 
 function setProgress(percent) {
-const offset = circumference - (percent / 100) * circumference;
-progressBar.style.strokeDashoffset = offset;
-progressText.textContent = `${Math.round(percent)}%`;
+    const offset = circumference - (percent / 100) * circumference;
+    progressBar.style.strokeDashoffset = offset;
+    progressText.textContent = `${Math.round(percent)}%`;
 }
 
-// Simulate progress
-const interval = setInterval(() => {
-progress += 1; // Increment by 1%
+async function pollProgress() {
+    try {
+        const res = await fetch(`/progress/${encodeURIComponent(imagePath)}`);
+        const data = await res.json();
 
-// Non-linear speed simulation (slow down near end)
-let speed = 20;
-if (progress > 80) speed = 50;
-if (progress > 90) speed = 100;
+        setProgress(data.progress || 0);
+        if (data.status) {
+            statusEl.textContent = data.status.toUpperCase();
+        }
 
-setProgress(progress);
+        if (data.error) {
+            statusEl.textContent = 'ERROR — PLEASE TRY AGAIN';
+            setTimeout(() => window.location.href = '/', 2500);
+            return;
+        }
 
-if (progress >= 100) {
-clearInterval(interval);
-setTimeout(() => {
-if (imagePath) {
-window.location.href = `/results?image=${encodeURIComponent(imagePath)}`;
-} else {
-window.location.href = '/results'; // Fallback
+        if (data.completed) {
+            // Store result for results page
+            localStorage.setItem('analysisResult', JSON.stringify(data.result));
+            localStorage.setItem('analysisFilename', imagePath);
+            setTimeout(() => {
+                window.location.href = `/results?image=${encodeURIComponent(imagePath)}`;
+            }, 400);
+            return;
+        }
+
+        setTimeout(pollProgress, 400);
+    } catch (e) {
+        setTimeout(pollProgress, 800);
+    }
 }
-}, 500);
-}
-}, 25);
+
+pollProgress();
 {% endblock %}

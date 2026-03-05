@@ -151,9 +151,9 @@ statusText.textContent = 'Ready';
 async function uploadImage() {
 if (!capturedImageBlob) return;
 
-// If already uploaded (warning shown), proceed to results
+// If already uploaded (warning shown), proceed to loading
 if (uploadedFilename) {
-window.location.href = '/results';
+window.location.href = `/loading?image=${encodeURIComponent(uploadedFilename)}`;
 return;
 }
 
@@ -183,7 +183,7 @@ lucide.createIcons();
 confirmBtn.disabled = false;
 } else {
 statusText.textContent = 'Uploaded!';
-window.location.href = '/results';
+window.location.href = `/loading?image=${encodeURIComponent(data.filename)}`;
 }
 } else {
 statusText.textContent = 'Upload Failed';

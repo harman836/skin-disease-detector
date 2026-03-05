@@ -124,6 +124,7 @@ const qualityWarningText = document.getElementById('qualityWarningText');
 const analyzeContainer = document.getElementById('analyzeContainer');
 const buttonGroup = document.getElementById('buttonGroup');
 let hasUploadedImage = false;
+let uploadedFilename = null;
 
 // Drag and drop logic
 uploadArea.addEventListener('dragover', (e) => {
@@ -182,6 +183,7 @@ fetch('/upload', { method: 'POST', body: formData })
 loading.classList.add('hidden');
 if (data.success) {
 localStorage.setItem('uploadedImageData', data.imageData);
+uploadedFilename = data.filename;
 showImagePreview(data.imageData);
 hasUploadedImage = true;
 analyzeContainer.classList.remove('hidden');
@@ -226,7 +228,9 @@ qualityWarningDiv.classList.add('hidden');
 }
 
 function analyzeImage() {
-if (hasUploadedImage) window.location.href = '/results';
+if (hasUploadedImage && uploadedFilename) {
+    window.location.href = `/loading?image=${encodeURIComponent(uploadedFilename)}`;
+}
 }
 
 function startOver() { removeImage(); }

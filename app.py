@@ -6,9 +6,11 @@ import numpy as np
 import os
 import threading
 import time
+import ast
 from pathlib import Path
 from io import BytesIO
 import base64
+import onnxruntime as ort
 
 app = Flask(__name__)
 
@@ -22,6 +24,22 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 
 # Ensure uploads folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Load ONNX model at startup
+_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'yolov8model.onnx')
+_ort_session = None
+_class_names = []
+
+def _load_model():
+    global _ort_session, _class_names
+    if os.path.exists(_MODEL_PATH):
+        _ort_session = ort.InferenceSession(_MODEL_PATH)
+        meta = _ort_session.get_modelmeta().custom_metadata_map
+        names_str = meta.get('names', '{}')
+        names_dict = ast.literal_eval(names_str)
+        _class_names = [names_dict[i] for i in sorted(names_dict.keys())]
+
+_load_model()
 
 # Global dictionary to store task progress
 TASKS = {}
@@ -170,6 +188,27 @@ def download_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
+def run_onnx_inference(filepath):
+    """Run YOLOv8 classification ONNX inference on an image file."""
+    img = Image.open(filepath).convert('RGB')
+    img = img.resize((224, 224), Image.Resampling.LANCZOS)
+    img_np = np.array(img).astype(np.float32) / 255.0  # Normalize to [0,1]
+    img_np = img_np.transpose(2, 0, 1)                 # HWC -> CHW
+    img_np = np.expand_dims(img_np, axis=0)            # Add batch dim: [1,3,224,224]
+
+    input_name = _ort_session.get_inputs()[0].name
+    outputs = _ort_session.run(None, {input_name: img_np})
+    probs = outputs[0][0]  # Shape: [num_classes]
+
+    # Apply softmax if outputs aren't already probabilities
+    exp_probs = np.exp(probs - probs.max())
+    probs = exp_probs / exp_probs.sum()
+
+    scores = {_class_names[i]: round(float(probs[i]), 4) for i in range(len(_class_names))}
+    top_idx = int(np.argmax(probs))
+    return scores, _class_names[top_idx], round(float(probs[top_idx]) * 100, 1)
+
+
 def process_image(filename):
     task_id = filename
     TASKS[task_id] = {'progress': 0, 'status': 'Starting...', 'completed': False}
@@ -177,37 +216,29 @@ def process_image(filename):
     try:
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        # Step 1: Re-run preprocessing on the saved file to confirm pipeline
+        # Step 1: Preprocessing confirmation
         TASKS[task_id].update({'status': 'Correcting orientation & enhancing contrast...', 'progress': 20})
         with open(filepath, 'rb') as f:
             _, _, _ = prepare_image(f)
 
-        # Step 2: Load model (if available)
+        # Step 2: Load check
         TASKS[task_id].update({'status': 'Loading model...', 'progress': 40})
-        model_path = os.path.join(os.path.dirname(__file__), 'runs', 'classify', 'train', 'weights', 'best.pt')
-        model = None
-        if os.path.exists(model_path):
-            from ultralytics import YOLO
-            model = YOLO(model_path)
+        if _ort_session is None:
+            raise RuntimeError('ONNX model not loaded. Ensure yolov8model.onnx is present.')
 
-        # Step 3: Run inference or simulate
+        # Step 3: Run ONNX inference
         TASKS[task_id].update({'status': 'Analyzing skin patterns...', 'progress': 70})
-        result_data = {}
-        if model is not None:
-            img = Image.open(filepath)
-            results = model(img)
-            probs = results[0].probs
-            class_names = list(model.names.values())
-            top_idx = probs.top1
-            top3_indices = np.argsort(probs.data.numpy())[-3:][::-1]
-            result_data = {
-                'primary_diagnosis': class_names[top_idx],
-                'confidence': round(probs.top1conf.item() * 100, 1),
-                'top3': [
-                    {'disease': class_names[i], 'probability': round(probs.data[i].item() * 100, 1)}
-                    for i in top3_indices
-                ]
-            }
+        scores, primary_diagnosis, confidence = run_onnx_inference(filepath)
+
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        top3 = [{'disease': name, 'probability': round(prob * 100, 1)} for name, prob in sorted_scores[:3]]
+
+        result_data = {
+            'primary_diagnosis': primary_diagnosis,
+            'confidence': confidence,
+            'top3': top3,
+            'scores': scores
+        }
 
         TASKS[task_id].update({'status': 'Finalizing results...', 'progress': 90})
         time.sleep(0.3)
