@@ -41,7 +41,14 @@ if api_key:
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(
         model_name="gemini-2.5-flash",
-        system_instruction="You are a helpful skin health assistant. Remind users that you are an AI, not a doctor."
+        system_instruction=(
+            "You are a concise skin health assistant embedded in a skin disease detection app. "
+            "Answer only questions related to the skin conditions shown in the analysis results: "
+            "Melanoma, Basal Cell Carcinoma, Eczema, Psoriasis, and Tinea Ringworm. "
+            "Keep replies short — 2-3 sentences max. Use plain language. "
+            "Do not diagnose. If asked about unrelated topics, politely redirect to skin health. "
+            "Always remind users you are an AI and not a substitute for a dermatologist."
+        )
     )
 else:
     print("--- 🚨 CRITICAL ERROR: API Key is STILL None. Python cannot read the .env file! ---")

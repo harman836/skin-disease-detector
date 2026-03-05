@@ -34,7 +34,7 @@
               "height": 40,
               "iconFontName": "stethoscope",
               "iconFontFamily": "lucide",
-              "fill": "#7C9082"
+              "fill": "#2a4b7c"
             },
             {
               "type": "text",
@@ -51,7 +51,7 @@
               "type": "text",
               "id": "oDMeG",
               "name": "subtitle",
-              "fill": "#5A5A5A",
+              "fill": "#5d6d7e",
               "content": "A gentle, AI-powered assessment for your skin health.",
               "textAlign": "center",
               "fontFamily": "Inter",
@@ -83,7 +83,7 @@
               "name": "Upload Hit Area",
               "width": 300,
               "height": 180,
-              "fill": "#F5F3EF",
+              "fill": "#f1f4f9",
               "cornerRadius": 20,
               "layout": "vertical",
               "gap": 12,
@@ -97,7 +97,7 @@
                   "height": 32,
                   "iconFontName": "camera",
                   "iconFontFamily": "lucide",
-                  "fill": "#7C9082"
+                  "fill": "#2a4b7c"
                 },
                 {
                   "type": "text",
@@ -131,7 +131,7 @@
                   "id": "lg0u1",
                   "name": "primaryBtn",
                   "width": "fill_container",
-                  "fill": "#7C9082",
+                  "fill": "#2a4b7c",
                   "cornerRadius": 24,
                   "gap": 8,
                   "padding": [
@@ -173,7 +173,7 @@
                     {
                       "type": "text",
                       "id": "qy1C9",
-                      "fill": "#5A5A5A",
+                      "fill": "#5d6d7e",
                       "content": "Choose from Device",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -227,7 +227,7 @@
                   "height": 18,
                   "iconFontName": "chevron-down",
                   "iconFontFamily": "lucide",
-                  "fill": "#7C9082"
+                  "fill": "#2a4b7c"
                 }
               ]
             },
@@ -249,7 +249,7 @@
                 {
                   "type": "text",
                   "id": "XDv6h",
-                  "fill": "#5A5A5A",
+                  "fill": "#5d6d7e",
                   "content": "1. Ensure soft, natural lighting.",
                   "fontFamily": "Inter",
                   "fontSize": 13,
@@ -258,7 +258,7 @@
                 {
                   "type": "text",
                   "id": "4WVW8",
-                  "fill": "#5A5A5A",
+                  "fill": "#5d6d7e",
                   "content": "2. Focus on the area of concern.",
                   "fontFamily": "Inter",
                   "fontSize": 13,
@@ -267,7 +267,7 @@
                 {
                   "type": "text",
                   "id": "kYKnT",
-                  "fill": "#5A5A5A",
+                  "fill": "#5d6d7e",
                   "content": "3. Maintain a distance of 10-15cm.",
                   "fontFamily": "Inter",
                   "fontSize": 13,
@@ -291,7 +291,7 @@
             {
               "type": "text",
               "id": "bFABs",
-              "fill": "#5A5A5A",
+              "fill": "#5d6d7e",
               "textGrowth": "fixed-width",
               "width": "fill_container",
               "content": "Our AI assists in detection but is not a clinical diagnosis. Please consult a specialist for professional care.",
@@ -388,12 +388,12 @@
                       "height": 14,
                       "iconFontName": "microscope",
                       "iconFontFamily": "lucide",
-                      "fill": "#7C9082"
+                      "fill": "#2a4b7c"
                     },
                     {
                       "type": "text",
                       "id": "PBXdp",
-                      "fill": "#5A5A5A",
+                      "fill": "#5d6d7e",
                       "content": "Show AI Focus Area",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -430,7 +430,7 @@
                         {
                           "type": "text",
                           "id": "Gq1zZ",
-                          "fill": "#5A5A5A",
+                          "fill": "#5d6d7e",
                           "content": "About This Model",
                           "fontFamily": "Inter",
                           "fontSize": 13,
@@ -443,7 +443,7 @@
                           "height": 14,
                           "iconFontName": "chevron-down",
                           "iconFontFamily": "lucide",
-                          "fill": "#7C9082"
+                          "fill": "#2a4b7c"
                         }
                       ]
                     },
@@ -537,7 +537,7 @@
                       "type": "frame",
                       "id": "3EVkW",
                       "name": "Metric Badge",
-                      "fill": "#7C908215",
+                      "fill": "#489fb515",
                       "cornerRadius": 16,
                       "padding": [
                         6,
@@ -547,7 +547,7 @@
                         {
                           "type": "text",
                           "id": "VGdht",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "MEDIUM",
                           "fontFamily": "Inter",
                           "fontSize": 11,
@@ -609,7 +609,7 @@
                         {
                           "type": "text",
                           "id": "Pwmus",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "Medium",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 24,
@@ -626,7 +626,7 @@
               "id": "TjhwH",
               "name": "descCard",
               "width": "fill_container",
-              "fill": "#F5F3EF",
+              "fill": "#f1f4f9",
               "cornerRadius": 16,
               "layout": "vertical",
               "gap": 8,
@@ -644,7 +644,7 @@
                 {
                   "type": "text",
                   "id": "aY8Zt",
-                  "fill": "#5A5A5A",
+                  "fill": "#5d6d7e",
                   "textGrowth": "fixed-width",
                   "width": "fill_container",
                   "content": "Melanoma is a type of skin cancer that develops from pigment-producing cells. Early detection significantly improves long-term outcomes.",
@@ -660,12 +660,12 @@
               "id": "XUPYO",
               "name": "Recommended Action",
               "width": "fill_container",
-              "fill": "#7C908215",
+              "fill": "#489fb515",
               "cornerRadius": 16,
               "stroke": {
                 "align": "inside",
                 "thickness": 1,
-                "fill": "#7C908233"
+                "fill": "#489fb533"
               },
               "gap": 16,
               "padding": 20,
@@ -678,7 +678,7 @@
                   "height": 24,
                   "iconFontName": "stethoscope",
                   "iconFontFamily": "lucide",
-                  "fill": "#7C9082"
+                  "fill": "#2a4b7c"
                 },
                 {
                   "type": "frame",
@@ -700,7 +700,7 @@
                     {
                       "type": "text",
                       "id": "92Uz0",
-                      "fill": "#5A5A5A",
+                      "fill": "#5d6d7e",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
                       "content": "Professional assessment is recommended to monitor and prevent progression. Please consult a licensed dermatologist.",
@@ -723,7 +723,7 @@
                   "type": "frame",
                   "id": "Bx0LZ",
                   "width": "fill_container",
-                  "fill": "#7C9082",
+                  "fill": "#2a4b7c",
                   "cornerRadius": 24,
                   "gap": 8,
                   "padding": [
@@ -764,7 +764,7 @@
                     {
                       "type": "text",
                       "id": "Vt6Xy",
-                      "fill": "#5A5A5A",
+                      "fill": "#5d6d7e",
                       "content": "Analyze Another",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -825,7 +825,7 @@
                         {
                           "type": "text",
                           "id": "ZpEqU",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "30%",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 13,
@@ -846,7 +846,7 @@
                           "id": "vmHIe",
                           "width": 150,
                           "height": "fill_container",
-                          "fill": "#7C9082",
+                          "fill": "#2a4b7c",
                           "cornerRadius": 4
                         }
                       ]
@@ -879,7 +879,7 @@
                         {
                           "type": "text",
                           "id": "PTSMH",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "25%",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 13,
@@ -900,7 +900,7 @@
                           "id": "5TAbF",
                           "width": 125,
                           "height": "fill_container",
-                          "fill": "#7C9082",
+                          "fill": "#2a4b7c",
                           "cornerRadius": 4
                         }
                       ]
@@ -933,7 +933,7 @@
                         {
                           "type": "text",
                           "id": "Y3AnM",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "18%",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 13,
@@ -954,7 +954,7 @@
                           "id": "GPJyn",
                           "width": 90,
                           "height": "fill_container",
-                          "fill": "#7C9082",
+                          "fill": "#2a4b7c",
                           "cornerRadius": 4
                         }
                       ]
@@ -987,7 +987,7 @@
                         {
                           "type": "text",
                           "id": "z0eh5",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "15%",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 13,
@@ -1008,7 +1008,7 @@
                           "id": "qVhbP",
                           "width": 75,
                           "height": "fill_container",
-                          "fill": "#7C9082",
+                          "fill": "#2a4b7c",
                           "cornerRadius": 4
                         }
                       ]
@@ -1041,7 +1041,7 @@
                         {
                           "type": "text",
                           "id": "y08OG",
-                          "fill": "#7C9082",
+                          "fill": "#489fb5",
                           "content": "12%",
                           "fontFamily": "IBM Plex Mono",
                           "fontSize": 13,
@@ -1062,7 +1062,7 @@
                           "id": "HyjQm",
                           "width": 60,
                           "height": "fill_container",
-                          "fill": "#7C9082",
+                          "fill": "#2a4b7c",
                           "cornerRadius": 4
                         }
                       ]
