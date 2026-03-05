@@ -126,8 +126,14 @@
 
                 if (data.success) {
                     statusText.textContent = 'Uploaded!';
+                    
+                    // ==========================================
+                    // THE FIX IS HERE: Save image to browser memory
+                    // ==========================================
+                    localStorage.setItem('uploadedImageData', data.imageData);
+                    
                     setTimeout(() => {
-                        window.location.href = `/results?image=${encodeURIComponent(data.filepath)}`;
+                        window.location.href = '/results';
                     }, 1500);
                 } else {
                     statusText.textContent = 'Upload Failed';
