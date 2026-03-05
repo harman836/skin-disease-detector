@@ -7,8 +7,89 @@
 {% block extra_styles %}
 <style>
     .container {
-        max-width: 1260px;
+        max-width: none;
+        padding: 0;
     }
+    .results-layout {
+        display: flex;
+        min-height: 100vh;
+        align-items: stretch;
+    }
+    .results-main {
+        flex: 1;
+        min-width: 0;
+        padding: 32px;
+        overflow-y: auto;
+    }
+    .chat-sidebar {
+        width: 340px;
+        flex-shrink: 0;
+        border-left: 1px solid #e5e7eb;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+    .chat-sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    #chat-window {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #fafafa;
+    }
+    .chat-input-row {
+        padding: 12px 16px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        gap: 8px;
+        background: #fff;
+    }
+    .chat-input-row input {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        outline: none;
+    }
+    .chat-input-row input:focus {
+        border-color: #489fb5;
+    }
+    .chat-send-btn {
+        background: #2a4b7c;
+        color: white;
+        border: none;
+        padding: 0 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: opacity 0.2s;
+    }
+    .chat-send-btn:hover { opacity: 0.85; }
+    .chat-clear-btn {
+        background: none;
+        color: #999;
+        border: 1px solid #e5e7eb;
+        padding: 0 12px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .chat-clear-btn:hover { color: #555; }
     @keyframes bounce {
         0%, 60%, 100% { transform: translateY(0); }
         30% { transform: translateY(-6px); }
@@ -18,9 +99,11 @@
 
 {% block content %}
 <div class="container animate-fade-in">
+<div class="results-layout">
 
+<div class="results-main">
     <!-- Header -->
-    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <button class="btn btn-secondary" id="back-btn" style="width: auto;">
             <i data-lucide="arrow-left"></i>
             <span>Back</span>
@@ -133,32 +216,40 @@
             <div class="medical-disclaimer">
                 <i class="fas fa-shield-alt"></i>
                 <p>
-                    <strong>Important:</strong> This AI tool provides screening support only and does not replace professional medical diagnosis. 
+                    <strong>Important:</strong> This AI tool provides screening support only and does not replace professional medical diagnosis.
                     Always consult with a licensed dermatologist before making any medical decisions. For urgent concerns, seek immediate medical attention.
                 </p>
             </div>
 
-            <div style="margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 30px;">
-                <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 600; color: #1a1a1a; margin-bottom: 8px;">
-                    <i class="fas fa-robot" style="color: #2F80ED;"></i> Ask the AI Assistant
-                </h2>
-                <p style="color: #666; font-size: 0.95rem; margin-bottom: 20px;">Have questions about your results? Ask Gemini below.</p>
-                
-                <div id="chat-window" style="height: 300px; overflow-y: auto; background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
-                    <div style="background: rgba(47, 128, 237, 0.1); color: #2F80ED; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 80%; align-self: flex-start; font-size: 0.95rem; line-height: 1.5;">
-                        Hello! I can help explain your analysis results or answer general skin health questions. How can I help?
-                    </div>
-                </div>
+            </div><!-- end right column -->
+    </div><!-- end results-grid -->
+</div><!-- end results-main -->
 
-                <div style="display: flex; gap: 12px;">
-                    <input type="text" id="chat-input" placeholder="Type your question here..." style="flex: 1; padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 0.95rem; outline: none;" onkeypress="if(event.key==='Enter') sendChat()">
-                    <button onclick="sendChat()" style="background: #2F80ED; color: white; border: none; padding: 0 24px; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: 0.2s;">Send</button>
-                    <button onclick="clearChat()" style="background: white; color: #666; border: 1px solid #e5e7eb; padding: 0 20px; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: 0.2s;">Clear</button>
-                </div>
-            </div>
-            </div>
+<!-- CHAT SIDEBAR -->
+<div class="chat-sidebar">
+    <div class="chat-sidebar-header">
+        <i class="fas fa-robot" style="color: #2a4b7c; font-size: 1rem;"></i>
+        <div>
+            <p style="margin: 0; font-weight: 600; font-size: 0.9rem; color: #1a1a1a;">AI Assistant</p>
+            <p style="margin: 0; font-size: 0.75rem; color: #8a8a8a;">Ask about your results</p>
+        </div>
+    </div>
+
+    <div id="chat-window">
+        <div style="background: rgba(73,159,181,0.1); color: #2d2d2d; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 90%; align-self: flex-start; font-size: 0.875rem; line-height: 1.5;">
+            Hello! I can see your analysis results. Ask me anything about your skin health findings.
+        </div>
+    </div>
+
+    <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ask about your results..." onkeypress="if(event.key==='Enter') sendChat()">
+        <button class="chat-send-btn" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+        <button class="chat-clear-btn" onclick="clearChat()">Clear</button>
     </div>
 </div>
+
+</div><!-- end results-layout -->
+</div><!-- end container -->
 {% endblock %}
 
 {% block scripts %}
@@ -258,22 +349,57 @@ setTimeout(() => {
 });
 }
 
-// Heatmap toggle
-document.getElementById('toggleHeatmap').addEventListener('click', function () {
+// Heatmap toggle — real occlusion sensitivity from backend
+let heatmapCache = null;
+let heatmapLoading = false;
+
+document.getElementById('toggleHeatmap').addEventListener('click', async function () {
 const overlay = document.getElementById('heatmapOverlay');
+const btn = this;
 const showing = overlay.style.display !== 'none';
+
 if (showing) {
     overlay.style.display = 'none';
-    this.classList.remove('btn-primary');
-    this.classList.add('btn-secondary');
-    this.querySelector('span').textContent = 'Show AI Focus Area';
-} else {
-    overlay.style.display = 'block';
-    overlay.style.background = 'radial-gradient(circle at 50% 45%, rgba(255,0,0,0.3) 0%, rgba(255,165,0,0.15) 30%, transparent 70%)';
-    this.classList.remove('btn-secondary');
-    this.classList.add('btn-primary');
-    this.querySelector('span').textContent = 'Hide AI Focus Area';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-secondary');
+    btn.querySelector('span').textContent = 'Show AI Focus Area';
+    return;
 }
+
+if (heatmapCache) {
+    overlay.innerHTML = `<img src="${heatmapCache}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
+    overlay.style.display = 'block';
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-primary');
+    btn.querySelector('span').textContent = 'Hide AI Focus Area';
+    return;
+}
+
+if (heatmapLoading) return;
+heatmapLoading = true;
+btn.disabled = true;
+btn.querySelector('span').textContent = 'Generating…';
+
+const filename = new URLSearchParams(window.location.search).get('image');
+try {
+    const res = await fetch(`/heatmap/${encodeURIComponent(filename)}`);
+    const data = await res.json();
+    if (data.heatmap) {
+        heatmapCache = data.heatmap;
+        overlay.innerHTML = `<img src="${heatmapCache}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
+        overlay.style.display = 'block';
+        btn.classList.remove('btn-secondary');
+        btn.classList.add('btn-primary');
+        btn.querySelector('span').textContent = 'Hide AI Focus Area';
+    } else {
+        btn.querySelector('span').textContent = 'Show AI Focus Area';
+        alert('Heatmap error: ' + (data.error || 'Unknown'));
+    }
+} catch (e) {
+    btn.querySelector('span').textContent = 'Show AI Focus Area';
+}
+heatmapLoading = false;
+btn.disabled = false;
 });
 
 document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
@@ -347,11 +473,15 @@ async function sendChat() {
     chatWindow.appendChild(typingBubble);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
+    let analysisResults = null;
+    try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
+    const imageData = localStorage.getItem('uploadedImageData') || null;
+
     try {
         const res = await fetch('/chat', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message})
+            body: JSON.stringify({message, results: analysisResults, image: imageData})
         });
         const data = await res.json();
         typingBubble.style.cssText = 'background:rgba(73,159,181,0.1);color:#2d2d2d;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:80%;align-self:flex-start;font-size:0.9rem;line-height:1.6;';
@@ -367,6 +497,6 @@ async function sendChat() {
 
 function clearChat() {
     const chatWindow = document.getElementById('chat-window');
-    chatWindow.innerHTML = '<div style="background:rgba(47,128,237,0.1);color:#489fb5;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:80%;align-self:flex-start;font-size:0.95rem;line-height:1.5;">Hello! I can help explain your analysis results or answer general skin health questions. How can I help?</div>';
+    chatWindow.innerHTML = '<div style="background:rgba(73,159,181,0.1);color:#2d2d2d;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:90%;align-self:flex-start;font-size:0.875rem;line-height:1.5;">Hello! I can see your analysis results. Ask me anything about your skin health findings.</div>';
 }
 {% endblock %}

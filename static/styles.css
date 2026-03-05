@@ -1,21 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
 
 :root {
-    /* Colors - Organic Health */
-    --background: #f4f1ea;
-    --foreground: #2d4f3e;
-    --muted-foreground: #4a5d4e;
-    --primary: #2d4f3e;
+    /* Colors - Clinical Precision */
+    --background: #faf8f5;
+    --foreground: #2d2d2d;
+    --muted-foreground: #5d6d7e;
+    --primary: #2a4b7c;
     --primary-foreground: #ffffff;
-    --secondary: #e8e4d9;
-    --secondary-foreground: #2d4f3e;
+    --secondary: #f1f4f9;
+    --secondary-foreground: #2a4b7c;
     --border: #e8e4df;
     --card: #ffffff;
-    --accent: #c16a5a;
+    --accent: #489fb5;
 
     /* Semantic Colors */
-    --color-success: #d6ead9;
-    --color-success-foreground: #2d4f3e;
+    --color-success: #d6eaf0;
+    --color-success-foreground: #2a6b7c;
     --color-error: #f0d8d4;
     --color-error-foreground: #c16a5a;
     --color-warning: #f5ecd4;
@@ -35,6 +35,11 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+html, body {
+    overflow-x: hidden;
+    width: 100%;
 }
 
 body {
@@ -373,8 +378,8 @@ h3,
 }
 
 .action-card {
-    background: rgba(45, 79, 62, 0.06);
-    border: 1px solid rgba(45, 79, 62, 0.15);
+    background: rgba(42, 75, 124, 0.06);
+    border: 1px solid rgba(42, 75, 124, 0.15);
     display: flex;
     gap: 16px;
     padding: 20px;

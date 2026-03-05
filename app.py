@@ -292,23 +292,115 @@ def progress(filename):
     return jsonify({'progress': 0, 'status': 'Waiting...', 'completed': False})
 
 
+def run_onnx_inference_array(img_np):
+    """Run ONNX inference on a 224x224 RGB numpy array."""
+    img_f = img_np.astype(np.float32) / 255.0
+    img_f = img_f.transpose(2, 0, 1)
+    img_f = np.expand_dims(img_f, axis=0)
+    input_name = _ort_session.get_inputs()[0].name
+    outputs = _ort_session.run(None, {input_name: img_f})
+    probs = outputs[0][0]
+    exp_probs = np.exp(probs - probs.max())
+    return exp_probs / exp_probs.sum()
+
+
+def generate_heatmap(filepath):
+    """
+    Occlusion sensitivity heatmap: occlude each patch in a 7x7 grid,
+    measure confidence drop, then colormap and blend over the original image.
+    """
+    img = Image.open(filepath).convert('RGB').resize((224, 224))
+    img_np = np.array(img)
+
+    baseline_probs = run_onnx_inference_array(img_np)
+    top_idx = int(np.argmax(baseline_probs))
+    baseline_conf = baseline_probs[top_idx]
+
+    grid_n = 7
+    patch = 224 // grid_n  # 32px per cell
+    heatmap = np.zeros((grid_n, grid_n), dtype=np.float32)
+
+    for i in range(grid_n):
+        for j in range(grid_n):
+            masked = img_np.copy()
+            masked[i*patch:(i+1)*patch, j*patch:(j+1)*patch] = 128
+            probs = run_onnx_inference_array(masked)
+            heatmap[i, j] = max(0.0, float(baseline_conf - probs[top_idx]))
+
+    if heatmap.max() > 0:
+        heatmap /= heatmap.max()
+
+    heatmap_large = cv2.resize(heatmap, (224, 224), interpolation=cv2.INTER_CUBIC)
+    heatmap_large = np.clip(heatmap_large, 0, 1)
+
+    heatmap_u8 = (heatmap_large * 255).astype(np.uint8)
+    colored = cv2.applyColorMap(heatmap_u8, cv2.COLORMAP_JET)
+    colored = cv2.cvtColor(colored, cv2.COLOR_BGR2RGB)
+
+    overlay = (img_np * 0.55 + colored * 0.45).astype(np.uint8)
+    buf = BytesIO()
+    Image.fromarray(overlay).save(buf, format='PNG')
+    b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    return f'data:image/png;base64,{b64}'
+
+
+@app.route('/heatmap/<filename>')
+def heatmap(filename):
+    filename = secure_filename(filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    if _ort_session is None:
+        return jsonify({'error': 'Model not loaded'}), 500
+    try:
+        return jsonify({'heatmap': generate_heatmap(filepath)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # --- ADDED FOR CHATBOT ---
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_input = request.json.get('message')
+    payload = request.json
+    user_input = payload.get('message')
+    results    = payload.get('results')   # analysis scores dict
+    image_data = payload.get('image')     # base64 data URL
+
     if not user_input:
         return jsonify({'error': 'No message'}), 400
-    
-    # Check if the model actually loaded
+
     if 'model' not in globals():
-        return jsonify({'error': "Python can't find the .env file or the key inside it."}), 500
-        
+        return jsonify({'error': 'AI assistant unavailable — check API key.'}), 500
+
     try:
-        response = model.generate_content(user_input)
+        parts = []
+
+        # Attach the analysed image so Gemini can see it
+        if image_data and ',' in image_data:
+            img_b64 = image_data.split(',', 1)[1]
+            img_bytes = base64.b64decode(img_b64)
+            pil_img = Image.open(BytesIO(img_bytes)).convert('RGB')
+            parts.append(pil_img)
+
+        # Build a results context string
+        context = ""
+        if results and results.get('scores'):
+            sorted_scores = sorted(results['scores'].items(), key=lambda x: x[1], reverse=True)
+            top_name, top_prob = sorted_scores[0]
+            breakdown = ", ".join(f"{k}: {round(v*100)}%" for k, v in sorted_scores)
+            context = (
+                f"The patient's skin analysis results are: "
+                f"primary condition '{top_name}' at {round(top_prob*100)}% confidence. "
+                f"Full breakdown — {breakdown}. "
+                f"Use these results to answer the user's question below.\n\n"
+            )
+
+        parts.append(context + user_input)
+        response = model.generate_content(parts)
         return jsonify({'reply': response.text})
+
     except Exception as e:
-        # This will send Google's EXACT error message to your screen
-        return jsonify({'error': f"Google AI Error: {str(e)}"}), 500
+        return jsonify({'error': f"AI Error: {str(e)}"}), 500
 # -------------------------
 
 
