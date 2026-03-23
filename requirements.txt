@@ -5,7 +5,7 @@ opencv-python==4.10.0.84
 numpy==2.4.2
 ultralytics==8.3.157
 onnxruntime==1.24.2
-google-generativeai
+google-genai
 python-dotenv
 torch
 torchvision

@@ -5,9 +5,7 @@ import cv2
 import numpy as np
 import os
 import threading
-import time
 import ast
-from pathlib import Path
 from io import BytesIO
 import base64
 import onnxruntime as ort
@@ -16,7 +14,8 @@ import torchvision.models as tv_models
 import torchvision.transforms as transforms
 
 # --- ADDED FOR CHATBOT ---
-import google.generativeai as genai
+from google import genai as google_genai
+from google.genai import types as genai_types
 from dotenv import load_dotenv
 
 # Force Python to find the .env file exactly where app.py is located
@@ -39,22 +38,20 @@ api_key = os.getenv("GEMINI_API_KEY")
 
 # Let's print this to the terminal so we can see if it worked!
 print(f"--- DEBUG: Looking for .env file at: {env_path} ---")
+_GEMINI_SYSTEM_PROMPT = (
+    "You are a concise skin health assistant embedded in a skin disease detection app. "
+    "Answer only questions related to the skin conditions shown in the analysis results: "
+    "Melanoma, Basal Cell Carcinoma, Eczema, Psoriasis, and Tinea Ringworm. "
+    "Keep replies short — 2-3 sentences max. Use plain language. "
+    "Do not diagnose. If asked about unrelated topics, politely redirect to skin health. "
+    "Always remind users you are an AI and not a substitute for a dermatologist."
+)
 if api_key:
     print(f"--- DEBUG: API Key found! It starts with: {api_key[:5]}... ---")
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.5-flash",
-        system_instruction=(
-            "You are a concise skin health assistant embedded in a skin disease detection app. "
-            "Answer only questions related to the skin conditions shown in the analysis results: "
-            "Melanoma, Basal Cell Carcinoma, Eczema, Psoriasis, and Tinea Ringworm. "
-            "Keep replies short — 2-3 sentences max. Use plain language. "
-            "Do not diagnose. If asked about unrelated topics, politely redirect to skin health. "
-            "Always remind users you are an AI and not a substitute for a dermatologist."
-        )
-    )
+    _genai_client = google_genai.Client(api_key=api_key)
 else:
-    print("--- 🚨 CRITICAL ERROR: API Key is STILL None. Python cannot read the .env file! ---")
+    _genai_client = None
+    print("--- CRITICAL ERROR: API Key is None. Python cannot read the .env file! ---")
 # -------------------------
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 
@@ -74,6 +71,8 @@ def _load_model():
         names_str = meta.get('names', '{}')
         names_dict = ast.literal_eval(names_str)
         _class_names = [names_dict[i] for i in sorted(names_dict.keys())]
+        # Normalise typo in model metadata
+        _class_names = ['Basal Cell Carcinoma' if n == 'Basic Cell Carcinoma' else n for n in _class_names]
 
 _load_model()
 
@@ -305,22 +304,22 @@ def process_image(filename):
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
         # Step 1: Preprocessing confirmation
-        TASKS[task_id].update({'status': 'Correcting orientation & enhancing contrast...', 'progress': 20})
+        TASKS[task_id].update({'status': 'Correcting orientation & enhancing contrast...', 'progress': 8})
         with open(filepath, 'rb') as f:
             _, _, _ = prepare_image(f)
 
         # Step 2: Load check
-        TASKS[task_id].update({'status': 'Loading models...', 'progress': 40})
+        TASKS[task_id].update({'status': 'Loading models...', 'progress': 15})
         if _ort_session is None:
             raise RuntimeError('ONNX model not loaded. Ensure yolov8model.onnx is present.')
 
         # Step 3: Run both models
-        TASKS[task_id].update({'status': 'Running YOLOv8 analysis...', 'progress': 55})
+        TASKS[task_id].update({'status': 'Running YOLOv8 analysis...', 'progress': 25})
         yolo_scores, _, _ = run_onnx_inference(filepath)
 
         resnet_scores = None
         if _resnet_model is not None:
-            TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 70})
+            TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 38})
             resnet_scores, _, _ = run_resnet50_inference(filepath)
 
         # Ensemble: weight ResNet50 2:1 over YOLOv8 (ResNet50 is more accurate)
@@ -339,6 +338,21 @@ def process_image(filename):
         sorted_scores = sorted(ensemble_scores.items(), key=lambda x: x[1], reverse=True)
         top3 = [{'disease': name, 'probability': round(prob * 100, 1)} for name, prob in sorted_scores[:3]]
 
+        # Step 4: Generate heatmaps while loading screen is still showing
+        # YOLOv8 heatmap: overall progress 50–72%
+        TASKS[task_id].update({'status': 'Generating YOLOv8 focus map...', 'progress': 50})
+        def yolo_progress(row_pct):
+            TASKS[task_id].update({'progress': 50 + round(row_pct * 0.22)})
+        yolo_heatmap = generate_heatmap(filepath, model='yolo', progress_callback=yolo_progress)
+
+        # ResNet50 heatmap: overall progress 72–94%
+        resnet_heatmap = None
+        if _resnet_model is not None:
+            TASKS[task_id].update({'status': 'Generating ResNet50 focus map...', 'progress': 72})
+            def resnet_progress(row_pct):
+                TASKS[task_id].update({'progress': 72 + round(row_pct * 0.22)})
+            resnet_heatmap = generate_heatmap(filepath, model='resnet', progress_callback=resnet_progress)
+
         result_data = {
             'primary_diagnosis': top_idx,
             'confidence': confidence,
@@ -347,10 +361,11 @@ def process_image(filename):
             'yolo_scores': yolo_scores,
             'resnet_scores': resnet_scores,
             'ensemble_scores': ensemble_scores,
+            'yolo_heatmap': yolo_heatmap,
+            'resnet_heatmap': resnet_heatmap,
         }
 
-        TASKS[task_id].update({'status': 'Finalizing results...', 'progress': 90})
-        time.sleep(0.3)
+        TASKS[task_id].update({'status': 'Almost done...', 'progress': 97})
 
         TASKS[task_id].update({
             'progress': 100,
@@ -382,15 +397,19 @@ def run_onnx_inference_array(img_np):
     return exp_probs / exp_probs.sum()
 
 
-def generate_heatmap(filepath):
+def generate_heatmap(filepath, model='yolo', progress_callback=None):
     """
     Occlusion sensitivity heatmap: occlude each patch in a 7x7 grid,
     measure confidence drop, then colormap and blend over the original image.
+    Supports model='yolo' or model='resnet'.
+    progress_callback(pct) is called after each row with a 0-100 value.
     """
+    infer_fn = run_resnet50_inference_array if model == 'resnet' else run_onnx_inference_array
+
     img = Image.open(filepath).convert('RGB').resize((224, 224))
     img_np = np.array(img)
 
-    baseline_probs = run_onnx_inference_array(img_np)
+    baseline_probs = infer_fn(img_np)
     top_idx = int(np.argmax(baseline_probs))
     baseline_conf = baseline_probs[top_idx]
 
@@ -402,8 +421,10 @@ def generate_heatmap(filepath):
         for j in range(grid_n):
             masked = img_np.copy()
             masked[i*patch:(i+1)*patch, j*patch:(j+1)*patch] = 128
-            probs = run_onnx_inference_array(masked)
+            probs = infer_fn(masked)
             heatmap[i, j] = max(0.0, float(baseline_conf - probs[top_idx]))
+        if progress_callback:
+            progress_callback(round((i + 1) / grid_n * 100))
 
     if heatmap.max() > 0:
         heatmap /= heatmap.max()
@@ -428,10 +449,13 @@ def heatmap(filename):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
-    if _ort_session is None:
-        return jsonify({'error': 'Model not loaded'}), 500
+    model = request.args.get('model', 'yolo')
+    if model == 'resnet' and _resnet_model is None:
+        return jsonify({'error': 'ResNet50 model not loaded'}), 500
+    if model != 'resnet' and _ort_session is None:
+        return jsonify({'error': 'ONNX model not loaded'}), 500
     try:
-        return jsonify({'heatmap': generate_heatmap(filepath)})
+        return jsonify({'heatmap': generate_heatmap(filepath, model=model)})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -447,7 +471,7 @@ def chat():
     if not user_input:
         return jsonify({'error': 'No message'}), 400
 
-    if 'model' not in globals():
+    if _genai_client is None:
         return jsonify({'error': 'AI assistant unavailable — check API key.'}), 500
 
     try:
@@ -457,8 +481,7 @@ def chat():
         if image_data and ',' in image_data:
             img_b64 = image_data.split(',', 1)[1]
             img_bytes = base64.b64decode(img_b64)
-            pil_img = Image.open(BytesIO(img_bytes)).convert('RGB')
-            parts.append(pil_img)
+            parts.append(genai_types.Part.from_bytes(data=img_bytes, mime_type='image/jpeg'))
 
         # Build a results context string
         context = ""
@@ -474,7 +497,11 @@ def chat():
             )
 
         parts.append(context + user_input)
-        response = model.generate_content(parts)
+        response = _genai_client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=parts,
+            config=genai_types.GenerateContentConfig(system_instruction=_GEMINI_SYSTEM_PROMPT)
+        )
         return jsonify({'reply': response.text})
 
     except Exception as e:
@@ -483,4 +510,5 @@ def chat():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug)

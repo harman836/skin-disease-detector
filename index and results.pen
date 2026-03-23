@@ -1,5 +1,5 @@
 {
-  "version": "2.8",
+  "version": "2.9",
   "children": [
     {
       "type": "frame",
@@ -234,9 +234,11 @@
             {
               "type": "frame",
               "id": "A7yqy",
+              "x": 0,
+              "y": 0,
               "name": "Accordion Content",
               "enabled": false,
-              "width": "fill_container",
+              "width": "fill_container(0)",
               "layout": "vertical",
               "gap": 8,
               "padding": [
@@ -450,9 +452,11 @@
                     {
                       "type": "frame",
                       "id": "EUR0E",
+                      "x": 0,
+                      "y": 0,
                       "name": "Accordion Content",
                       "enabled": false,
-                      "width": "fill_container",
+                      "width": "fill_container(0)",
                       "layout": "vertical",
                       "gap": 8,
                       "padding": [
@@ -1321,9 +1325,11 @@
             {
               "type": "frame",
               "id": "luk8L",
+              "x": 0,
+              "y": 0,
               "name": "Accordion Content",
               "enabled": false,
-              "width": "fill_container",
+              "width": "fill_container(0)",
               "layout": "vertical",
               "gap": 8,
               "padding": [
@@ -1537,9 +1543,11 @@
                     {
                       "type": "frame",
                       "id": "A1BkX",
+                      "x": 0,
+                      "y": 0,
                       "name": "Accordion Content",
                       "enabled": false,
-                      "width": "fill_container",
+                      "width": "fill_container(0)",
                       "layout": "vertical",
                       "gap": 8,
                       "padding": [
@@ -2407,9 +2415,11 @@
             {
               "type": "frame",
               "id": "sGx1O",
+              "x": 0,
+              "y": 0,
               "name": "Accordion Content",
               "enabled": false,
-              "width": "fill_container",
+              "width": "fill_container(0)",
               "layout": "vertical",
               "gap": 8,
               "padding": [
@@ -2623,9 +2633,11 @@
                     {
                       "type": "frame",
                       "id": "Ulczq",
+                      "x": 0,
+                      "y": 0,
                       "name": "Accordion Content",
                       "enabled": false,
-                      "width": "fill_container",
+                      "width": "fill_container(0)",
                       "layout": "vertical",
                       "gap": 8,
                       "padding": [
@@ -3484,9 +3496,11 @@
             {
               "type": "frame",
               "id": "qMhrH",
+              "x": 0,
+              "y": 0,
               "name": "Accordion Content",
               "enabled": false,
-              "width": "fill_container",
+              "width": "fill_container(0)",
               "layout": "vertical",
               "gap": 8,
               "padding": [
@@ -3695,9 +3709,11 @@
                     {
                       "type": "frame",
                       "id": "aDbO1",
+                      "x": 0,
+                      "y": 0,
                       "name": "Accordion Content",
                       "enabled": false,
-                      "width": "fill_container",
+                      "width": "fill_container(0)",
                       "layout": "vertical",
                       "gap": 8,
                       "padding": [
@@ -4547,9 +4563,11 @@
             {
               "type": "frame",
               "id": "sXtv7",
+              "x": 0,
+              "y": 0,
               "name": "Accordion Content",
               "enabled": false,
-              "width": "fill_container",
+              "width": "fill_container(0)",
               "layout": "vertical",
               "gap": 8,
               "padding": [
@@ -4764,9 +4782,11 @@
                     {
                       "type": "frame",
                       "id": "DVCu8",
+                      "x": 0,
+                      "y": 0,
                       "name": "Accordion Content",
                       "enabled": false,
-                      "width": "fill_container",
+                      "width": "fill_container(0)",
                       "layout": "vertical",
                       "gap": 8,
                       "padding": [
@@ -5392,862 +5412,6 @@
               "fontFamily": "Inter",
               "fontSize": 11,
               "fontWeight": "normal"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "IYgT0",
-      "x": -2320,
-      "y": -686,
-      "name": "Landing Page",
-      "width": 1440,
-      "fill": "#F5F4F1",
-      "layout": "vertical",
-      "children": [
-        {
-          "type": "frame",
-          "id": "SMPLu",
-          "name": "Header",
-          "width": "fill_container",
-          "height": 80,
-          "padding": [
-            0,
-            120
-          ],
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "text",
-              "id": "OG0vH",
-              "name": "logo",
-              "fill": "#1A1918",
-              "content": "SkinDetect.",
-              "fontFamily": "Inter",
-              "fontSize": 24,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "frame",
-              "id": "yqT2W",
-              "name": "nav",
-              "gap": 40,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "CTEDz",
-                  "name": "navLink1",
-                  "fill": "#6D6C6A",
-                  "content": "How it Works",
-                  "fontFamily": "Inter",
-                  "fontSize": 15,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "Zr1Zy",
-                  "name": "navLink2",
-                  "fill": "#6D6C6A",
-                  "content": "Features",
-                  "fontFamily": "Inter",
-                  "fontSize": 15,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "4ueU4",
-                  "name": "navLink3",
-                  "fill": "#6D6C6A",
-                  "content": "FAQ",
-                  "fontFamily": "Inter",
-                  "fontSize": 15,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "GFsaD",
-              "name": "ctaHeader",
-              "fill": "#3D8A5A",
-              "cornerRadius": 6,
-              "padding": [
-                12,
-                24
-              ],
-              "children": [
-                {
-                  "type": "text",
-                  "id": "brSKs",
-                  "name": "ctaHeaderText",
-                  "fill": "#FFFFFF",
-                  "content": "Analyze Now",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "IcCKb",
-          "name": "Hero",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 48,
-          "padding": [
-            100,
-            120,
-            120,
-            120
-          ],
-          "children": [
-            {
-              "type": "frame",
-              "id": "vX7tf",
-              "name": "Hero Text",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "TtuUX",
-                  "name": "Badge",
-                  "fill": "#3D8A5A15",
-                  "cornerRadius": 100,
-                  "padding": [
-                    6,
-                    12
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "zKq55",
-                      "name": "badgeText",
-                      "fill": "#3D8A5A",
-                      "content": "AI-POWERED DERMATOLOGY",
-                      "fontFamily": "Inter",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "text",
-                  "id": "24tVl",
-                  "name": "h1",
-                  "fill": "#1A1918",
-                  "content": "Clarity for your skin, peace for your mind.",
-                  "textAlign": "center",
-                  "fontFamily": "Inter",
-                  "fontSize": 64,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "mIrYy",
-                  "name": "h1Sub",
-                  "fill": "#6D6C6A",
-                  "content": "Instant detection of skin conditions with clinical-grade accuracy. Professional guidance at your fingertips.",
-                  "textAlign": "center",
-                  "fontFamily": "Inter",
-                  "fontSize": 20,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "dA7YY",
-              "name": "Centerpiece",
-              "width": 900,
-              "height": 500,
-              "fill": "#FFFFFF",
-              "cornerRadius": 8,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "rGbIZ",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Skin Image",
-                  "metadata": {
-                    "type": "unsplash",
-                    "username": "pawel_czerwinski",
-                    "link": "https://unsplash.com/@pawel_czerwinski",
-                    "author": "Pawel Czerwinski"
-                  },
-                  "width": 900,
-                  "height": 500,
-                  "fill": {
-                    "type": "image",
-                    "enabled": true,
-                    "url": "https://images.unsplash.com/photo-1573483164701-fbd9ad53cc7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzIwMzk3ODN8&ixlib=rb-4.1.0&q=80&w=1080",
-                    "mode": "fill"
-                  }
-                },
-                {
-                  "type": "frame",
-                  "id": "HnAhf",
-                  "x": 0,
-                  "y": 200,
-                  "name": "Scanner Line",
-                  "width": 900,
-                  "height": 2,
-                  "fill": "#3D8A5A"
-                },
-                {
-                  "type": "ellipse",
-                  "id": "mrVnI",
-                  "x": 300,
-                  "y": 250,
-                  "name": "Point 1",
-                  "fill": "#D8957540",
-                  "width": 24,
-                  "height": 24
-                },
-                {
-                  "type": "frame",
-                  "id": "7bKEF",
-                  "x": 330,
-                  "y": 240,
-                  "name": "Label 1",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 4,
-                  "padding": [
-                    6,
-                    12
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "4kvXg",
-                      "name": "pointText1",
-                      "fill": "#1A1918",
-                      "content": "Healthy Tissue",
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "ellipse",
-                  "id": "FT9VO",
-                  "x": 550,
-                  "y": 150,
-                  "name": "Point 2",
-                  "fill": "#3D8A5A40",
-                  "width": 24,
-                  "height": 24
-                },
-                {
-                  "type": "frame",
-                  "id": "o1ijc",
-                  "x": 580,
-                  "y": 140,
-                  "name": "Label 2",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 4,
-                  "padding": [
-                    6,
-                    12
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Pp59j",
-                      "name": "pointText2",
-                      "fill": "#1A1918",
-                      "content": "Detection match 98%",
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "WLbc9",
-          "name": "How it Works",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 64,
-          "padding": 120,
-          "children": [
-            {
-              "type": "frame",
-              "id": "H8MdL",
-              "name": "hiwHeader",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "BbO95",
-                  "name": "hiwTitle",
-                  "fill": "#1A1918",
-                  "content": "Your skin health in three simple steps.",
-                  "textAlign": "center",
-                  "fontFamily": "Inter",
-                  "fontSize": 40,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "z9XHI",
-                  "name": "hiwSub",
-                  "fill": "#6D6C6A",
-                  "content": "Clinically backed AI analysis designed for speed and accuracy.",
-                  "textAlign": "center",
-                  "fontFamily": "Inter",
-                  "fontSize": 18,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "lGdwQ",
-              "name": "Steps Grid",
-              "width": "fill_container",
-              "gap": 32,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "EGqJF",
-                  "name": "Step 1",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 8,
-                  "layout": "vertical",
-                  "gap": 24,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "icon_font",
-                      "id": "oUry8",
-                      "name": "s1Icon",
-                      "width": 0,
-                      "height": 0,
-                      "iconFontFamily": "Material Symbols Rounded",
-                      "fill": "#3D8A5A"
-                    },
-                    {
-                      "type": "text",
-                      "id": "F7Ygx",
-                      "name": "s1Title",
-                      "fill": "#1A1918",
-                      "content": "1. Capture",
-                      "fontFamily": "Inter",
-                      "fontSize": 24,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "XQJ4k",
-                      "name": "s1Desc",
-                      "fill": "#6D6C6A",
-                      "content": "Take a clear photo of the skin area using your phone's camera.",
-                      "lineHeight": 1.5,
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "8kOjf",
-                  "name": "Step 2",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 8,
-                  "layout": "vertical",
-                  "gap": 24,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "icon_font",
-                      "id": "26R8Y",
-                      "name": "s2Icon",
-                      "width": 0,
-                      "height": 0,
-                      "iconFontFamily": "Material Symbols Rounded",
-                      "fill": "#3D8A5A"
-                    },
-                    {
-                      "type": "text",
-                      "id": "8hO87",
-                      "name": "s2Title",
-                      "fill": "#1A1918",
-                      "content": "2. Analyze",
-                      "fontFamily": "Inter",
-                      "fontSize": 24,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "xg517",
-                      "name": "s2Desc",
-                      "fill": "#6D6C6A",
-                      "content": "Our trained neural network analyzes thousands of data points instantly.",
-                      "lineHeight": 1.5,
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "6cfe1",
-                  "name": "Step 3",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 8,
-                  "layout": "vertical",
-                  "gap": 24,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "icon_font",
-                      "id": "N9F6l",
-                      "name": "s3Icon",
-                      "width": 0,
-                      "height": 0,
-                      "iconFontFamily": "Material Symbols Rounded",
-                      "fill": "#3D8A5A"
-                    },
-                    {
-                      "type": "text",
-                      "id": "p2hdj",
-                      "name": "s3Title",
-                      "fill": "#1A1918",
-                      "content": "3. Review",
-                      "fontFamily": "Inter",
-                      "fontSize": 24,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "YsHux",
-                      "name": "s3Desc",
-                      "fill": "#6D6C6A",
-                      "textGrowth": "fixed-width-height",
-                      "width": 291,
-                      "height": 24,
-                      "content": "Receive immediate insights and clearly defined next steps for your health.",
-                      "lineHeight": 1.5,
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "3uai3",
-          "name": "CTA Section",
-          "width": "fill_container",
-          "fill": "#D8957510",
-          "layout": "vertical",
-          "gap": 32,
-          "padding": 120,
-          "children": [
-            {
-              "type": "text",
-              "id": "ICIe5",
-              "name": "ctaTitle",
-              "fill": "#1A1918",
-              "content": "Ready to take control of your skin health?",
-              "textAlign": "center",
-              "fontFamily": "Inter",
-              "fontSize": 48,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "frame",
-              "id": "lLxqt",
-              "name": "ctaBtnLarge",
-              "fill": "#3D8A5A",
-              "cornerRadius": 6,
-              "padding": [
-                20,
-                40
-              ],
-              "children": [
-                {
-                  "type": "text",
-                  "id": "CSRAR",
-                  "name": "ctaBtnText",
-                  "fill": "#FFFFFF",
-                  "content": "Start Your First Scan",
-                  "fontFamily": "Inter",
-                  "fontSize": 18,
-                  "fontWeight": "normal"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "IdxzV",
-          "name": "Features",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 64,
-          "padding": 120,
-          "children": [
-            {
-              "type": "frame",
-              "id": "5Ir3q",
-              "name": "featHeader",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "SDkVe",
-                  "name": "featTitle",
-                  "fill": "#1A1918",
-                  "content": "Advanced features for complete care.",
-                  "textAlign": "center",
-                  "fontFamily": "Inter",
-                  "fontSize": 40,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "iC9G6",
-              "name": "bento",
-              "width": "fill_container",
-              "height": 600,
-              "layout": "none",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "ECd4C",
-                  "x": 0,
-                  "y": 0,
-                  "name": "Bento 1",
-                  "width": 600,
-                  "height": 350,
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 8,
-                  "layout": "vertical",
-                  "gap": 16,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "FNiXl",
-                      "name": "c1Title",
-                      "fill": "#1A1918",
-                      "content": "99% Accuracy",
-                      "fontFamily": "Inter",
-                      "fontSize": 24,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "3ul7U",
-                      "name": "c1Desc",
-                      "fill": "#6D6C6A",
-                      "content": "Trained on over 2 million dermatological images to provide results you can trust.",
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "umkBX",
-                      "name": "c1Img",
-                      "metadata": {
-                        "type": "unsplash",
-                        "username": "pawel_czerwinski",
-                        "link": "https://unsplash.com/@pawel_czerwinski",
-                        "author": "Pawel Czerwinski"
-                      },
-                      "width": "fill_container",
-                      "height": 150,
-                      "fill": {
-                        "type": "image",
-                        "enabled": true,
-                        "url": "https://images.unsplash.com/photo-1632687224921-a72cc504a5cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzIwMzk4MDR8&ixlib=rb-4.1.0&q=80&w=1080",
-                        "mode": "fill"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "M1RHI",
-                  "x": 632,
-                  "y": 0,
-                  "name": "Bento 2",
-                  "width": 568,
-                  "height": 350,
-                  "fill": "#3D8A5A",
-                  "cornerRadius": 8,
-                  "layout": "vertical",
-                  "gap": 16,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "YlnWj",
-                      "name": "c2Title",
-                      "fill": "#FFFFFF",
-                      "content": "Privacy First",
-                      "fontFamily": "Inter",
-                      "fontSize": 24,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "bZ2UE",
-                      "name": "c2Desc",
-                      "fill": "#C8F0D8",
-                      "content": "Your photos are encrypted and never stored without your explicit permission.",
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "eWQWf",
-                  "x": 0,
-                  "y": 382,
-                  "name": "Bento 3",
-                  "width": 1200,
-                  "height": 218,
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 8,
-                  "gap": 48,
-                  "padding": 40,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "UqfBG",
-                      "name": "c3Text",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 8,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "o271j",
-                          "name": "c3Title",
-                          "fill": "#1A1918",
-                          "content": "Seamless Integration",
-                          "fontFamily": "Inter",
-                          "fontSize": 24,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "IXavE",
-                      "name": "c3Desc",
-                      "fill": "#6D6C6A",
-                      "content": "Export reports directly to your physician or store them in your health history for tracking.",
-                      "fontFamily": "Inter",
-                      "fontSize": 16,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "PAZau",
-          "name": "Footer",
-          "width": "fill_container",
-          "height": 300,
-          "fill": "#FFFFFF",
-          "padding": [
-            80,
-            120
-          ],
-          "children": [
-            {
-              "type": "frame",
-              "id": "sIM6u",
-              "name": "footInfo",
-              "layout": "vertical",
-              "gap": 16,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "TNxZS",
-                  "name": "footLogo",
-                  "fill": "#1A1918",
-                  "content": "SkinDetect.",
-                  "fontFamily": "Inter",
-                  "fontSize": 24,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "jHCjW",
-                  "name": "footCopy",
-                  "fill": "#9C9B99",
-                  "content": "© 2026 SkinDetect AI. Professional care, democratized.",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "9wQAE",
-              "name": "footLinks",
-              "gap": 80,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "8uYNj",
-                  "name": "col1",
-                  "layout": "vertical",
-                  "gap": 12,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Vm1Ok",
-                      "name": "c1h",
-                      "fill": "#1A1918",
-                      "content": "PRODUCT",
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "WEMcO",
-                      "name": "c1l1",
-                      "fill": "#6D6C6A",
-                      "content": "App",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "qksT2",
-                      "name": "c1l2",
-                      "fill": "#6D6C6A",
-                      "content": "API",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "ZH6TS",
-                  "name": "col2",
-                  "layout": "vertical",
-                  "gap": 12,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "XHLc6",
-                      "name": "c2h",
-                      "fill": "#1A1918",
-                      "content": "COMPANY",
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "WR2Xq",
-                      "name": "c2l1",
-                      "fill": "#6D6C6A",
-                      "content": "About",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "sdxIO",
-                      "name": "c2l2",
-                      "fill": "#6D6C6A",
-                      "content": "Contact",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "OpMXZ",
-                  "name": "col3",
-                  "layout": "vertical",
-                  "gap": 12,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "MfCiC",
-                      "name": "c3h",
-                      "fill": "#1A1918",
-                      "content": "LEGAL",
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "c2Pvt",
-                      "name": "c3l1",
-                      "fill": "#6D6C6A",
-                      "content": "Privacy",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "aveTo",
-                      "name": "c3l2",
-                      "fill": "#6D6C6A",
-                      "content": "Terms",
-                      "fontFamily": "Inter",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
             }
           ]
         }

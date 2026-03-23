@@ -123,9 +123,12 @@ async function pollProgress() {
             // Store result for results page
             localStorage.setItem('analysisResult', JSON.stringify(data.result));
             localStorage.setItem('analysisFilename', imagePath);
+            // Animate to 100% then navigate immediately — no artificial hold
+            setProgress(100);
+            statusEl.textContent = 'ANALYSIS COMPLETE';
             setTimeout(() => {
                 window.location.href = `/results?image=${encodeURIComponent(imagePath)}`;
-            }, 400);
+            }, 150);
             return;
         }
 

@@ -12,7 +12,10 @@
       "Bash(venv/Scripts/pip install onnxruntime)",
       "Bash(python -c \":*)",
       "Bash(python -c \"import torch; import torchvision; print\\(torch.__version__, torchvision.__version__\\)\")",
-      "Bash(source venv/Scripts/activate)"
+      "Bash(source venv/Scripts/activate)",
+      "Bash(pip show:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\(''app.py''\\).read\\(\\)\\); print\\(''OK''\\)\")"
     ]
   }
 }
