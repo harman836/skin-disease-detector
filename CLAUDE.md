@@ -52,3 +52,30 @@ The model file `yolov8model.onnx` must be present in the project root. It is loa
 **`preprocessing.py`** — standalone script / notebook cells for offline experimentation with the `.pt` model (not used by the Flask app at runtime; the app uses ONNX directly).
 
 **`SkinDiseaseScreening_CNN_Models.ipynb`** — Jupyter notebook for model training and evaluation.
+
+## Design Context
+
+### Users
+Everyday people (patients, general public) checking a suspicious skin spot — likely on a phone, possibly anxious, with no medical training. Mobile is the primary context. Anxiety is the default emotional state on arrival.
+
+### Brand Personality
+**Three words: Trustworthy. Empowering. Precise.**
+
+The voice is calm, direct, and knowledgeable — like a trusted GP summarizing a test result, not a chatbot performing friendliness.
+
+### Aesthetic Direction
+Clinical & trustworthy. Clean surfaces, restrained typography, purposeful whitespace. Existing palette (navy `#2a4b7c`, teal `#489fb5`, warm cream `#faf8f5`) and type stack (Fraunces + Inter) are correct. Dark mode is desirable but not blocking.
+
+**Must NOT look like:** a generic AI chatbot (dark sidebar + floating bubbles + robot avatar) or a consumer wellness app (pastel gradients, gamified elements).
+
+### Design Principles
+1. **Clarity over cleverness.** Every interaction must be immediately understandable by a stressed, non-technical person.
+2. **Information hierarchy earns trust.** Primary diagnosis dominates. Supporting data follows. Users should never hunt for the answer.
+3. **Actions over information.** Every result must conclude with a clear, actionable recommendation.
+4. **Restraint signals professionalism.** Fewer animations, no decorative gradients, no personality-driven micro-copy.
+5. **Mobile-first, anxiety-aware.** Generous touch targets, legible in bright daylight, informative loading states.
+
+### Accessibility Target
+Best-effort WCAG AA — fix obvious contrast, keyboard nav, and screen reader issues. Full WCAG compliance is not a blocker for this research project.
+
+> Full design context in `.impeccable.md` at the project root.

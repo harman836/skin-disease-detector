@@ -18,7 +18,7 @@
     <div class="upload-card">
 
         <!-- Upload Hit Area -->
-        <div class="upload-hit-area" id="uploadArea">
+        <div class="upload-hit-area" id="uploadArea" role="button" tabindex="0" aria-label="Upload image — click or drag and drop">
             <div class="upload-area-content" id="uploadContent"
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
                 <i data-lucide="camera" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
@@ -147,6 +147,13 @@ uploadFile(files[0]);
 
 uploadArea.addEventListener('click', (e) => {
 if (!hasUploadedImage && e.target.closest('#uploadArea')) {
+fileInput.click();
+}
+});
+
+uploadArea.addEventListener('keydown', (e) => {
+if (!hasUploadedImage && (e.key === 'Enter' || e.key === ' ')) {
+e.preventDefault();
 fileInput.click();
 }
 });

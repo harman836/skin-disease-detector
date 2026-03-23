@@ -33,11 +33,8 @@
         height: 100vh;
     }
     .chat-sidebar-header {
-        padding: 20px;
+        padding: 16px 20px;
         border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        align-items: center;
-        gap: 10px;
     }
     #chat-window {
         flex: 1;
@@ -45,7 +42,7 @@
         padding: 16px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         background: #fafafa;
     }
     .chat-input-row {
@@ -62,37 +59,90 @@
         border-radius: 10px;
         font-family: 'Inter', sans-serif;
         font-size: 0.875rem;
-        outline: none;
     }
     .chat-input-row input:focus {
-        border-color: #489fb5;
+        outline: 2px solid #489fb5;
+        outline-offset: 1px;
+        border-color: transparent;
     }
     .chat-send-btn {
-        background: #2a4b7c;
+        background: var(--primary);
         color: white;
         border: none;
-        padding: 0 16px;
+        width: 40px;
+        height: 40px;
         border-radius: 10px;
-        font-weight: 600;
         cursor: pointer;
-        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
         transition: opacity 0.2s;
     }
     .chat-send-btn:hover { opacity: 0.85; }
-    .chat-clear-btn {
-        background: none;
-        color: #999;
-        border: 1px solid #e5e7eb;
-        padding: 0 12px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: color 0.2s;
+    .chat-send-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .chat-bubble {
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 88%;
+        font-size: 0.875rem;
+        line-height: 1.55;
     }
-    .chat-clear-btn:hover { color: #555; }
-    @keyframes bounce {
-        0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-6px); }
+    .chat-bubble-user {
+        background: var(--primary);
+        color: white;
+        border-bottom-right-radius: 3px;
+        align-self: flex-end;
+    }
+    .chat-bubble-ai {
+        background: rgba(73,159,181,0.1);
+        color: var(--foreground);
+        border-bottom-left-radius: 3px;
+        align-self: flex-start;
+    }
+    .chat-bubble-error {
+        background: var(--color-error);
+        color: var(--color-error-foreground);
+        border-bottom-left-radius: 3px;
+        align-self: flex-start;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+    }
+    .chat-bubble-typing {
+        color: var(--muted-foreground);
+        border-bottom-left-radius: 3px;
+        align-self: flex-start;
+        letter-spacing: 3px;
+        animation: pulse 1.2s ease-in-out infinite;
+    }
+    .sr-only {
+        position: absolute; width: 1px; height: 1px;
+        padding: 0; margin: -1px; overflow: hidden;
+        clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+    .model-tab {
+        background: none;
+        border: none;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #6b7280;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        font-family: 'Inter', sans-serif;
+        white-space: nowrap;
+    }
+    .model-tab.active {
+        background: #fff;
+        color: #2a4b7c;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .model-tab:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
     }
 </style>
 {% endblock %}
@@ -138,8 +188,12 @@
                     <div class="accordion-content">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Architecture</span>
-                                <span>YOLOv8n-cls (ONNX)</span>
+                                <span style="color: #8A8A8A;">Models</span>
+                                <span>YOLOv8n-cls + ResNet50</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                                <span style="color: #8A8A8A;">Ensemble</span>
+                                <span>Averaged softmax</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 13px;">
                                 <span style="color: #8A8A8A;">Classes</span>
@@ -196,7 +250,15 @@
 
             <!-- Confidence Breakdown -->
             <div class="card">
-                <p class="section-label">CONFIDENCE BREAKDOWN</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <p class="section-label" style="margin-bottom: 0;">CONFIDENCE BREAKDOWN</p>
+                    <div id="modelToggle" style="display: flex; gap: 4px; background: var(--secondary); border-radius: 8px; padding: 3px;">
+                        <button class="model-tab active" data-model="ensemble" onclick="switchModel('ensemble')">Ensemble</button>
+                        <button class="model-tab" data-model="resnet" onclick="switchModel('resnet')">ResNet50</button>
+                        <button class="model-tab" data-model="yolo" onclick="switchModel('yolo')">YOLOv8</button>
+                    </div>
+                </div>
+                <p id="modelLabel" style="font-size: 11px; color: #8A8A8A; margin-bottom: 12px;">Combined prediction (averaged from both models)</p>
                 <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
                     <!-- Breakdown items injected here -->
                 </div>
@@ -228,23 +290,21 @@
 <!-- CHAT SIDEBAR -->
 <div class="chat-sidebar">
     <div class="chat-sidebar-header">
-        <i class="fas fa-robot" style="color: #2a4b7c; font-size: 1rem;"></i>
-        <div>
-            <p style="margin: 0; font-weight: 600; font-size: 0.9rem; color: #1a1a1a;">AI Assistant</p>
-            <p style="margin: 0; font-size: 0.75rem; color: #8a8a8a;">Ask about your results</p>
-        </div>
+        <p style="margin: 0; font-weight: 600; font-size: 0.875rem; color: var(--foreground);">Ask about your results</p>
     </div>
 
-    <div id="chat-window">
-        <div style="background: rgba(73,159,181,0.1); color: #2d2d2d; padding: 12px 16px; border-radius: 12px; border-bottom-left-radius: 4px; max-width: 90%; align-self: flex-start; font-size: 0.875rem; line-height: 1.5;">
-            Hello! I can see your analysis results. Ask me anything about your skin health findings.
+    <div id="chat-window" aria-live="polite" aria-label="Conversation">
+        <div class="chat-bubble chat-bubble-ai">
+            What would you like to know about these results?
         </div>
     </div>
 
     <div class="chat-input-row">
-        <input type="text" id="chat-input" placeholder="Ask about your results..." onkeypress="if(event.key==='Enter') sendChat()">
-        <button class="chat-send-btn" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
-        <button class="chat-clear-btn" onclick="clearChat()">Clear</button>
+        <label for="chat-input" class="sr-only">Ask a question about your results</label>
+        <input type="text" id="chat-input" placeholder="Type a question…" onkeypress="if(event.key==='Enter') sendChat()">
+        <button class="chat-send-btn" onclick="sendChat()" aria-label="Send">
+            <i data-lucide="send" style="width:15px;height:15px;"></i>
+        </button>
     </div>
 </div>
 
@@ -258,7 +318,7 @@ const diseaseInfo = {
     explanation: 'Melanoma is the most serious type of skin cancer. It can spread rapidly to other parts of the body if not detected early. Early detection through regular screening and prompt treatment significantly improves outcomes.',
     highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
 },
-'Basic Cell Carcinoma': {
+'Basal Cell Carcinoma': {
     explanation: 'Basal cell carcinoma is a common type of non-melanoma skin cancer. It typically grows slowly and has a high cure rate when treated early.',
     highRiskThreshold: 0.50, mediumRiskThreshold: 0.20
 },
@@ -416,22 +476,49 @@ document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US
 const storedImage = localStorage.getItem('uploadedImageData');
 if (storedImage) document.getElementById('result-image').src = storedImage;
 
+// Multi-model score storage
+let allScores = { ensemble: null, yolo: null, resnet: null };
+let activeModel = 'ensemble';
+
+const modelLabels = {
+    ensemble: 'Combined prediction (averaged from both models)',
+    yolo: 'YOLOv8n-cls — lightweight, fast classification',
+    resnet: 'ResNet50 — fine-tuned deep residual network',
+};
+
+function switchModel(model) {
+    if (!allScores[model]) return;
+    activeModel = model;
+    document.querySelectorAll('.model-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.model === model);
+    });
+    document.getElementById('modelLabel').textContent = modelLabels[model];
+    displayResults(allScores[model]);
+}
+
+function initModelToggle(result) {
+    allScores.ensemble = result.ensemble_scores || result.scores || null;
+    allScores.yolo     = result.yolo_scores || null;
+    allScores.resnet   = result.resnet_scores || null;
+
+    // Disable ResNet tab if not available
+    document.querySelectorAll('.model-tab').forEach(btn => {
+        if (btn.dataset.model === 'resnet' && !allScores.resnet) btn.disabled = true;
+        if (btn.dataset.model === 'yolo' && !allScores.yolo) btn.disabled = true;
+    });
+
+    // Default to ensemble (weighted toward ResNet50), fall back to resnet, then yolo
+    const preferred = allScores.ensemble ? 'ensemble' : allScores.resnet ? 'resnet' : 'yolo';
+    switchModel(preferred);
+}
+
 // Load real analysis results from localStorage (set by loading page)
 const storedResult = localStorage.getItem('analysisResult');
 if (storedResult) {
     try {
         const result = JSON.parse(storedResult);
-        if (result && result.scores) {
-            displayResults(result.scores);
-        } else if (result && result.primary_diagnosis) {
-            // Fallback: build scores from top3 if full scores not available
-            const scores = {};
-            if (result.top3) {
-                result.top3.forEach(item => {
-                    scores[item.disease] = item.probability / 100;
-                });
-            }
-            displayResults(scores);
+        if (result) {
+            initModelToggle(result);
         }
     } catch (e) {
         console.error('Failed to parse analysis result', e);
@@ -444,12 +531,17 @@ if (storedResult) {
         fetch(`/progress/${encodeURIComponent(imagePath)}`)
             .then(r => r.json())
             .then(data => {
-                if (data.result && data.result.scores) {
-                    displayResults(data.result.scores);
-                }
+                if (data.result) initModelToggle(data.result);
             })
             .catch(() => {});
     }
+}
+
+function makeBubble(className, text) {
+    const el = document.createElement('div');
+    el.className = 'chat-bubble ' + className;
+    el.textContent = text;
+    return el;
 }
 
 async function sendChat() {
@@ -461,15 +553,9 @@ async function sendChat() {
     input.value = '';
     input.disabled = true;
 
-    const userBubble = document.createElement('div');
-    userBubble.style.cssText = 'background:#2a4b7c;color:white;padding:12px 16px;border-radius:12px;border-bottom-right-radius:4px;max-width:80%;align-self:flex-end;font-size:0.9rem;line-height:1.5;';
-    userBubble.textContent = message;
-    chatWindow.appendChild(userBubble);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    chatWindow.appendChild(makeBubble('chat-bubble-user', message));
 
-    const typingBubble = document.createElement('div');
-    typingBubble.style.cssText = 'background:rgba(73,159,181,0.1);padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;align-self:flex-start;display:flex;gap:5px;align-items:center;';
-    typingBubble.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#489fb5;animation:bounce 1s infinite 0s"></span><span style="width:7px;height:7px;border-radius:50%;background:#489fb5;animation:bounce 1s infinite 0.2s"></span><span style="width:7px;height:7px;border-radius:50%;background:#489fb5;animation:bounce 1s infinite 0.4s"></span>';
+    const typingBubble = makeBubble('chat-bubble chat-bubble-typing', '...');
     chatWindow.appendChild(typingBubble);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
@@ -484,19 +570,15 @@ async function sendChat() {
             body: JSON.stringify({message, results: analysisResults, image: imageData})
         });
         const data = await res.json();
-        typingBubble.style.cssText = 'background:rgba(73,159,181,0.1);color:#2d2d2d;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:80%;align-self:flex-start;font-size:0.9rem;line-height:1.6;';
+        typingBubble.className = 'chat-bubble chat-bubble-ai';
         typingBubble.textContent = data.reply || data.error || 'Something went wrong.';
     } catch (e) {
-        typingBubble.style.cssText = 'background:rgba(73,159,181,0.1);color:#c0392b;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:80%;align-self:flex-start;font-size:0.9rem;';
-        typingBubble.textContent = 'Error connecting to assistant.';
+        typingBubble.className = 'chat-bubble chat-bubble-error';
+        typingBubble.textContent = 'Could not connect. Please try again.';
     }
+
     input.disabled = false;
     input.focus();
     chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-function clearChat() {
-    const chatWindow = document.getElementById('chat-window');
-    chatWindow.innerHTML = '<div style="background:rgba(73,159,181,0.1);color:#2d2d2d;padding:12px 16px;border-radius:12px;border-bottom-left-radius:4px;max-width:90%;align-self:flex-start;font-size:0.875rem;line-height:1.5;">Hello! I can see your analysis results. Ask me anything about your skin health findings.</div>';
 }
 {% endblock %}

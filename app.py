@@ -11,6 +11,9 @@ from pathlib import Path
 from io import BytesIO
 import base64
 import onnxruntime as ort
+import torch
+import torchvision.models as tv_models
+import torchvision.transforms as transforms
 
 # --- ADDED FOR CHATBOT ---
 import google.generativeai as genai
@@ -73,6 +76,34 @@ def _load_model():
         _class_names = [names_dict[i] for i in sorted(names_dict.keys())]
 
 _load_model()
+
+# Load ResNet50 model at startup
+_RESNET_PATH = os.path.join(os.path.dirname(__file__), 'best_resnet50_finetuned.pth')
+_resnet_model = None
+
+_resnet_transforms = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+def _load_resnet_model():
+    global _resnet_model
+    if os.path.exists(_RESNET_PATH):
+        try:
+            net = tv_models.resnet50(weights=None)
+            net.fc = torch.nn.Linear(2048, 5)
+            state = torch.load(_RESNET_PATH, map_location='cpu', weights_only=True)
+            net.load_state_dict(state)
+            net.eval()
+            _resnet_model = net
+            print("--- ResNet50 model loaded successfully ---")
+        except Exception as e:
+            print(f"--- WARNING: Could not load ResNet50: {e} ---")
+    else:
+        print(f"--- WARNING: ResNet50 not found at {_RESNET_PATH} ---")
+
+_load_resnet_model()
 
 # Global dictionary to store task progress
 TASKS = {}
@@ -219,6 +250,32 @@ def download_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
+def run_resnet50_inference(filepath):
+    """Run ResNet50 inference on an image file. Returns (scores, top_class, confidence_pct)."""
+    if _resnet_model is None:
+        raise RuntimeError('ResNet50 model not loaded.')
+    img = Image.open(filepath).convert('RGB')
+    tensor = _resnet_transforms(img).unsqueeze(0)
+    with torch.no_grad():
+        logits = _resnet_model(tensor)[0]
+        probs = torch.softmax(logits, dim=0).numpy()
+    scores = {_class_names[i]: round(float(probs[i]), 4) for i in range(len(_class_names))}
+    top_idx = int(np.argmax(probs))
+    return scores, _class_names[top_idx], round(float(probs[top_idx]) * 100, 1)
+
+
+def run_resnet50_inference_array(img_np):
+    """Run ResNet50 inference on a 224x224 RGB numpy array."""
+    if _resnet_model is None:
+        raise RuntimeError('ResNet50 model not loaded.')
+    img = Image.fromarray(img_np.astype(np.uint8))
+    tensor = _resnet_transforms(img).unsqueeze(0)
+    with torch.no_grad():
+        logits = _resnet_model(tensor)[0]
+        probs = torch.softmax(logits, dim=0).numpy()
+    return probs
+
+
 def run_onnx_inference(filepath):
     """Run YOLOv8 classification ONNX inference on an image file."""
     img = Image.open(filepath).convert('RGB')
@@ -253,22 +310,43 @@ def process_image(filename):
             _, _, _ = prepare_image(f)
 
         # Step 2: Load check
-        TASKS[task_id].update({'status': 'Loading model...', 'progress': 40})
+        TASKS[task_id].update({'status': 'Loading models...', 'progress': 40})
         if _ort_session is None:
             raise RuntimeError('ONNX model not loaded. Ensure yolov8model.onnx is present.')
 
-        # Step 3: Run ONNX inference
-        TASKS[task_id].update({'status': 'Analyzing skin patterns...', 'progress': 70})
-        scores, primary_diagnosis, confidence = run_onnx_inference(filepath)
+        # Step 3: Run both models
+        TASKS[task_id].update({'status': 'Running YOLOv8 analysis...', 'progress': 55})
+        yolo_scores, _, _ = run_onnx_inference(filepath)
 
-        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        resnet_scores = None
+        if _resnet_model is not None:
+            TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 70})
+            resnet_scores, _, _ = run_resnet50_inference(filepath)
+
+        # Ensemble: weight ResNet50 2:1 over YOLOv8 (ResNet50 is more accurate)
+        if resnet_scores is not None:
+            ensemble_scores = {
+                cls: round((resnet_scores[cls] * 2 + yolo_scores[cls]) / 3, 4)
+                for cls in yolo_scores
+            }
+        else:
+            ensemble_scores = yolo_scores
+
+        # Primary result driven by ResNet50 when available, else ensemble
+        primary_scores = resnet_scores if resnet_scores is not None else ensemble_scores
+        top_idx = max(primary_scores, key=primary_scores.get)
+        confidence = round(ensemble_scores[top_idx] * 100, 1)
+        sorted_scores = sorted(ensemble_scores.items(), key=lambda x: x[1], reverse=True)
         top3 = [{'disease': name, 'probability': round(prob * 100, 1)} for name, prob in sorted_scores[:3]]
 
         result_data = {
-            'primary_diagnosis': primary_diagnosis,
+            'primary_diagnosis': top_idx,
             'confidence': confidence,
             'top3': top3,
-            'scores': scores
+            'scores': ensemble_scores,
+            'yolo_scores': yolo_scores,
+            'resnet_scores': resnet_scores,
+            'ensemble_scores': ensemble_scores,
         }
 
         TASKS[task_id].update({'status': 'Finalizing results...', 'progress': 90})

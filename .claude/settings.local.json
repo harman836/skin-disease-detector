@@ -9,7 +9,10 @@
       "Bash(venv/Scripts/pip install ultralytics==8.3.157)",
       "Bash(venv/Scripts/python -c \"import cv2; import ultralytics; from PIL import Image; print\\(''cv2:'', cv2.__version__\\); print\\(''ultralytics:'', ultralytics.__version__\\); print\\(''Pillow:'', Image.__version__\\)\")",
       "Bash(venv/Scripts/python.exe -c \"import onnxruntime; print\\(''onnxruntime available:'', onnxruntime.__version__\\)\")",
-      "Bash(venv/Scripts/pip install onnxruntime)"
+      "Bash(venv/Scripts/pip install onnxruntime)",
+      "Bash(python -c \":*)",
+      "Bash(python -c \"import torch; import torchvision; print\\(torch.__version__, torchvision.__version__\\)\")",
+      "Bash(source venv/Scripts/activate)"
     ]
   }
 }
