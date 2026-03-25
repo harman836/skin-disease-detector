@@ -5,6 +5,7 @@
 {% block body_class %}results-page{% endblock %}
 
 {% block extra_styles %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
     .container {
         max-width: none;
@@ -152,7 +153,6 @@
 <div class="results-layout">
 
 <div class="results-main">
-    <!-- Header -->
     <header style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <button class="btn btn-secondary" id="back-btn" style="width: auto;">
             <i data-lucide="arrow-left"></i>
@@ -163,7 +163,6 @@
     </header>
 
     <div class="results-grid">
-        <!-- LEFT COLUMN -->
         <div style="display: flex; flex-direction: column; gap: 24px;">
             <div class="image-container">
                 <div class="result-image-box">
@@ -179,7 +178,6 @@
                     <span>Show AI Focus Area</span>
                 </button>
 
-                <!-- About This Model -->
                 <details class="health-accordion" style="width: 100%;">
                     <summary class="accordion-trigger">
                         <span>About This Model</span>
@@ -209,10 +207,8 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
         <div style="display: flex; flex-direction: column; gap: 24px;">
 
-            <!-- Main Prediction Card -->
             <div class="card main-prediction-card">
                 <p class="section-label">MOST LIKELY CONDITION</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -232,7 +228,6 @@
                 </div>
             </div>
 
-            <!-- What This Means -->
             <div class="card desc-card">
                 <p class="section-label">WHAT THIS MEANS</p>
                 <p id="explanationText" style="font-size: 14px; color: var(--muted-foreground); line-height: 1.5;">
@@ -248,7 +243,6 @@
                 </div>
             </div>
 
-            <!-- Confidence Breakdown -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <p class="section-label" style="margin-bottom: 0;">CONFIDENCE BREAKDOWN</p>
@@ -260,8 +254,7 @@
                 </div>
                 <p id="modelLabel" style="font-size: 11px; color: #8A8A8A; margin-bottom: 12px;">Combined prediction (averaged from both models)</p>
                 <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
-                    <!-- Breakdown items injected here -->
-                </div>
+                    </div>
             </div>
 
             <div class="results-actions">
@@ -283,12 +276,7 @@
                 </p>
             </div>
 
-            </div><!-- end right column -->
-    </div><!-- end results-grid -->
-</div><!-- end results-main -->
-
-<!-- CHAT SIDEBAR -->
-<div class="chat-sidebar">
+            </div></div></div><div class="chat-sidebar">
     <div class="chat-sidebar-header">
         <p style="margin: 0; font-weight: 600; font-size: 0.875rem; color: var(--foreground);">Ask about your results</p>
     </div>
@@ -308,9 +296,7 @@
     </div>
 </div>
 
-</div><!-- end results-layout -->
-</div><!-- end container -->
-{% endblock %}
+</div></div>{% endblock %}
 
 {% block scripts %}
 const diseaseInfo = {
@@ -481,162 +467,38 @@ btn.disabled = false;
 
 document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
 document.getElementById('upload-new-btn').addEventListener('click', () => window.location.href = '/');
-document.getElementById('download-btn').addEventListener('click', () => alert('PDF report is being generated...'));
 
-// Set timestamp
-const now = new Date();
-document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-});
+document.getElementById('download-btn').addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i data-lucide="loader"></i><span>Generating PDF...</span>';
+    btn.style.opacity = '0.7';
+    btn.disabled = true;
 
-// Load image from localStorage
-const storedImage = localStorage.getItem('uploadedImageData');
-if (storedImage) document.getElementById('result-image').src = storedImage;
+    const actionsDiv = document.querySelector('.results-actions');
+    const chatSidebar = document.querySelector('.chat-sidebar');
+    const backBtn = document.getElementById('back-btn');
+    const mainContainer = document.querySelector('.results-main');
+    const gridContainer = document.querySelector('.results-grid');
+    
+    if (actionsDiv) actionsDiv.style.display = 'none';
+    if (chatSidebar) chatSidebar.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'none';
 
-// Multi-model score storage
-let allScores = { ensemble: null, yolo: null, resnet: null };
-let activeModel = 'ensemble';
+    // Temporarily force a single-column, print-friendly layout
+    const originalMainOverflow = mainContainer.style.overflow;
+    const originalMainPadding = mainContainer.style.padding;
+    const originalGridDisplay = gridContainer.style.display;
+    const originalGridDir = gridContainer.style.flexDirection;
 
-const modelLabels = {
-    ensemble: 'Combined prediction (averaged from both models)',
-    yolo: 'YOLOv8n-cls — lightweight, fast classification',
-    resnet: 'ResNet50 — fine-tuned deep residual network',
-};
+    mainContainer.style.overflow = 'visible';
+    mainContainer.style.padding = '10px';
+    gridContainer.style.display = 'flex'; 
+    gridContainer.style.flexDirection = 'column'; 
 
-function switchModel(model) {
-    if (!allScores[model]) return;
-    const prevKey = heatmapModelKey();
-    activeModel = model;
-    document.querySelectorAll('.model-tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.model === model);
-    });
-    document.getElementById('modelLabel').textContent = modelLabels[model];
-    displayResults(allScores[model]);
-
-    // Refresh heatmap overlay if it's currently visible and the model key changed
-    const newKey = heatmapModelKey();
-    const overlay = document.getElementById('heatmapOverlay');
-    const btn = document.getElementById('toggleHeatmap');
-    if (overlay.style.display !== 'none' && newKey !== prevKey) {
-        if (heatmapCache[newKey]) {
-            overlay.innerHTML = `<img src="${heatmapCache[newKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
-        } else {
-            // Hide and reset so user can re-generate for the new model
-            overlay.style.display = 'none';
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-secondary');
-            btn.querySelector('span').textContent = 'Show AI Focus Area';
-        }
-    }
-}
-
-function initModelToggle(result) {
-    allScores.ensemble = result.ensemble_scores || result.scores || null;
-    allScores.yolo     = result.yolo_scores || null;
-    allScores.resnet   = result.resnet_scores || null;
-
-    // Disable ResNet tab if not available
-    document.querySelectorAll('.model-tab').forEach(btn => {
-        if (btn.dataset.model === 'resnet' && !allScores.resnet) btn.disabled = true;
-        if (btn.dataset.model === 'yolo' && !allScores.yolo) btn.disabled = true;
-    });
-
-    // Default to ensemble (weighted toward ResNet50), fall back to resnet, then yolo
-    const preferred = allScores.ensemble ? 'ensemble' : allScores.resnet ? 'resnet' : 'yolo';
-    switchModel(preferred);
-
-    // Load heatmaps from result data (pre-generated during loading screen)
-    prefetchHeatmaps(result);
-}
-
-async function prefetchHeatmap(modelKey) {
-    if (heatmapCache[modelKey]) return;
-    const filename = new URLSearchParams(window.location.search).get('image');
-    if (!filename) return;
-    try {
-        const res = await fetch(`/heatmap/${encodeURIComponent(filename)}?model=${modelKey}`);
-        const data = await res.json();
-        if (data.heatmap) heatmapCache[modelKey] = data.heatmap;
-    } catch (_) {}
-}
-
-function prefetchHeatmaps(result) {
-    // Heatmaps are pre-generated during loading — read from result if available,
-    // otherwise fall back to fetching from the backend
-    if (result.yolo_heatmap) heatmapCache['yolo'] = result.yolo_heatmap;
-    if (result.resnet_heatmap) heatmapCache['resnet'] = result.resnet_heatmap;
-    // Fetch any that are still missing (e.g. old cached localStorage result)
-    if (!heatmapCache['yolo']) prefetchHeatmap('yolo');
-    if (!heatmapCache['resnet']) prefetchHeatmap('resnet');
-}
-
-// Load real analysis results from localStorage (set by loading page)
-const storedResult = localStorage.getItem('analysisResult');
-if (storedResult) {
-    try {
-        const result = JSON.parse(storedResult);
-        if (result) {
-            initModelToggle(result);
-        }
-    } catch (e) {
-        console.error('Failed to parse analysis result', e);
-    }
-} else {
-    // No result in storage — try fetching from backend using filename in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const imagePath = urlParams.get('image');
-    if (imagePath) {
-        fetch(`/progress/${encodeURIComponent(imagePath)}`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.result) initModelToggle(data.result);
-            })
-            .catch(() => {});
-    }
-}
-
-function makeBubble(className, text) {
-    const el = document.createElement('div');
-    el.className = 'chat-bubble ' + className;
-    el.textContent = text;
-    return el;
-}
-
-async function sendChat() {
-    const input = document.getElementById('chat-input');
-    const chatWindow = document.getElementById('chat-window');
-    const message = input.value.trim();
-    if (!message) return;
-
-    input.value = '';
-    input.disabled = true;
-
-    chatWindow.appendChild(makeBubble('chat-bubble-user', message));
-
-    const typingBubble = makeBubble('chat-bubble chat-bubble-typing', '...');
-    chatWindow.appendChild(typingBubble);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-
-    let analysisResults = null;
-    try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
-    const imageData = localStorage.getItem('uploadedImageData') || null;
-
-    try {
-        const res = await fetch('/chat', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({message, results: analysisResults, image: imageData})
-        });
-        const data = await res.json();
-        typingBubble.className = 'chat-bubble chat-bubble-ai';
-        typingBubble.textContent = data.reply || data.error || 'Something went wrong.';
-    } catch (e) {
-        typingBubble.className = 'chat-bubble chat-bubble-error';
-        typingBubble.textContent = 'Could not connect. Please try again.';
-    }
-
-    input.disabled = false;
-    input.focus();
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-{% endblock %}
+    const opt = {
+        margin:       15,
+        filename:     'Skin_Analysis_Report.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 }, // Forces mobile/tablet
