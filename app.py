@@ -287,9 +287,14 @@ def run_onnx_inference(filepath):
     outputs = _ort_session.run(None, {input_name: img_np})
     probs = outputs[0][0]  # Shape: [num_classes]
 
-    # Apply softmax if outputs aren't already probabilities
-    exp_probs = np.exp(probs - probs.max())
-    probs = exp_probs / exp_probs.sum()
+    # Check if already probabilities (sum close to 1 and all in [0,1])
+    if np.sum(probs) > 0.99 and np.all(probs >= 0) and np.all(probs <= 1):
+        # Already probabilities, just normalize
+        probs = probs / np.sum(probs)
+    else:
+        # Apply softmax
+        exp_probs = np.exp(probs - probs.max())
+        probs = exp_probs / exp_probs.sum()
 
     scores = {_class_names[i]: round(float(probs[i]), 4) for i in range(len(_class_names))}
     top_idx = int(np.argmax(probs))
@@ -310,26 +315,33 @@ def process_image(filename):
 
         # Step 2: Load check
         TASKS[task_id].update({'status': 'Loading models...', 'progress': 15})
-        if _ort_session is None:
-            raise RuntimeError('ONNX model not loaded. Ensure yolov8model.onnx is present.')
 
         # Step 3: Run both models
         TASKS[task_id].update({'status': 'Running YOLOv8 analysis...', 'progress': 25})
-        yolo_scores, _, _ = run_onnx_inference(filepath)
+        yolo_scores = None
+        if _ort_session is not None:
+            yolo_scores, _, _ = run_onnx_inference(filepath)
 
         resnet_scores = None
         if _resnet_model is not None:
             TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 38})
             resnet_scores, _, _ = run_resnet50_inference(filepath)
 
+        if yolo_scores is None and resnet_scores is None:
+            raise RuntimeError('No AI models loaded. Please install required packages (onnxruntime, torch, torchvision).')
+
         # Ensemble: weight ResNet50 2:1 over YOLOv8 (ResNet50 is more accurate)
-        if resnet_scores is not None:
+        if resnet_scores is not None and yolo_scores is not None:
             ensemble_scores = {
                 cls: round((resnet_scores[cls] * 2 + yolo_scores[cls]) / 3, 4)
                 for cls in yolo_scores
             }
-        else:
+        elif resnet_scores is not None:
+            ensemble_scores = resnet_scores
+        elif yolo_scores is not None:
             ensemble_scores = yolo_scores
+        else:
+            raise RuntimeError('No models available')
 
         # Primary result driven by ResNet50 when available, else ensemble
         primary_scores = resnet_scores if resnet_scores is not None else ensemble_scores
@@ -393,8 +405,13 @@ def run_onnx_inference_array(img_np):
     input_name = _ort_session.get_inputs()[0].name
     outputs = _ort_session.run(None, {input_name: img_f})
     probs = outputs[0][0]
-    exp_probs = np.exp(probs - probs.max())
-    return exp_probs / exp_probs.sum()
+    # Check if already probabilities
+    if np.sum(probs) > 0.99 and np.all(probs >= 0) and np.all(probs <= 1):
+        probs = probs / np.sum(probs)
+    else:
+        exp_probs = np.exp(probs - probs.max())
+        probs = exp_probs / exp_probs.sum()
+    return probs
 
 
 def generate_heatmap(filepath, model='yolo', progress_callback=None):
@@ -453,7 +470,7 @@ def heatmap(filename):
     if model == 'resnet' and _resnet_model is None:
         return jsonify({'error': 'ResNet50 model not loaded'}), 500
     if model != 'resnet' and _ort_session is None:
-        return jsonify({'error': 'ONNX model not loaded'}), 500
+        return jsonify({'error': 'YOLOv8 model not loaded'}), 500
     try:
         return jsonify({'heatmap': generate_heatmap(filepath, model=model)})
     except Exception as e:

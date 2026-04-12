@@ -7,296 +7,247 @@
 {% block extra_styles %}
 <script src="/static/jspdf.umd.min.js"></script>
 <style>
-    .container {
-        max-width: none;
-        padding: 0;
-    }
     .results-layout {
-        display: flex;
-        min-height: 100vh;
-        align-items: stretch;
+        display: grid;
+        grid-template-columns: minmax(320px, 420px) minmax(0, 1fr) 320px;
+        gap: 32px;
+        align-items: start;
+        width: 100%;
     }
-    .results-main {
-        flex: 1;
-        min-width: 0;
-        padding: 32px;
-        overflow-y: auto;
-    }
-    .chat-sidebar {
-        width: 340px;
-        flex-shrink: 0;
-        border-left: 1px solid #e5e7eb;
-        background: #fff;
+
+    .image-column {
         display: flex;
         flex-direction: column;
+        gap: 28px;
+    }
+
+    .image-card-large {
         position: sticky;
-        top: 0;
-        height: 100vh;
+        top: 28px;
     }
-    .chat-sidebar-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid #e5e7eb;
+
+    .image-card-large .result-image-box-large {
+        min-height: 520px;
     }
-    #chat-window {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px;
+
+    .action-card {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 18px;
+        align-items: center;
+    }
+
+    .action-card i {
+        min-width: 44px;
+        min-height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        background: rgba(0, 113, 227, 0.1);
+    }
+
+    .model-info {
+        font-size: 0.95rem;
+        color: var(--muted-foreground);
+        background: rgba(243, 246, 251, 0.92);
+        border-radius: 22px;
+        border: 1px solid rgba(42, 75, 124, 0.08);
+        padding: 20px 22px;
+    }
+
+    .model-info summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--foreground);
+        margin-bottom: 10px;
+        list-style: none;
+    }
+
+    .model-info summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .model-info p {
+        margin-top: 12px;
+        line-height: 1.7;
+    }
+
+    .section-heading h2 {
+        font-size: 1.2rem;
+    }
+
+    .results-main {
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        background: #fafafa;
+        gap: 28px;
     }
-    .chat-input-row {
-        padding: 12px 16px;
-        border-top: 1px solid #e5e7eb;
-        display: flex;
-        gap: 8px;
-        background: #fff;
+
+    .medical-disclaimer {
+        color: #475569;
+        font-size: 0.95rem;
     }
-    .chat-input-row input {
-        flex: 1;
-        padding: 10px 14px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.875rem;
+
+    @media (max-width: 1200px) {
+        .results-layout {
+            grid-template-columns: 1fr 320px;
+        }
+        .image-card-large {
+            position: relative;
+            top: auto;
+        }
     }
-    .chat-input-row input:focus {
-        outline: 2px solid #489fb5;
-        outline-offset: 1px;
-        border-color: transparent;
-    }
-    .chat-send-btn {
-        background: var(--primary);
-        color: white;
-        border: none;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        transition: opacity 0.2s;
-    }
-    .chat-send-btn:hover { opacity: 0.85; }
-    .chat-send-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .chat-bubble {
-        padding: 10px 14px;
-        border-radius: 12px;
-        max-width: 88%;
-        font-size: 0.875rem;
-        line-height: 1.55;
-    }
-    .chat-bubble-user {
-        background: var(--primary);
-        color: white;
-        border-bottom-right-radius: 3px;
-        align-self: flex-end;
-    }
-    .chat-bubble-ai {
-        background: rgba(73,159,181,0.1);
-        color: var(--foreground);
-        border-bottom-left-radius: 3px;
-        align-self: flex-start;
-    }
-    .chat-bubble-error {
-        background: var(--color-error);
-        color: var(--color-error-foreground);
-        border-bottom-left-radius: 3px;
-        align-self: flex-start;
-    }
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.35; }
-    }
-    .chat-bubble-typing {
-        color: var(--muted-foreground);
-        border-bottom-left-radius: 3px;
-        align-self: flex-start;
-        letter-spacing: 3px;
-        animation: pulse 1.2s ease-in-out infinite;
-    }
-    .sr-only {
-        position: absolute; width: 1px; height: 1px;
-        padding: 0; margin: -1px; overflow: hidden;
-        clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-    }
-    .model-tab {
-        background: none;
-        border: none;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 500;
-        color: #6b7280;
-        cursor: pointer;
-        transition: background 0.15s, color 0.15s;
-        font-family: 'Inter', sans-serif;
-        white-space: nowrap;
-    }
-    .model-tab.active {
-        background: #fff;
-        color: #2a4b7c;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    }
-    .model-tab:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
+
+    @media (max-width: 980px) {
+        .results-layout {
+            grid-template-columns: 1fr;
+        }
+        .chat-sidebar {
+            position: relative;
+            top: auto;
+            min-height: auto;
+        }
+        .image-card-large {
+            position: relative;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container animate-fade-in">
-<div class="results-layout">
+    <div class="results-layout">
+        <section class="image-column">
+            <section class="card image-card-large">
+                <div class="result-image-box-large">
+                    <img id="result-image" src="" alt="Analyzed skin image">
+                    <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none;"></div>
+                </div>
+                <p class="image-note">Toggle the focus overlay to understand where the model paid most attention.</p>
+                <button class="btn btn-secondary" id="toggleHeatmap" type="button">
+                    <i data-lucide="microscope"></i>
+                    <span>Show AI focus area</span>
+                </button>
+            </section>
 
-<div class="results-main">
-    <header style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <button class="btn btn-secondary" id="back-btn" style="width: auto;">
-            <i data-lucide="arrow-left"></i>
-            <span>Back</span>
-        </button>
-        <h2 class="heading-serif" style="font-size: 24px;">Analysis Results</h2>
-        <div id="timestamp" style="font-size: 13px; color: #8A8A8A;"></div>
-    </header>
+            <section class="model-info">
+                <details>
+                    <summary>About this model</summary>
+                    <p>Results are generated by an ensemble of ResNet50 and YOLOv8 screening models. This tool is designed for early detection support only and does not replace a licensed dermatologist.</p>
+                </details>
+            </section>
+        </section>
 
-    <div class="results-grid">
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-            <div class="image-container">
-                <div class="result-image-box">
-                    <img id="result-image" src="" alt="Analyzed Image">
-                    <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none;">
+        <main class="results-main">
+            <div class="page-header">
+                <div class="heading-group">
+                    <span class="eyebrow">Screening summary</span>
+                    <h1>Analysis results</h1>
+                    <p>Review the most likely condition, confidence, and recommended next step from the current image.</p>
+                    <div class="header-meta">
+                        <span id="timestamp" class="timestamp">—</span>
                     </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="back-btn" type="button">
+                        <i data-lucide="arrow-left"></i>
+                        Back
+                    </button>
+                    <button class="btn btn-secondary" id="upload-new-btn" type="button">
+                        <i data-lucide="rotate-ccw"></i>
+                        Analyze another
+                    </button>
+                    <button class="btn btn-secondary" id="download-btn" type="button">
+                        <i data-lucide="download"></i>
+                        Download report
+                    </button>
                 </div>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn btn-secondary" id="toggleHeatmap">
-                    <i data-lucide="microscope"></i>
-                    <span>Show AI Focus Area</span>
-                </button>
-
-                <details class="health-accordion" style="width: 100%;">
-                    <summary class="accordion-trigger">
-                        <span>About This Model</span>
-                        <i data-lucide="chevron-down"></i>
-                    </summary>
-                    <div class="accordion-content">
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Models</span>
-                                <span>YOLOv8n-cls + ResNet50</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Ensemble</span>
-                                <span>Averaged softmax</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Classes</span>
-                                <span>5 Skin Conditions</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 13px;">
-                                <span style="color: #8A8A8A;">Input Size</span>
-                                <span>224 × 224 px</span>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-
-            <div class="card main-prediction-card">
-                <p class="section-label">MOST LIKELY CONDITION</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 class="prediction-name" id="topCondition">--</h3>
+            <section class="card result-summary-card-large">
+                <p class="section-label">Most likely condition</p>
+                <div class="summary-headline" style="display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 28px;">
+                    <h2 class="prediction-name" id="topCondition">--</h2>
                     <div class="risk-pill" id="riskBadge"><span id="riskBadgeText">--</span></div>
                 </div>
-
-                <div style="display: flex; gap: 40px;">
-                    <div class="stat-item">
+                <div class="stats-grid-large">
+                    <div class="stat-card">
                         <span class="stat-label">Confidence</span>
                         <span class="stat-value" id="topConfidence">--%</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Risk Level</span>
+                    <div class="stat-card">
+                        <span class="stat-label">Risk level</span>
                         <span class="stat-value" id="topRiskLevel">--</span>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="card desc-card">
-                <p class="section-label">WHAT THIS MEANS</p>
-                <p id="explanationText" style="font-size: 14px; color: var(--muted-foreground); line-height: 1.5;">
-                    Loading explanation...
-                </p>
-            </div>
-
-            <div class="card action-card">
-                <i data-lucide="stethoscope"
-                    style="color: var(--primary); width: 24px; height: 24px; flex-shrink: 0;"></i>
-                <div id="recommendationContent" style="font-size: 14px; color: var(--foreground);">
-                    Loading recommended action...
+            <section class="card insights-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">What this means</p>
+                        <h2>Interpretation</h2>
+                    </div>
                 </div>
-            </div>
+                <p class="section-text" id="explanationText">Loading explanation...</p>
+            </section>
 
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <p class="section-label" style="margin-bottom: 0;">CONFIDENCE BREAKDOWN</p>
-                    <div id="modelToggle" style="display: flex; gap: 4px; background: var(--secondary); border-radius: 8px; padding: 3px;">
+            <section class="card action-card">
+                <i data-lucide="stethoscope" style="color: var(--primary); width: 24px; height: 24px;"></i>
+                <div>
+                    <p class="section-label">Recommended next step</p>
+                    <p class="section-text" id="recommendationContent">Loading recommended action...</p>
+                </div>
+            </section>
+
+            <section class="card breakdown-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Confidence breakdown</p>
+                        <h2>Model comparison</h2>
+                    </div>
+                    <div class="model-tabs" id="modelToggle">
                         <button class="model-tab active" data-model="ensemble" onclick="switchModel('ensemble')">Ensemble</button>
                         <button class="model-tab" data-model="resnet" onclick="switchModel('resnet')">ResNet50</button>
                         <button class="model-tab" data-model="yolo" onclick="switchModel('yolo')">YOLOv8</button>
                     </div>
                 </div>
-                <p id="modelLabel" style="font-size: 11px; color: #8A8A8A; margin-bottom: 12px;">Combined prediction (averaged from both models)</p>
-                <div id="diseaseResults" style="display: flex; flex-direction: column; gap: 16px;">
-                    </div>
-            </div>
+                <p class="section-text" id="modelLabel" style="margin-bottom: 18px;">Combined prediction (averaged from all available models)</p>
+                <div id="diseaseResults"></div>
+            </section>
 
-            <div class="results-actions">
-                <button class="btn btn-primary" id="download-btn">
-                    <i data-lucide="download"></i>
-                    <span>Download Report</span>
-                </button>
-                <button class="btn btn-secondary" id="upload-new-btn">
-                    <i data-lucide="rotate-ccw"></i>
-                    <span>Analyze Another</span>
-                </button>
-            </div>
+            <section class="card top-predictions-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="section-label">Quick view</p>
+                        <h2>Top 3 predictions</h2>
+                    </div>
+                </div>
+                <div class="top-predictions" id="topPredictions"></div>
+            </section>
 
             <div class="medical-disclaimer">
-                <i class="fas fa-shield-alt"></i>
-                <p>
-                    <strong>Important:</strong> This AI tool provides screening support only and does not replace professional medical diagnosis.
-                    Always consult with a licensed dermatologist before making any medical decisions. For urgent concerns, seek immediate medical attention.
-                </p>
+                <strong>Important:</strong> This AI tool provides screening support only and does not replace professional medical diagnosis. Always consult a licensed dermatologist before making medical decisions.
             </div>
+        </main>
 
-            </div></div></div><div class="chat-sidebar">
-    <div class="chat-sidebar-header">
-        <p style="margin: 0; font-weight: 600; font-size: 0.875rem; color: var(--foreground);">Ask about your results</p>
-    </div>
-
-    <div id="chat-window" aria-live="polite" aria-label="Conversation">
-        <div class="chat-bubble chat-bubble-ai">
-            What would you like to know about these results?
-        </div>
-    </div>
-
-    <div class="chat-input-row">
-        <label for="chat-input" class="sr-only">Ask a question about your results</label>
-        <input type="text" id="chat-input" placeholder="Type a question…" onkeypress="if(event.key==='Enter') sendChat()">
-        <button class="chat-send-btn" onclick="sendChat()" aria-label="Send">
-            <i data-lucide="send" style="width:15px;height:15px;"></i>
-        </button>
+        <aside class="chat-sidebar">
+            <div class="chat-sidebar-header">
+                <p>Ask about your results</p>
+            </div>
+            <div id="chat-window" aria-live="polite" aria-label="Conversation">
+                <div class="chat-bubble chat-bubble-ai">What would you like to know about these results?</div>
+            </div>
+            <div class="chat-input-row">
+                <label for="chat-input" class="sr-only">Ask a question about your results</label>
+                <input type="text" id="chat-input" placeholder="Type a question…" onkeypress="if(event.key==='Enter') sendChat()">
+                <button class="chat-send-btn" onclick="sendChat()" aria-label="Send">
+                    <i data-lucide="send" style="width: 15px; height: 15px;"></i>
+                </button>
+            </div>
+        </aside>
     </div>
 </div>
-
-</div></div>{% endblock %}
+{% endblock %}
 
 {% block scripts %}
 const diseaseInfo = {
@@ -359,9 +310,23 @@ document.getElementById('topConfidence').textContent = `${Math.round(topConfiden
 document.getElementById('topRiskLevel').textContent = topRisk;
 document.getElementById('topRiskLevel').style.color = topColor;
 
-const pill = document.getElementById('riskBadge');
-pill.style.color = topColor;
-pill.style.borderColor = topColor;
+    const topContainer = document.getElementById('topPredictions');
+    topContainer.innerHTML = '';
+    sorted.slice(0, 3).forEach(([disease, confidence], index) => {
+        const pct = Math.round(confidence * 100);
+        const color = getRiskColor(getRiskLevel(disease, confidence));
+        const card = document.createElement('div');
+        card.className = 'top-prediction';
+        card.innerHTML = `
+            <div class="top-prediction-rank">#${index + 1}</div>
+            <div>
+                <div class="top-prediction-name">${disease}</div>
+                <div class="top-prediction-score" style="color: ${color};">${pct}% confidence</div>
+            </div>
+            <div class="top-prediction-pill" style="border-color: ${color}; color: ${color};">${getRiskLevel(disease, confidence)}</div>
+        `;
+        topContainer.appendChild(card);
+    });
 document.getElementById('riskBadgeText').textContent = topRisk;
 
 document.getElementById('explanationText').textContent =
@@ -404,13 +369,10 @@ setTimeout(() => {
 });
 }
 
-// Heatmap toggle — real occlusion sensitivity from backend
-// Cache per model so switching doesn't re-fetch unnecessarily
 const heatmapCache = {};
 let heatmapLoading = false;
 
 function heatmapModelKey() {
-    // Ensemble uses the resnet heatmap (higher accuracy); yolo uses yolo
     return activeModel === 'yolo' ? 'yolo' : 'resnet';
 }
 
@@ -484,7 +446,6 @@ document.getElementById('download-btn').addEventListener('click', async function
         const cW = pageW - 2 * mg;
         let y = 0;
 
-        // Read live DOM values (already populated from localStorage by displayResults())
         const topCondition  = document.getElementById('topCondition').textContent.trim();
         const topConfidence = document.getElementById('topConfidence').textContent.trim();
         const topRiskLevel  = document.getElementById('topRiskLevel').textContent.trim();
@@ -493,7 +454,6 @@ document.getElementById('download-btn').addEventListener('click', async function
         const timestamp     = document.getElementById('timestamp').textContent.trim();
         const imageEl       = document.getElementById('result-image');
 
-        // Sorted scores from the currently active model
         const scores = allScores[activeModel] || {};
         const sorted = Object.entries(scores).sort(([, a], [, b]) => b - a);
 
@@ -503,7 +463,6 @@ document.getElementById('download-btn').addEventListener('click', async function
             return [55, 140, 130];
         }
 
-        // ── Header bar ──────────────────────────────────────────────
         doc.setFillColor(42, 75, 124);
         doc.rect(0, 0, pageW, 22, 'F');
         doc.setFont('helvetica', 'bold');
@@ -517,7 +476,6 @@ document.getElementById('download-btn').addEventListener('click', async function
 
         y = 32;
 
-        // ── Image + top-condition card ────────────────────────────────
         let imgLoaded = false;
         const imgSrc = imageEl.getAttribute('src');
         if (imgSrc && imgSrc.length > 10) {
@@ -560,7 +518,6 @@ document.getElementById('download-btn').addEventListener('click', async function
 
         y += 64;
 
-        // ── What this means ──────────────────────────────────────────
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(8);
         doc.setTextColor(100, 110, 130);
@@ -573,7 +530,6 @@ document.getElementById('download-btn').addEventListener('click', async function
         doc.text(expLines, mg, y);
         y += expLines.length * 4.5 + 8;
 
-        // ── Recommendation ───────────────────────────────────────────
         const recLines = doc.splitTextToSize(recText, cW - 14);
         const recH = recLines.length * 4.5 + 14;
         doc.setFillColor(240, 247, 250);
@@ -590,7 +546,6 @@ document.getElementById('download-btn').addEventListener('click', async function
         doc.text(recLines, mg + 8, y + 13);
         y += recH + 10;
 
-        // ── Confidence breakdown ─────────────────────────────────────
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(8);
         doc.setTextColor(100, 110, 130);
@@ -622,7 +577,6 @@ document.getElementById('download-btn').addEventListener('click', async function
 
         y += 6;
 
-        // ── Disclaimer ───────────────────────────────────────────────
         if (y > pageH - 28) { doc.addPage(); y = 20; }
         const disc = 'DISCLAIMER: This AI tool provides screening support only and does not replace professional medical diagnosis. Always consult with a licensed dermatologist before making any medical decisions. For urgent concerns, seek immediate medical attention.';
         const discLines = doc.splitTextToSize(disc, cW - 12);
@@ -647,17 +601,14 @@ document.getElementById('download-btn').addEventListener('click', async function
     lucide.createIcons();
 });
 
-// Set timestamp
 const now = new Date();
 document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
 });
 
-// Load image from localStorage
 const storedImage = localStorage.getItem('uploadedImageData');
 if (storedImage) document.getElementById('result-image').src = storedImage;
 
-// Multi-model score storage
 let allScores = { ensemble: null, yolo: null, resnet: null };
 let activeModel = 'ensemble';
 
@@ -677,7 +628,6 @@ function switchModel(model) {
     document.getElementById('modelLabel').textContent = modelLabels[model];
     displayResults(allScores[model]);
 
-    // Refresh heatmap overlay if it's currently visible and the model key changed
     const newKey = heatmapModelKey();
     const overlay = document.getElementById('heatmapOverlay');
     const btn = document.getElementById('toggleHeatmap');
@@ -727,7 +677,6 @@ function prefetchHeatmaps(result) {
     if (!heatmapCache['resnet']) prefetchHeatmap('resnet');
 }
 
-// Load real analysis results from localStorage (set by loading page)
 const storedResult = localStorage.getItem('analysisResult');
 if (storedResult) {
     try {
