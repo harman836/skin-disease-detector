@@ -6,104 +6,81 @@
 
 {% block content %}
 <div class="container animate-fade-in">
+    <section class="hero-panel">
+        <span class="eyebrow">Skin wellness, grounded in evidence</span>
+        <h1 class="hero-header">Smart screening for suspicious skin spots</h1>
+        <p class="hero-copy">Upload a clear photo and receive a concise assessment with confidence metrics, trend guidance, and next-step recommendations.</p>
+    </section>
 
-    <!-- Header Group -->
-    <header class="hero-group">
-        <i data-lucide="stethoscope" style="color: var(--primary); width: 40px; height: 40px;"></i>
-        <h1 class="hero-header">Skin Wellness Analysis</h1>
-        <p class="subtitle">An AI-powered assessment for your skin health.</p>
-    </header>
-
-    <!-- Trust Upload Card -->
-    <div class="upload-card">
-
-        <!-- Upload Hit Area -->
-        <div class="upload-hit-area" id="uploadArea" role="button" tabindex="0" aria-label="Upload image — click or drag and drop">
-            <div class="upload-area-content" id="uploadContent"
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
-                <i data-lucide="camera" style="width: 48px; height: 48px; margin-bottom: 8px;"></i>
-                <p class="text-main">Place your image here</p>
-                <p class="text-sub">Secure Review Active</p>
+    <section class="upload-section card">
+        <div class="upload-panel">
+            <div class="upload-intro">
+                <h2>Start with a focused image</h2>
+                <p>For best results, capture a single lesion on a well-lit background. The model is optimized for clear close-up photos.</p>
+                <ul class="feature-list">
+                    <li><strong>Fast screening</strong> — results in seconds.</li>
+                    <li><strong>Secure process</strong> — image data is used only in this session.</li>
+                    <li><strong>Actionable guidance</strong> — follow-up recommendations are included.</li>
+                </ul>
             </div>
-
-            <!-- Image Preview -->
-            <div class="image-preview-wrapper hidden" id="previewWrapper">
-                <div style="position: relative;">
-                    <img id="previewImage" src="" alt="Preview"
-                        style="max-width: 100%; border-radius: 12px; max-height: 250px;">
-                    <button class="remove-btn" onclick="removeImage(event)" title="Remove image"
-                        style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 50%; background: var(--color-error-foreground); color: white; border: none; cursor: pointer;">
-                        <i class="fas fa-times"></i>
-                    </button>
+            <div class="upload-widget card card-soft">
+                <div class="upload-surface" id="uploadArea" role="button" tabindex="0" aria-label="Upload image — click or drag and drop">
+                    <div class="upload-state" id="uploadContent">
+                        <i data-lucide="upload-cloud"></i>
+                        <h3>Click or drag a photo</h3>
+                        <p>JPG, PNG, or HEIC up to 16MB.</p>
+                    </div>
+                    <div class="image-preview-wrapper hidden" id="previewWrapper">
+                        <div class="preview-frame">
+                            <img id="previewImage" src="" alt="Selected skin image preview">
+                            <button type="button" class="remove-btn" onclick="removeImage(event)" title="Remove image">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="upload-meta">
+                    <div id="loading" class="status-message hidden"><i class="fas fa-spinner fa-spin"></i> Preparing image…</div>
+                    <div id="error" class="status-message status-error hidden"></div>
+                    <div id="success" class="status-message status-success hidden"></div>
+                    <div id="qualityWarning" class="quality-warning hidden" role="alert">
+                        <i data-lucide="triangle-alert"></i>
+                        <div>
+                            <p class="quality-title">Image quality issue detected</p>
+                            <p id="qualityWarningText"></p>
+                            <p class="quality-note">You can still analyze this photo, but results may be less accurate.</p>
+                        </div>
+                    </div>
+                    <div id="buttonGroup" class="action-group stacked">
+                        <a href="/capture" class="btn btn-primary">Take a photo</a>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Choose from device</button>
+                    </div>
+                    <div id="analyzeContainer" class="action-group stacked hidden">
+                        <button type="button" class="btn btn-primary" onclick="analyzeImage()">Analyze image</button>
+                        <button type="button" class="btn btn-secondary" onclick="startOver()">Replace image</button>
+                    </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Action Group -->
-        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-            <!-- Status Messages -->
-            <div id="loading" class="hidden" style="text-align: center; color: var(--primary); font-size: 13px;">
-                <p><i class="fas fa-spinner fa-spin"></i> Preparing your image...</p>
-            </div>
-            <div id="error" class="hidden"
-                style="color: var(--color-error-foreground); font-size: 13px; text-align: center;"></div>
-            <div id="success" class="hidden"
-                style="color: var(--color-success-foreground); font-size: 13px; text-align: center;"></div>
+    <section class="info-grid">
+        <article class="info-card">
+            <p class="info-title">Designed for confidence</p>
+            <p>See your most likely condition, the model's confidence level, and clear guidance for next steps.</p>
+        </article>
+        <article class="info-card">
+            <p class="info-title">Built for real users</p>
+            <p>Simple results, calm language, and thoughtful design make the tool easier to understand and trust.</p>
+        </article>
+        <article class="info-card">
+            <p class="info-title">Screening support only</p>
+            <p>This tool is not a medical diagnosis. Always consult a licensed dermatologist for medical decisions.</p>
+        </article>
+    </section>
 
-            <!-- Initial Buttons -->
-            <div id="buttonGroup" class="action-group">
-                <a href="/capture" class="btn btn-primary">
-                    <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
-                    <span>Take a Photo</span>
-                </a>
-                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
-                    <i data-lucide="image" style="width: 16px; height: 16px;"></i>
-                    <span>Choose from Device</span>
-                </button>
-            </div>
-
-            <!-- Analyze Container (shown after image selected) -->
-            <div id="analyzeContainer" class="action-group hidden">
-                <button class="btn btn-primary" onclick="analyzeImage()">
-                    <i class="fas fa-wand-magic-sparkles"></i>
-                    <span>Analyze Image</span>
-                </button>
-                <button class="btn btn-secondary" onclick="startOver()">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Change Image</span>
-                </button>
-            </div>
-
-            <!-- Quality Warning (shown below buttons when issue detected) -->
-            <div id="qualityWarning" class="hidden"
-                style="background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 12px 16px; display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%;">
-                <i data-lucide="triangle-alert" style="width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--color-warning-foreground);"></i>
-                <div>
-                    <p style="margin: 0 0 2px; font-weight: 600; font-size: 13px; color: var(--color-warning-foreground);">Image quality issue detected</p>
-                    <p id="qualityWarningText" style="margin: 0; font-size: 12px; color: var(--color-warning-foreground);"></p>
-                    <p style="margin: 4px 0 0; font-size: 12px; color: var(--color-warning-foreground); opacity: 0.85;">You can still analyze this image, but results may be less accurate.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Health Accordion -->
-    <details class="health-accordion">
-        <summary class="accordion-trigger">
-            <span>How to take a clear photo</span>
-            <i data-lucide="chevron-down"></i>
-        </summary>
-        <div class="accordion-content">
-            <p class="accordion-item">1. Ensure soft, natural lighting.</p>
-            <p class="accordion-item">2. Focus on the area of concern.</p>
-            <p class="accordion-item">3. Maintain a distance of 10-15cm.</p>
-        </div>
-    </details>
-
-    <!-- Medical Disclaimer -->
     <div class="medical-disclaimer">
-        <p>Our AI assists in detection but is not a clinical diagnosis. Please consult a specialist for professional
-            care.</p>
+        <strong>Medical disclaimer:</strong> The assessment is AI-supported screening only and is not a substitute for professional medical advice.
     </div>
 
     <input type="file" id="fileInput" accept="image/*" class="hidden">
