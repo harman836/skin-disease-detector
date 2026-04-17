@@ -16,7 +16,11 @@
       "Bash(pip show:*)",
       "Bash(pip install:*)",
       "Bash(python -c \"import ast; ast.parse\\(open\\(''app.py''\\).read\\(\\)\\); print\\(''OK''\\)\")",
-      "Bash(curl -s \"https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js\")"
+      "Bash(curl -s \"https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js\")",
+      "Read(//c/Users/shahh/.claude/skills/arrange/reference/**)",
+      "Read(//c/Users/shahh/.agents/skills/arrange/reference/**)",
+      "Read(//c/Users/shahh/.claude/skills/frontend-design/reference/**)",
+      "Read(//c/Users/shahh/.agents/skills/frontend-design/reference/**)"
     ]
   }
 }

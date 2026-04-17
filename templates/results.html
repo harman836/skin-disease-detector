@@ -7,194 +7,144 @@
 {% block extra_styles %}
 <script src="/static/jspdf.umd.min.js"></script>
 <style>
-    /* Reset & Override Wrapper to guarantee layout */
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #ffffff;
-        font-family: 'Inter', -apple-system, sans-serif;
-    }
-
-    .app-results-wrapper {
-        display: grid;
-        grid-template-columns: 280px minmax(600px, 1fr) 320px;
-        gap: 2rem;
-        max-width: 1600px;
+    .results-container {
+        max-width: 100%;
         margin: 0 auto;
-        padding: 24px 32px;
-        height: 100vh;
-        overflow: hidden;
-        color: #1f2937;
+        padding: 32px 20px 64px;
+        display: grid;
+        grid-template-columns: 248px minmax(0, 1fr) 420px;
+        gap: 2rem;
+        align-items: start;
     }
 
-    /* Column Scrolling Constraints */
-    .col-left, .col-center, .col-right {
-        height: 100%;
-        overflow-y: auto;
+    /* ── Left column ── */
+    .col-left {
         display: flex;
         flex-direction: column;
+        gap: 0;
+        position: sticky;
+        top: calc(var(--header-h) + 16px);
     }
-
-    /* Scrollbar styling for a cleaner look */
-    .col-left::-webkit-scrollbar, .col-center::-webkit-scrollbar, .col-right::-webkit-scrollbar {
-        width: 6px;
-    }
-    .col-left::-webkit-scrollbar-thumb, .col-center::-webkit-scrollbar-thumb, .col-right::-webkit-scrollbar-thumb {
-        background-color: #e5e7eb;
-        border-radius: 4px;
-    }
-
-    /* ================= LEFT COLUMN ================= */
-    .col-left { gap: 1.5rem; padding-right: 8px; }
-
-    .btn-back {
-        background: #ffffff;
-        border: 1px solid #d1d5db;
-        border-radius: 999px;
-        padding: 6px 16px;
-        font-size: 0.85rem;
-        color: #374151;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        width: fit-content;
-        transition: background 0.2s;
-    }
-    .btn-back:hover { background: #f3f4f6; }
+    /* Left column spacing: image is the anchor, controls follow quietly */
+    .col-left #back-btn     { margin-bottom: 1.25rem; }
+    .col-left .image-container { margin-bottom: 1rem; }
+    .col-left #toggleHeatmap   { margin-bottom: 0; }
+    .col-left .accordion-simple { margin-top: 1rem; }
 
     .image-container {
-        border: 1px solid #d1d5db;
-        border-radius: 12px;
-        padding: 0;
+        border-radius: var(--radius-l);
         overflow: hidden;
-        background: #737373; /* Gray background to match screenshot */
+        background: var(--secondary);
         width: 100%;
-        aspect-ratio: 1 / 1; /* Forces square aspect ratio */
+        aspect-ratio: 1 / 1;
         position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: var(--shadow-sm);
     }
-    
     .image-container img {
         width: 100%;
         height: 100%;
-        object-fit: contain; /* Keeps image proportions inside the square */
+        object-fit: contain;
         display: block;
     }
 
-    .btn-outline-full {
-        width: 100%;
-        background: #ffffff;
-        border: 1px solid #d1d5db;
-        border-radius: 999px;
-        padding: 10px;
-        font-size: 0.85rem;
-        color: #374151;
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-    }
-
     .accordion-simple {
-        border-top: 1px solid #e5e7eb;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 16px 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        padding: 16px 0 0;
     }
     .accordion-simple summary {
         list-style: none;
         display: flex;
         justify-content: space-between;
+        align-items: center;
         font-size: 0.85rem;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
+        color: var(--foreground);
     }
     .accordion-simple summary::-webkit-details-marker { display: none; }
     .accordion-simple p {
-        font-size: 0.8rem;
-        color: #6b7280;
+        font-size: 0.82rem;
         margin-top: 12px;
-        line-height: 1.5;
+        line-height: 1.65;
     }
 
-    /* ================= CENTER COLUMN ================= */
+    /* ── Center column — intentional rhythm, not flat gap ── */
     .col-center {
-        gap: 1.5rem;
-        padding: 0 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
     }
 
-    .header-area {
+    /* 1. Results header: visual anchor, generous space below */
+    .results-header {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        position: relative;
-        padding-bottom: 1rem;
+        align-items: center;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid rgba(42, 75, 124, 0.1);
+        margin-bottom: 1.75rem;
     }
-
-    .header-area h1 {
-        font-family: 'Fraunces', serif;
-        font-size: 1.75rem;
-        font-weight: 400;
-        color: #1f2937;
+    .results-header h1 {
+        font-size: clamp(1.5rem, 2vw, 1.875rem);
         margin: 0;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
     }
 
-    .header-area .timestamp {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-left: auto;
+    /* 2. Primary condition card: dominant — extra internal breathing room */
+    .condition-card {
+        padding: 32px 32px 28px;
+        margin-bottom: 1.25rem;
     }
 
-    /* Flat Cards */
-    .flat-card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 24px;
+    /* 3. Insights pair: explanation + recommendation are one unit — tight grouping */
+    .insights-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        margin-bottom: 2.5rem;
     }
-    
-    .flat-card.tinted {
-        background: #f8fafc;
+    .insights-group .card {
+        padding: 22px 28px;
+    }
+
+    /* 4. Breakdown section: new analytical zone — generous space signals the shift */
+    .breakdown-section {
+        margin-bottom: 2rem;
     }
 
     .label-sm {
-        font-size: 0.65rem;
+        font-size: 0.64rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #9ca3af;
+        letter-spacing: 0.12em;
+        color: var(--muted-foreground);
         margin-bottom: 1rem;
         display: block;
     }
 
-    /* Top Condition specific */
     .condition-row {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid var(--secondary);
         margin-bottom: 1.5rem;
     }
-    
     .condition-row h2 {
-        font-family: 'Fraunces', serif;
-        font-size: 2rem;
+        font-size: clamp(1.75rem, 2.8vw, 2.5rem);
         font-weight: 400;
         margin: 0;
-        color: #111827;
+        line-height: 1.08;
     }
 
-    .risk-pill {
-        border: 1px solid currentColor;
-        padding: 4px 16px;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 600;
+    .risk-badge {
+        border: 1.5px solid currentColor;
+        padding: 5px 16px;
+        border-radius: var(--radius-pill);
+        font-size: 0.68rem;
+        font-weight: 700;
         text-transform: uppercase;
+        letter-spacing: 0.06em;
     }
 
     .stats-row {
@@ -202,235 +152,180 @@
         gap: 3rem;
     }
     .stat-box { display: flex; flex-direction: column; gap: 4px; }
-    .stat-box span:first-child { font-size: 0.75rem; color: #6b7280; }
-    .stat-box span:last-child { font-size: 1.1rem; color: #111827; font-weight: 400; }
+    .stat-box .stat-label { font-size: 0.75rem; }
+    .stat-box .stat-value { font-size: 1.1rem; font-weight: 500; color: var(--foreground); }
 
-    /* Segmented Control */
+    .recommendation-card {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    .recommendation-card i { color: var(--primary); flex-shrink: 0; margin-top: 2px; }
+
+    /* Segmented control */
     .segmented-control {
         display: flex;
-        background: #f3f4f6;
+        background: var(--secondary);
         padding: 4px;
-        border-radius: 8px;
+        border-radius: var(--radius-s);
         gap: 4px;
     }
     .segmented-control button {
         background: transparent;
         border: none;
-        padding: 4px 12px;
+        padding: 5px 12px;
         font-size: 0.75rem;
-        color: #6b7280;
-        border-radius: 6px;
+        color: var(--muted-foreground);
+        border-radius: 8px;
         cursor: pointer;
+        transition: all 0.2s;
     }
     .segmented-control button.active {
-        background: #ffffff;
-        color: #111827;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        background: white;
+        color: var(--foreground);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
-    /* Breakdown Bars */
-    .bar-row { margin-bottom: 18px; }
+    /* Breakdown bars */
+    .bar-row { margin-bottom: 20px; }
     .bar-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 0.8rem;
-        color: #1f2937;
+        font-size: 0.85rem;
+        color: var(--foreground);
         margin-bottom: 8px;
     }
     .bar-track {
         height: 6px;
-        background: #f3f4f6;
-        border-radius: 3px;
-        width: 100%;
+        background: var(--secondary);
+        border-radius: 999px;
         overflow: hidden;
     }
     .bar-fill {
         height: 100%;
-        border-radius: 3px;
+        border-radius: 999px;
         transition: width 0.8s ease-out;
     }
 
-    /* ================= RIGHT COLUMN (CHAT) ================= */
+    /* ── Right column (chat) — anchored to header ── */
     .col-right {
-        border-left: 1px solid #e5e7eb;
-        padding-left: 24px;
+        position: sticky;
+        top: calc(var(--header-h) + 16px);
+        height: calc(100vh - var(--header-h) - 32px);
         display: flex;
         flex-direction: column;
     }
 
-    .chat-title {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 1rem;
-    }
-
-    .chat-area {
-        flex: 1;
-        background: #f9fafb; /* Light gray background matching screenshot */
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .chat-messages {
-        flex: 1;
-        padding: 16px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .chat-bubble {
-        padding: 12px 16px;
-        border-radius: 8px 8px 8px 0;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        max-width: 85%;
-    }
-    .chat-bubble.ai {
-        background: #e5e7eb;
-        color: #1f2937;
-        align-self: flex-start;
-    }
-    .chat-bubble.user {
-        background: #1e293b;
-        color: #ffffff;
-        align-self: flex-end;
-        border-radius: 8px 8px 0 8px;
-    }
-
-    .chat-input-wrapper {
-        background: #ffffff;
-        padding: 16px 0 0 0;
-        display: flex;
-        gap: 8px;
-    }
-    
-    .chat-input-wrapper input {
-        flex: 1;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 10px 14px;
-        font-size: 0.85rem;
-        outline: none;
-    }
-    
-    .chat-send {
-        background: #1e293b;
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        width: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-
-    /* Responsive fallback */
-    @media (max-width: 1200px) {
-        .app-results-wrapper { grid-template-columns: 280px 1fr; }
+    @media (max-width: 1400px) {
+        .results-container { grid-template-columns: 260px 1fr; gap: 2rem; }
         .col-right { display: none; }
-        .app-results-wrapper { height: auto; overflow: visible; }
-        .col-left, .col-center { height: auto; overflow: visible; }
+    }
+    @media (max-width: 768px) {
+        .results-container { grid-template-columns: 1fr; padding: 24px 16px 56px; gap: 0; }
+        .col-left { position: static; margin-bottom: 2rem; }
+        .col-left #back-btn { margin-bottom: 1rem; }
+        .col-left .image-container { margin-bottom: 0.875rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="app-results-wrapper animate-fade-in">
-    
+<div class="results-container animate-fade-in">
+
+    <!-- Left: image + controls -->
     <aside class="col-left">
-        <button class="btn-back" id="back-btn" type="button">
+        <button class="btn btn-secondary" id="back-btn" type="button" style="min-width: 0; padding: 10px 18px; width: fit-content;">
             <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back
         </button>
 
         <div class="image-container">
             <img id="result-image" src="" alt="Analyzed skin image">
-            <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none; border-radius: 12px; overflow: hidden;"></div>
+            <div id="heatmapOverlay" style="display: none; position: absolute; inset: 0; pointer-events: none; border-radius: var(--radius-l); overflow: hidden;"></div>
         </div>
 
-        <button class="btn-outline-full" id="toggleHeatmap" type="button">
+        <button class="btn btn-secondary" id="toggleHeatmap" type="button" style="width: 100%; min-width: 0;">
             <i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Show AI Focus Area
         </button>
 
         <details class="accordion-simple">
-            <summary>About This Model <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #9ca3af;"></i></summary>
-            <p>Results are generated by an ensemble of ResNet50 and YOLOv8 screening models. This tool is designed for early detection support only and does not replace a licensed dermatologist.</p>
+            <summary>
+                About This Model
+                <i data-lucide="chevron-down" style="width: 15px; height: 15px; color: var(--muted-foreground);"></i>
+            </summary>
+            <p id="aboutModelText">Results are generated by an ensemble of ResNet50 and YOLOv8 screening models. This tool is designed for early detection support only and does not replace a licensed dermatologist.</p>
         </details>
     </aside>
 
+    <!-- Center: results -->
     <main class="col-center">
-        <div class="header-area">
+        <div class="results-header">
             <h1>Analysis Results</h1>
             <span class="timestamp" id="timestamp">—</span>
             <button id="download-btn" style="display:none;"></button>
         </div>
 
-        <div class="flat-card">
+        <!-- 1 · Primary condition — dominant card -->
+        <div class="card condition-card">
             <span class="label-sm">Most Likely Condition</span>
-            
             <div class="condition-row">
                 <h2 id="topCondition">--</h2>
-                <div class="risk-pill" id="riskBadge"><span id="riskBadgeText">--</span></div>
+                <div class="risk-badge" id="riskBadge"><span id="riskBadgeText">--</span></div>
             </div>
-
             <div class="stats-row">
                 <div class="stat-box">
-                    <span>Confidence</span>
-                    <span id="topConfidence">--%</span>
+                    <span class="stat-label">Confidence</span>
+                    <span class="stat-value" id="topConfidence">--%</span>
                 </div>
                 <div class="stat-box">
-                    <span>Risk Level</span>
-                    <span id="topRiskLevel">--</span>
+                    <span class="stat-label">Risk Level</span>
+                    <span class="stat-value" id="topRiskLevel">--</span>
                 </div>
             </div>
         </div>
 
-        <div class="flat-card tinted">
-            <span class="label-sm">What This Means</span>
-            <p id="explanationText" style="margin: 0; font-size: 0.85rem; color: #4b5563; line-height: 1.6;">Loading explanation...</p>
+        <!-- 2 · Insights pair — tight grouped unit -->
+        <div class="insights-group">
+            <div class="card card-soft">
+                <span class="label-sm">What This Means</span>
+                <p id="explanationText" style="margin: 0; font-size: 0.9rem; line-height: 1.7;">Loading explanation...</p>
+            </div>
+            <div class="card card-soft recommendation-card">
+                <i data-lucide="stethoscope" style="width: 20px; height: 20px;"></i>
+                <p id="recommendationContent" style="margin: 0; font-size: 0.9rem; line-height: 1.7;">Loading recommended action...</p>
+            </div>
         </div>
 
-        <div class="flat-card tinted" style="display: flex; gap: 16px; align-items: center;">
-            <i data-lucide="stethoscope" style="color: #3b82f6; width: 24px; height: 24px;"></i>
-            <p id="recommendationContent" style="margin: 0; font-size: 0.85rem; color: #4b5563; line-height: 1.6;">Loading recommended action...</p>
-        </div>
-
-        <div class="flat-card" style="margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+        <!-- 3 · Confidence breakdown — new analytical zone -->
+        <div class="card breakdown-section">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;">
                 <div>
                     <span class="label-sm" style="margin-bottom: 4px;">Confidence Breakdown</span>
-                    <span id="modelLabel" style="font-size: 0.75rem; color: #6b7280;">Combined prediction (averaged from both models)</span>
+                    <span id="modelLabel" style="font-size: 0.78rem; color: var(--muted-foreground);">Combined prediction (averaged from both models)</span>
                 </div>
-                
                 <div class="segmented-control" id="modelToggle">
                     <button class="active" data-model="ensemble" onclick="switchModel('ensemble')">Ensemble</button>
                     <button data-model="resnet" onclick="switchModel('resnet')">ResNet50</button>
                     <button data-model="yolo" onclick="switchModel('yolo')">YOLOv8</button>
                 </div>
             </div>
-            
             <div id="diseaseResults"></div>
         </div>
     </main>
 
+    <!-- Right: chat -->
     <aside class="col-right">
-        <div class="chat-title">Ask about your results</div>
-        <div style="flex: 1; display: flex; flex-direction: column;">
-            <div class="chat-area">
-                <div class="chat-messages" id="chat-window">
-                    <div class="chat-bubble ai">What would you like to know about these results?</div>
-                </div>
+        <div class="chat-sidebar" style="height: 100%;">
+            <div class="chat-sidebar-header">
+                <p>Ask about your results</p>
             </div>
-            <div class="chat-input-wrapper">
+            <div id="chat-window">
+                <div class="chat-bubble ai">What would you like to know about these results?</div>
+            </div>
+            <div class="chat-input-row">
                 <label for="chat-input" class="sr-only">Type a question...</label>
                 <input type="text" id="chat-input" placeholder="Type a question…" onkeypress="if(event.key==='Enter') sendChat()">
-                <button class="chat-send" onclick="sendChat()" aria-label="Send">
+                <button class="chat-send-btn" onclick="sendChat()" aria-label="Send">
                     <i data-lucide="send" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
@@ -464,11 +359,10 @@ const diseaseInfo = {
     }
 };
 
-// Exact colors from the screenshot mockup
-const colors = {
-    high: '#d97757',   // Muted soft orange/red
-    medium: '#d4a64a', // Muted amber
-    low: '#4b8b7a',    // Muted teal/green
+const riskColors = {
+    high: '#d97757',
+    medium: '#d4a64a',
+    low: '#4b8b7a',
     default: '#6b7280'
 };
 
@@ -481,10 +375,10 @@ function getRiskLevel(condition, confidence) {
 }
 
 function getRiskColor(riskLevel) {
-    if (riskLevel === 'High') return colors.high;
-    if (riskLevel === 'Medium') return colors.medium;
-    if (riskLevel === 'Low') return colors.low;
-    return colors.default;
+    if (riskLevel === 'High') return riskColors.high;
+    if (riskLevel === 'Medium') return riskColors.medium;
+    if (riskLevel === 'Low') return riskColors.low;
+    return riskColors.default;
 }
 
 function normaliseScoreKeys(scores) {
@@ -502,10 +396,9 @@ function displayResults(scores) {
     const topRisk = getRiskLevel(topCondition, topConfidence);
     const topColor = getRiskColor(topRisk);
 
-    // Update Top Card
     document.getElementById('topCondition').textContent = topCondition;
     document.getElementById('topConfidence').textContent = `${Math.round(topConfidence * 100)}%`;
-    
+
     const riskLvlEl = document.getElementById('topRiskLevel');
     riskLvlEl.textContent = topRisk;
     riskLvlEl.style.color = topColor;
@@ -515,19 +408,17 @@ function displayResults(scores) {
     riskBadge.style.color = topColor;
     riskBadge.style.borderColor = topColor;
 
-    // Update Text
     document.getElementById('explanationText').textContent = diseaseInfo[topCondition]?.explanation || 'Information not available.';
 
     const recEl = document.getElementById('recommendationContent');
     if (topRisk === 'High') {
-        recEl.innerHTML = `<strong style="color:#111827;">Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation.`;
+        recEl.innerHTML = `<strong style="color:var(--foreground);">Consult a dermatologist as soon as possible.</strong> High-risk findings require professional medical evaluation.`;
     } else if (topRisk === 'Medium') {
-        recEl.innerHTML = `<strong style="color:#111827;">Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and prevent progression.`;
+        recEl.innerHTML = `<strong style="color:var(--foreground);">Schedule a medical evaluation.</strong> Professional assessment is recommended to monitor and prevent progression.`;
     } else {
-        recEl.innerHTML = `<strong style="color:#111827;">Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
+        recEl.innerHTML = `<strong style="color:var(--foreground);">Monitor and rescan in 4 weeks.</strong> Contact a healthcare provider if changes occur.`;
     }
 
-    // Build Thin Breakdown Bars
     const list = document.getElementById('diseaseResults');
     list.innerHTML = '';
     sorted.forEach(([disease, confidence], i) => {
@@ -540,24 +431,28 @@ function displayResults(scores) {
         row.innerHTML = `
         <div class="bar-header">
             <span>${disease}</span>
-            <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="display:flex;gap:10px;align-items:center;">
                 <span>${pct}%</span>
-                <span class="risk-pill" style="font-size: 0.6rem; padding: 2px 8px; color: ${color}; border-color: ${color};">${risk}</span>
+                <span class="risk-badge bar-risk-pill">${risk}</span>
             </div>
         </div>
         <div class="bar-track">
-            <div class="bar-fill" style="width: 0%; background-color: ${color};" data-width="${pct}%"></div>
+            <div class="bar-fill" data-width="${pct}"></div>
         </div>
         `;
+        const pill = row.querySelector('.bar-risk-pill');
+        pill.style.fontSize = '0.6rem';
+        pill.style.padding = '2px 10px';
+        pill.style.color = color;
+        pill.style.borderColor = color;
+        const fill = row.querySelector('.bar-fill');
+        fill.style.backgroundColor = color;
         list.appendChild(row);
-        
-        setTimeout(() => {
-            row.querySelector('[data-width]').style.width = `${pct}%`;
-        }, 50 * i);
+        setTimeout(() => { fill.style.width = pct + '%'; }, 50 * i);
     });
 }
 
-// Segmentation Toggle
+// Model toggle
 let allScores = { ensemble: null, yolo: null, resnet: null };
 let activeModel = 'ensemble';
 const modelLabels = {
@@ -565,28 +460,33 @@ const modelLabels = {
     yolo: 'YOLOv8 prediction (lightweight fast classification)',
     resnet: 'ResNet50 prediction (fine-tuned deep network)',
 };
+const modelAbout = {
+    ensemble: 'Results are generated by an ensemble of ResNet50 and YOLOv8 screening models, combining both predictions for improved accuracy. This tool is designed for early detection support only and does not replace a licensed dermatologist.',
+    yolo: 'Results are generated by a YOLOv8 model — a lightweight, fast classification architecture optimised for real-time inference. This tool is designed for early detection support only and does not replace a licensed dermatologist.',
+    resnet: 'Results are generated by a ResNet50 deep convolutional network, fine-tuned on labelled skin lesion data. This tool is designed for early detection support only and does not replace a licensed dermatologist.',
+};
 
 function switchModel(model) {
     if (!allScores[model]) return;
     const prevKey = heatmapModelKey();
     activeModel = model;
-    
+
     document.querySelectorAll('.segmented-control button').forEach(btn => {
-        if(btn.dataset.model === model) btn.classList.add('active');
-        else btn.classList.remove('active');
+        btn.classList.toggle('active', btn.dataset.model === model);
     });
-    
+
     document.getElementById('modelLabel').textContent = modelLabels[model];
+    document.getElementById('aboutModelText').textContent = modelAbout[model];
     displayResults(allScores[model]);
 
     const newKey = heatmapModelKey();
     const overlay = document.getElementById('heatmapOverlay');
     if (overlay.style.display !== 'none' && newKey !== prevKey) {
         if (heatmapCache[newKey]) {
-            overlay.innerHTML = `<img src="${heatmapCache[newKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
+            overlay.innerHTML = `<img src="${heatmapCache[newKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-l);">`;
         } else {
             overlay.style.display = 'none';
-            document.getElementById('toggleHeatmap').innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Show AI Focus Area`;
+            document.getElementById('toggleHeatmap').innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Show AI Focus Area`;
         }
     }
     lucide.createIcons();
@@ -597,7 +497,7 @@ const heatmapCache = {};
 let heatmapLoading = false;
 
 function heatmapModelKey() {
-return activeModel === 'yolo' ? 'yolo' : 'resnet';
+    return activeModel === 'yolo' ? 'yolo' : 'resnet';
 }
 
 document.getElementById('toggleHeatmap').addEventListener('click', async function () {
@@ -606,17 +506,16 @@ document.getElementById('toggleHeatmap').addEventListener('click', async functio
 
     if (showing) {
         overlay.style.display = 'none';
-        this.innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Show AI Focus Area`;
+        this.innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Show AI Focus Area`;
         lucide.createIcons();
         return;
     }
 
     const modelKey = heatmapModelKey();
-
     if (heatmapCache[modelKey]) {
-        overlay.innerHTML = `<img src="${heatmapCache[modelKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
+        overlay.innerHTML = `<img src="${heatmapCache[modelKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-l);">`;
         overlay.style.display = 'block';
-        this.innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Hide AI Focus Area`;
+        this.innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Hide AI Focus Area`;
         lucide.createIcons();
         return;
     }
@@ -624,7 +523,7 @@ document.getElementById('toggleHeatmap').addEventListener('click', async functio
     if (heatmapLoading) return;
     heatmapLoading = true;
     this.disabled = true;
-    this.innerHTML = `<i data-lucide="loader" style="width: 16px; height: 16px;" class="lucide-spin"></i> Generating...`;
+    this.innerHTML = `<i data-lucide="loader" style="width:16px;height:16px;" class="lucide-spin"></i> Generating...`;
     lucide.createIcons();
 
     const filename = new URLSearchParams(window.location.search).get('image');
@@ -633,35 +532,35 @@ document.getElementById('toggleHeatmap').addEventListener('click', async functio
         const data = await res.json();
         if (data.heatmap) {
             heatmapCache[modelKey] = data.heatmap;
-            overlay.innerHTML = `<img src="${heatmapCache[modelKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
+            overlay.innerHTML = `<img src="${heatmapCache[modelKey]}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-l);">`;
             overlay.style.display = 'block';
-            this.innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Hide AI Focus Area`;
+            this.innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Hide AI Focus Area`;
         } else {
-            this.innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Show AI Focus Area`;
+            this.innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Show AI Focus Area`;
         }
     } catch (e) {
-        this.innerHTML = `<i data-lucide="microscope" style="width: 16px; height: 16px;"></i> Show AI Focus Area`;
+        this.innerHTML = `<i data-lucide="microscope" style="width:16px;height:16px;"></i> Show AI Focus Area`;
     }
     lucide.createIcons();
     heatmapLoading = false;
     this.disabled = false;
 });
 
-// Init Config
+// Init
 document.getElementById('back-btn').addEventListener('click', () => window.location.href = '/');
 
 const now = new Date();
 document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
-year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
 });
 
 const storedImage = localStorage.getItem('uploadedImageData');
 if (storedImage) document.getElementById('result-image').src = storedImage;
 
 function initModelToggle(result) {
-allScores.ensemble = result.ensemble_scores || result.scores || null;
-allScores.yolo = result.yolo_scores || null;
-allScores.resnet = result.resnet_scores || null;
+    allScores.ensemble = result.ensemble_scores || result.scores || null;
+    allScores.yolo = result.yolo_scores || null;
+    allScores.resnet = result.resnet_scores || null;
 
     document.querySelectorAll('.segmented-control button').forEach(btn => {
         if (btn.dataset.model === 'resnet' && !allScores.resnet) btn.style.display = 'none';
@@ -689,7 +588,7 @@ if (storedResult) {
     }
 }
 
-// PDF Logic
+// PDF
 document.getElementById('download-btn').addEventListener('click', async function() {
     try {
         const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
@@ -702,7 +601,7 @@ document.getElementById('download-btn').addEventListener('click', async function
     }
 });
 
-// Chat Logic
+// Chat
 function makeBubble(text, isUser) {
     const el = document.createElement('div');
     el.className = 'chat-bubble ' + (isUser ? 'user' : 'ai');
@@ -711,22 +610,23 @@ function makeBubble(text, isUser) {
 }
 
 async function sendChat() {
-const input = document.getElementById('chat-input');
-const chatWindow = document.getElementById('chat-window');
-const message = input.value.trim();
-if (!message) return;
+    const input = document.getElementById('chat-input');
+    const chatWindow = document.getElementById('chat-window');
+    const message = input.value.trim();
+    if (!message) return;
 
-input.value = '';
-input.disabled = true;
+    input.value = '';
+    input.disabled = true;
 
     chatWindow.appendChild(makeBubble(message, true));
     const typingBubble = makeBubble('...', false);
+    typingBubble.className += ' chat-bubble-typing';
     chatWindow.appendChild(typingBubble);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
-let analysisResults = null;
-try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
-const imageData = localStorage.getItem('uploadedImageData') || null;
+    let analysisResults = null;
+    try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
+    const imageData = localStorage.getItem('uploadedImageData') || null;
 
     try {
         const res = await fetch('/chat', {
@@ -736,12 +636,14 @@ const imageData = localStorage.getItem('uploadedImageData') || null;
         });
         const data = await res.json();
         typingBubble.textContent = data.reply || data.error || 'Something went wrong.';
+        typingBubble.className = 'chat-bubble ai';
     } catch (e) {
         typingBubble.textContent = 'Could not connect. Please try again.';
+        typingBubble.className = 'chat-bubble ai chat-bubble-error';
     }
 
-input.disabled = false;
-input.focus();
-chatWindow.scrollTop = chatWindow.scrollHeight;
+    input.disabled = false;
+    input.focus();
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 {% endblock %}

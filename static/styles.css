@@ -174,14 +174,15 @@ li {
     background: rgba(42, 75, 124, 0.08);
     font-size: 0.78rem;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--primary);
 }
 
 .hero-header {
     font-size: clamp(2.4rem, 3.3vw, 3.8rem);
-    line-height: 1.02;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
     max-width: 760px;
 }
 
@@ -206,46 +207,45 @@ li {
 
 .upload-panel {
     display: grid;
-    grid-template-columns: 1fr 1.15fr;
-    gap: 28px;
+    grid-template-columns: 280px 1fr;
+    gap: 36px;
     align-items: stretch;
 }
 
 .upload-intro {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .upload-intro h2 {
     font-size: 1.55rem;
+    letter-spacing: -0.02em;
     margin-bottom: 0;
+    line-height: 1.15;
 }
 
 .upload-intro p {
     max-width: 560px;
+    line-height: 1.65;
 }
 
-.feature-list {
-    list-style: none;
-    display: grid;
-    gap: 14px;
-    padding-left: 0;
-}
-
-.feature-list li {
+.capability-tags {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    color: var(--muted-foreground);
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
 }
 
-.feature-list li::before {
-    content: '•';
+.capability-tag {
+    font-size: 0.775rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--primary);
-    font-weight: 700;
-    line-height: 1;
-    margin-top: 4px;
+    background: rgba(0, 113, 227, 0.07);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
 }
 
 .upload-widget {
