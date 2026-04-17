@@ -597,7 +597,7 @@ const heatmapCache = {};
 let heatmapLoading = false;
 
 function heatmapModelKey() {
-    return activeModel === 'yolo' ? 'yolo' : 'resnet';
+return activeModel === 'yolo' ? 'yolo' : 'resnet';
 }
 
 document.getElementById('toggleHeatmap').addEventListener('click', async function () {
@@ -652,16 +652,16 @@ document.getElementById('back-btn').addEventListener('click', () => window.locat
 
 const now = new Date();
 document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
 });
 
 const storedImage = localStorage.getItem('uploadedImageData');
 if (storedImage) document.getElementById('result-image').src = storedImage;
 
 function initModelToggle(result) {
-    allScores.ensemble = result.ensemble_scores || result.scores || null;
-    allScores.yolo     = result.yolo_scores || null;
-    allScores.resnet   = result.resnet_scores || null;
+allScores.ensemble = result.ensemble_scores || result.scores || null;
+allScores.yolo = result.yolo_scores || null;
+allScores.resnet = result.resnet_scores || null;
 
     document.querySelectorAll('.segmented-control button').forEach(btn => {
         if (btn.dataset.model === 'resnet' && !allScores.resnet) btn.style.display = 'none';
@@ -711,22 +711,22 @@ function makeBubble(text, isUser) {
 }
 
 async function sendChat() {
-    const input = document.getElementById('chat-input');
-    const chatWindow = document.getElementById('chat-window');
-    const message = input.value.trim();
-    if (!message) return;
+const input = document.getElementById('chat-input');
+const chatWindow = document.getElementById('chat-window');
+const message = input.value.trim();
+if (!message) return;
 
-    input.value = '';
-    input.disabled = true;
+input.value = '';
+input.disabled = true;
 
     chatWindow.appendChild(makeBubble(message, true));
     const typingBubble = makeBubble('...', false);
     chatWindow.appendChild(typingBubble);
     chatWindow.scrollTop = chatWindow.scrollHeight;
 
-    let analysisResults = null;
-    try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
-    const imageData = localStorage.getItem('uploadedImageData') || null;
+let analysisResults = null;
+try { analysisResults = JSON.parse(localStorage.getItem('analysisResult')); } catch {}
+const imageData = localStorage.getItem('uploadedImageData') || null;
 
     try {
         const res = await fetch('/chat', {
@@ -740,8 +740,8 @@ async function sendChat() {
         typingBubble.textContent = 'Could not connect. Please try again.';
     }
 
-    input.disabled = false;
-    input.focus();
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+input.disabled = false;
+input.focus();
+chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 {% endblock %}
