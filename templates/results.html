@@ -307,6 +307,7 @@
                     <button class="active" data-model="ensemble" onclick="switchModel('ensemble')">Ensemble</button>
                     <button data-model="resnet" onclick="switchModel('resnet')">ResNet50</button>
                     <button data-model="yolo" onclick="switchModel('yolo')">YOLOv8</button>
+                    <button data-model="best" onclick="switchModel('best')">Best</button>
                 </div>
             </div>
             <div id="diseaseResults"></div>
@@ -453,7 +454,7 @@ function displayResults(scores) {
 }
 
 // Model toggle
-let allScores = { ensemble: null, yolo: null, resnet: null };
+let allScores = { ensemble: null, yolo: null, resnet: null, best: null };
 let activeModel = 'ensemble';
 const modelLabels = {
     ensemble: 'Combined prediction (averaged from both models)',
@@ -497,7 +498,9 @@ const heatmapCache = {};
 let heatmapLoading = false;
 
 function heatmapModelKey() {
-    return activeModel === 'yolo' ? 'yolo' : 'resnet';
+    if (activeModel === 'yolo') return 'yolo';
+    if (activeModel === 'best') return 'best';
+    return 'resnet';
 }
 
 document.getElementById('toggleHeatmap').addEventListener('click', async function () {
@@ -561,13 +564,15 @@ function initModelToggle(result) {
     allScores.ensemble = result.ensemble_scores || result.scores || null;
     allScores.yolo = result.yolo_scores || null;
     allScores.resnet = result.resnet_scores || null;
+    allScores.best = result.best_scores || null;
 
     document.querySelectorAll('.segmented-control button').forEach(btn => {
         if (btn.dataset.model === 'resnet' && !allScores.resnet) btn.style.display = 'none';
         if (btn.dataset.model === 'yolo' && !allScores.yolo) btn.style.display = 'none';
+        if (btn.dataset.model === 'best' && !allScores.best) btn.style.display = 'none';
     });
 
-    const preferred = allScores.ensemble ? 'ensemble' : allScores.resnet ? 'resnet' : 'yolo';
+    const preferred = allScores.ensemble ? 'ensemble' : allScores.resnet ? 'resnet' : allScores.best ? 'best' : 'yolo';
     switchModel(preferred);
 }
 
