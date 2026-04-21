@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A Flask web app for skin disease detection. It classifies skin lesions into 5 conditions (Melanoma, Basal Cell Carcinoma, Eczema, Psoriasis, Tinea Ringworm) using a YOLOv8 model exported to ONNX, with a Gemini-powered chatbot for follow-up questions.
+A Flask web app for skin disease detection. It classifies skin lesions into 5 conditions (Melanoma, Basal Cell Carcinoma, Eczema, Psoriasis, Tinea Ringworm) using a YOLOv8 ONNX model (the underlying best_model is YOLOv26, exported to ONNX as YOLOv8), with a Gemini-powered chatbot for follow-up questions.
 
 ## Running the App
 
