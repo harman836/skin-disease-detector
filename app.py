@@ -12,7 +12,6 @@ import onnxruntime as ort
 import torch
 import torchvision.models as tv_models
 import torchvision.transforms as transforms
-from ultralytics import YOLO
 
 # --- ADDED FOR CHATBOT ---
 from google import genai as google_genai
@@ -34,10 +33,9 @@ IMAGE_SIZE = (224, 224)  # Target image size
 
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-# --- ADDED FOR CHATBOT ---
+#  ADDED FOR CHATBOT 
 api_key = os.getenv("GEMINI_API_KEY")
-
-# Let's print this to the terminal so we can see if it worked!
+# print this to the terminal to check if LLM works!
 print(f"--- DEBUG: Looking for .env file at: {env_path} ---")
 _GEMINI_SYSTEM_PROMPT = (
     "You are a concise skin health assistant embedded in a skin disease detection app. "
@@ -104,30 +102,6 @@ def _load_resnet_model():
         print(f"--- WARNING: ResNet50 not found at {_RESNET_PATH} ---")
 
 _load_resnet_model()
-
-# Load best.pt model at startup
-_BEST_PATH = os.path.join(os.path.dirname(__file__), 'best_model.pt')
-_best_model = None
-_BEST_LABEL_MAP = {
-    'bcc': 'Basal Cell Carcinoma',
-    'eczema': 'Eczema',
-    'melanoma': 'Melanoma',
-    'psoriasis': 'Psoriasis',
-    'tinea': 'Tinea Ringworm',
-}
-
-def _load_best_model():
-    global _best_model
-    if os.path.exists(_BEST_PATH):
-        try:
-            _best_model = YOLO(_BEST_PATH)
-            print(f"--- best.pt loaded ({len(_best_model.names)} classes) ---")
-        except Exception as e:
-            print(f"--- WARNING: Could not load best.pt: {e} ---")
-    else:
-        print(f"--- WARNING: best.pt not found at {_BEST_PATH} ---")
-
-_load_best_model()
 
 # Global dictionary to store task progress
 TASKS = {}
@@ -300,20 +274,6 @@ def run_resnet50_inference_array(img_np):
     return probs
 
 
-def run_best_inference(filepath):
-    """Run best.pt inference. Returns scores dict keyed by display class names."""
-    if _best_model is None:
-        raise RuntimeError('best.pt model not loaded.')
-    result = _best_model(filepath, verbose=False)[0]
-    probs = result.probs.data.cpu().numpy()
-    raw_names = _best_model.names
-    scores = {
-        _BEST_LABEL_MAP.get(raw_names[i], raw_names[i]): round(float(probs[i]), 4)
-        for i in range(len(probs))
-    }
-    return scores
-
-
 def run_onnx_inference(filepath):
     """Run YOLOv8 classification ONNX inference on an image file."""
     img = Image.open(filepath).convert('RGB')
@@ -366,29 +326,24 @@ def process_image(filename):
             TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 38})
             resnet_scores, _, _ = run_resnet50_inference(filepath)
 
-        best_scores = None
-        if _best_model is not None:
-            TASKS[task_id].update({'status': 'Running best.pt analysis...', 'progress': 45})
-            best_scores = run_best_inference(filepath)
-
-        if yolo_scores is None and resnet_scores is None and best_scores is None:
+        if yolo_scores is None and resnet_scores is None:
             raise RuntimeError('No AI models loaded. Please install required packages (onnxruntime, torch, torchvision).')
 
-        # Ensemble: equal weight across available models
-        available = [s for s in [yolo_scores, resnet_scores, best_scores] if s is not None]
-        if len(available) > 1:
-            all_classes = list(available[0].keys())
+        # Ensemble: weight ResNet50 2:1 over YOLOv8 (ResNet50 is more accurate)
+        if resnet_scores is not None and yolo_scores is not None:
             ensemble_scores = {
-                cls: round(sum(s[cls] for s in available) / len(available), 4)
-                for cls in all_classes
+                cls: round((resnet_scores[cls] * 2 + yolo_scores[cls]) / 3, 4)
+                for cls in yolo_scores
             }
-        elif len(available) == 1:
-            ensemble_scores = available[0]
+        elif resnet_scores is not None:
+            ensemble_scores = resnet_scores
+        elif yolo_scores is not None:
+            ensemble_scores = yolo_scores
         else:
             raise RuntimeError('No models available')
 
-        # Primary result driven by ensemble
-        primary_scores = ensemble_scores
+        # Primary result driven by ResNet50 when available, else ensemble
+        primary_scores = resnet_scores if resnet_scores is not None else ensemble_scores
         top_idx = max(primary_scores, key=primary_scores.get)
         confidence = round(ensemble_scores[top_idx] * 100, 1)
         sorted_scores = sorted(ensemble_scores.items(), key=lambda x: x[1], reverse=True)
@@ -416,7 +371,6 @@ def process_image(filename):
             'scores': ensemble_scores,
             'yolo_scores': yolo_scores,
             'resnet_scores': resnet_scores,
-            'best_scores': best_scores,
             'ensemble_scores': ensemble_scores,
             'yolo_heatmap': yolo_heatmap,
             'resnet_heatmap': resnet_heatmap,
@@ -459,28 +413,14 @@ def run_onnx_inference_array(img_np):
     return probs
 
 
-def run_best_inference_array(img_np):
-    """Run best.pt inference on a 224x224 RGB numpy array."""
-    if _best_model is None:
-        raise RuntimeError('best.pt model not loaded.')
-    img = Image.fromarray(img_np.astype(np.uint8))
-    result = _best_model(img, verbose=False)[0]
-    return result.probs.data.cpu().numpy()
-
-
 def generate_heatmap(filepath, model='yolo', progress_callback=None):
     """
     Occlusion sensitivity heatmap: occlude each patch in a 7x7 grid,
     measure confidence drop, then colormap and blend over the original image.
-    Supports model='yolo', 'resnet', or 'best'.
+    Supports model='yolo' or model='resnet'.
     progress_callback(pct) is called after each row with a 0-100 value.
     """
-    if model == 'resnet':
-        infer_fn = run_resnet50_inference_array
-    elif model == 'best':
-        infer_fn = run_best_inference_array
-    else:
-        infer_fn = run_onnx_inference_array
+    infer_fn = run_resnet50_inference_array if model == 'resnet' else run_onnx_inference_array
 
     img = Image.open(filepath).convert('RGB').resize((224, 224))
     img_np = np.array(img)
@@ -528,9 +468,7 @@ def heatmap(filename):
     model = request.args.get('model', 'yolo')
     if model == 'resnet' and _resnet_model is None:
         return jsonify({'error': 'ResNet50 model not loaded'}), 500
-    if model == 'best' and _best_model is None:
-        return jsonify({'error': 'best.pt model not loaded'}), 500
-    if model not in ('resnet', 'best') and _ort_session is None:
+    if model != 'resnet' and _ort_session is None:
         return jsonify({'error': 'YOLOv8 model not loaded'}), 500
     try:
         return jsonify({'heatmap': generate_heatmap(filepath, model=model)})

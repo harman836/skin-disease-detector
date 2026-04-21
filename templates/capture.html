@@ -7,84 +7,102 @@
 {% block content %}
 <div class="container animate-fade-in">
 
-    <!-- Header Group -->
-    <header class="hero-group">
-        <i data-lucide="camera" style="color: var(--primary); width: 40px; height: 40px;"></i>
-        <h1 class="hero-header">Capture Image</h1>
-        <p class="subtitle">Focus on the area of concern under natural lighting.</p>
-    </header>
+    <!-- Header -->
+    <section class="hero-panel">
+        <i data-lucide="camera" style="width: 40px; height: 40px; color: var(--primary);"></i>
+        <h1 class="hero-header" style="font-size: clamp(1.8rem, 2.6vw, 2.8rem);">Capture image</h1>
+        <p class="hero-copy">Center the affected area in the guide ring. Use natural lighting for best results.</p>
+    </section>
 
     <!-- Camera Card -->
-    <div class="card camera-card">
+    <div class="card" style="max-width: 680px; width: 100%; margin: 0 auto; padding: 28px; display: flex; flex-direction: column; gap: 20px;">
 
-        <!-- Camera Viewport -->
-        <div class="camera-viewport">
-            <video id="camera-feed" autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
+        <!-- Viewport -->
+        <div style="position: relative; width: 100%; aspect-ratio: 4/3; background: #111; border-radius: var(--radius-m); overflow: hidden;">
+            <video id="camera-feed" autoplay playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
 
-            <!-- Overlay Guides -->
-            <div class="camera-overlay">
-                <div class="camera-guide"></div>
+            <!-- Corner guides -->
+            <div style="position: absolute; top: 14px; left: 14px; width: 22px; height: 22px; border-top: 2px solid rgba(255,255,255,0.6); border-left: 2px solid rgba(255,255,255,0.6); border-radius: 3px 0 0 0;"></div>
+            <div style="position: absolute; top: 14px; right: 14px; width: 22px; height: 22px; border-top: 2px solid rgba(255,255,255,0.6); border-right: 2px solid rgba(255,255,255,0.6); border-radius: 0 3px 0 0;"></div>
+            <div style="position: absolute; bottom: 14px; left: 14px; width: 22px; height: 22px; border-bottom: 2px solid rgba(255,255,255,0.6); border-left: 2px solid rgba(255,255,255,0.6); border-radius: 0 0 0 3px;"></div>
+            <div style="position: absolute; bottom: 14px; right: 14px; width: 22px; height: 22px; border-bottom: 2px solid rgba(255,255,255,0.6); border-right: 2px solid rgba(255,255,255,0.6); border-radius: 0 0 3px 0;"></div>
+
+            <!-- Status pill -->
+            <div id="status-pill" style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); padding: 4px 14px; border-radius: 99px; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                <div id="status-dot" style="width: 7px; height: 7px; border-radius: 50%; background: #4ade80; flex-shrink: 0;"></div>
+                <span id="status-text" style="color: white; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Ready</span>
             </div>
 
-            <!-- Preview Overlay (hidden by default) -->
-            <div class="preview-overlay" id="preview-container">
-                <img id="preview-image" src="" alt="Preview">
+            <!-- Back button -->
+            <button id="back-btn" style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.45); border: none; border-radius: 99px; padding: 6px 12px 6px 8px; display: flex; align-items: center; gap: 5px; cursor: pointer; color: white; font-size: 12px; font-family: inherit;">
+                <i data-lucide="chevron-left" style="width: 14px; height: 14px;"></i>
+                Back
+            </button>
 
-                <!-- Quality Warning Banner (hidden until a warning exists) -->
-                <div id="quality-warning-banner" style="display: none; margin: 8px 12px 0; background: var(--color-warning); border: 1px solid var(--color-warning-foreground); border-radius: 10px; padding: 10px 14px; text-align: left;">
-                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                        <i data-lucide="triangle-alert" style="width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; color: var(--color-warning-foreground);"></i>
-                        <div>
-                            <p style="margin: 0 0 2px; font-weight: 600; font-size: 12px; color: var(--color-warning-foreground);">Image quality issue</p>
-                            <p id="quality-warning-text" style="margin: 0 0 2px; font-size: 11px; color: var(--color-warning-foreground);"></p>
-                            <p style="margin: 0; font-size: 11px; color: var(--color-warning-foreground); opacity: 0.85;">Retake for better accuracy, or continue anyway.</p>
-                        </div>
+            <!-- Flash toggle -->
+            <button id="flash-btn" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.4); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <i data-lucide="zap-off" id="flash-icon" style="width: 16px; height: 16px; color: rgba(255,255,255,0.75);"></i>
+            </button>
+
+            <!-- Preview overlay -->
+            <div id="preview-container" style="display: none; position: absolute; inset: 0; background: #111; flex-direction: column;">
+                <img id="preview-image" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+
+                <!-- Quality warning -->
+                <div id="quality-warning-banner" style="display: none; position: absolute; bottom: 0; left: 0; right: 0; background: rgba(202,138,4,0.92); backdrop-filter: blur(4px); padding: 10px 14px; display: flex; gap: 10px; align-items: flex-start;">
+                    <i data-lucide="triangle-alert" style="width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; color: #fff;"></i>
+                    <div>
+                        <p style="margin: 0 0 2px; font-weight: 600; font-size: 12px; color: #fff; font-family: 'Inter', sans-serif;">Image quality issue</p>
+                        <p id="quality-warning-text" style="margin: 0; font-size: 11px; color: rgba(255,255,255,0.9); font-family: 'Inter', sans-serif;"></p>
                     </div>
                 </div>
-
-                <div class="preview-actions">
-                    <button class="btn btn-secondary" id="retake-btn">
-                        <i data-lucide="rotate-ccw"></i>
-                        <span>Retake</span>
-                    </button>
-                    <button class="btn btn-primary" id="confirm-btn">
-                        <i data-lucide="check"></i>
-                        <span>Use Photo</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Status Top Bar -->
-            <div
-                style="position: absolute; top: 16px; left: 16px; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 99px; backdrop-filter: blur(4px);">
-                <div id="status-dot"
-                    style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-success-foreground);">
-                </div>
-                <span id="status-text"
-                    style="color: white; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Ready</span>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="camera-controls">
-            <button class="btn btn-secondary" id="back-btn" style="width: auto; border: none; background: none;"
-                title="Go back">
-                <i data-lucide="arrow-left"></i>
+        <!-- Shutter controls -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 8px;">
+
+            <button id="gallery-btn" style="width: 48px; height: 48px; border-radius: var(--radius-s); background: rgba(243,246,251,0.92); border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm);" title="Upload from gallery">
+                <i data-lucide="image" style="width: 18px; height: 18px; color: var(--muted-foreground);"></i>
             </button>
 
-            <button class="capture-trigger" id="capture-btn" title="Capture">
-                <i data-lucide="camera"></i>
+            <button id="capture-btn" class="capture-trigger" title="Capture">
+                <i data-lucide="camera" style="width: 24px; height: 24px; color: var(--primary);"></i>
             </button>
 
-            <div style="width: 44px;"></div> <!-- Spacer for symmetry -->
+            <button id="focus-btn" style="width: 48px; height: 48px; border-radius: 50%; background: rgba(243,246,251,0.92); border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm);" title="Toggle zoom">
+                <i data-lucide="scan" style="width: 18px; height: 18px; color: var(--muted-foreground);"></i>
+            </button>
+        </div>
+
+        <!-- Preview action buttons -->
+        <div id="preview-actions" style="display: none; gap: 12px;">
+            <button id="retake-btn" class="btn btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i data-lucide="rotate-ccw" style="width: 16px; height: 16px;"></i>
+                <span>Retake</span>
+            </button>
+            <button id="confirm-btn" class="btn btn-primary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                <span>Use photo</span>
+            </button>
+        </div>
+
+        <!-- Tips -->
+        <div class="quality-warning" style="background: rgba(42,75,124,0.05); border-color: rgba(42,75,124,0.1);">
+            <i data-lucide="info" style="width: 18px; height: 18px; color: var(--primary); margin-top: 0;"></i>
+            <div>
+                <p class="quality-title" style="color: var(--primary);">Tips for a good photo</p>
+                <p style="margin: 0; font-size: 0.92rem;">Keep the lens clean · Use natural daylight · Hold steady · Fill the guide corners with the lesion</p>
+            </div>
         </div>
     </div>
 
-    <!-- Warning Disclaimer -->
-    <div class="medical-disclaimer" style="width: 100%;">
-        <p>Ensure the lens is clean and the lesion is centered for the best analysis results.</p>
+    <!-- Disclaimer -->
+    <div class="medical-disclaimer" style="align-self: center;">
+        <strong>Medical disclaimer:</strong> This tool is for informational screening only and does not replace professional medical advice. Always consult a licensed dermatologist.
     </div>
+
 </div>
 {% endblock %}
 
@@ -93,111 +111,167 @@ const video = document.getElementById('camera-feed');
 const canvas = document.getElementById('canvas');
 const captureBtn = document.getElementById('capture-btn');
 const backBtn = document.getElementById('back-btn');
-const previewContainer = document.getElementById('preview-container');
-const previewImage = document.getElementById('preview-image');
 const retakeBtn = document.getElementById('retake-btn');
 const confirmBtn = document.getElementById('confirm-btn');
+const previewContainer = document.getElementById('preview-container');
+const previewImage = document.getElementById('preview-image');
+const previewActions = document.getElementById('preview-actions');
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const qualityWarningBanner = document.getElementById('quality-warning-banner');
 const qualityWarningText = document.getElementById('quality-warning-text');
+const flashBtn = document.getElementById('flash-btn');
+const galleryBtn = document.getElementById('gallery-btn');
 
 let stream = null;
 let capturedImageBlob = null;
 let uploadedFilename = null;
+let flashEnabled = false;
+let torch = null;
+
+function setStatus(label, color) {
+    statusText.textContent = label;
+    statusDot.style.background = color;
+}
 
 async function startCamera() {
-try {
-stream = await navigator.mediaDevices.getUserMedia({
-video: { facingMode: 'environment' }
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1920 },
+                height: { ideal: 1440 }
+            }
+        });
+        video.srcObject = stream;
+
+        const track = stream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities?.() || {};
+        if (capabilities.torch) {
+            torch = track;
+            flashBtn.style.display = 'flex';
+        } else {
+            flashBtn.style.display = 'none';
+        }
+
+        setStatus('Ready', '#4ade80');
+    } catch (error) {
+        console.error('Camera error:', error);
+        setStatus('Camera error', '#f87171');
+        alert('Unable to access camera. Please check permissions.');
+    }
+}
+
+flashBtn.addEventListener('click', async () => {
+    if (!torch) return;
+    flashEnabled = !flashEnabled;
+    await torch.applyConstraints({ advanced: [{ torch: flashEnabled }] });
+    const icon = document.getElementById('flash-icon');
+    icon.setAttribute('data-lucide', flashEnabled ? 'zap' : 'zap-off');
+    icon.style.color = flashEnabled ? '#facc15' : 'rgba(255,255,255,0.75)';
+    lucide.createIcons();
 });
-video.srcObject = stream;
-statusText.textContent = 'Ready';
-statusDot.style.background = '#3D8A5A';
-} catch (error) {
-console.error('Error accessing camera:', error);
-statusText.textContent = 'Camera Error';
-statusDot.style.background = '#D89575';
-alert('Unable to access camera. Please check permissions.');
-}
-}
+
+galleryBtn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        capturedImageBlob = file;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            previewImage.src = ev.target.result;
+            showPreview();
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+});
 
 function captureImage() {
-canvas.width = video.videoWidth;
-canvas.height = video.videoHeight;
-const ctx = canvas.getContext('2d');
-ctx.drawImage(video, 0, 0);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
 
-canvas.toBlob((blob) => {
-capturedImageBlob = blob;
-const reader = new FileReader();
-reader.onload = (e) => {
-previewImage.src = e.target.result;
-previewContainer.classList.add('show');
-statusText.textContent = 'Preview';
-};
-reader.readAsDataURL(blob);
-}, 'image/jpeg', 0.95);
+    captureBtn.style.transform = 'scale(0.92)';
+    setTimeout(() => captureBtn.style.transform = '', 120);
+
+    canvas.toBlob((blob) => {
+        capturedImageBlob = blob;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            showPreview();
+        };
+        reader.readAsDataURL(blob);
+    }, 'image/jpeg', 0.95);
+}
+
+function showPreview() {
+    previewContainer.style.display = 'flex';
+    previewActions.style.display = 'flex';
+    setStatus('Preview', '#60a5fa');
 }
 
 function retakeImage() {
-previewContainer.classList.remove('show');
-capturedImageBlob = null;
-uploadedFilename = null;
-qualityWarningBanner.style.display = 'none';
-statusText.textContent = 'Ready';
+    previewContainer.style.display = 'none';
+    previewActions.style.display = 'none';
+    capturedImageBlob = null;
+    uploadedFilename = null;
+    qualityWarningBanner.style.display = 'none';
+    confirmBtn.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;"></i><span>Use photo</span>';
+    lucide.createIcons();
+    setStatus('Ready', '#4ade80');
 }
 
 async function uploadImage() {
-if (!capturedImageBlob) return;
+    if (!capturedImageBlob) return;
 
-// If already uploaded (warning shown), proceed to loading
-if (uploadedFilename) {
-window.location.href = `/loading?image=${encodeURIComponent(uploadedFilename)}`;
-return;
-}
+    if (uploadedFilename) {
+        window.location.href = `/loading?image=${encodeURIComponent(uploadedFilename)}`;
+        return;
+    }
 
-const formData = new FormData();
-formData.append('file', capturedImageBlob, 'capture.jpg');
+    const formData = new FormData();
+    formData.append('file', capturedImageBlob, 'capture.jpg');
 
-try {
-statusText.textContent = 'Uploading...';
-confirmBtn.disabled = true;
+    try {
+        setStatus('Uploading…', '#60a5fa');
+        confirmBtn.disabled = true;
 
-const response = await fetch('/upload', { method: 'POST', body: formData });
-const data = await response.json();
+        const response = await fetch('/upload', { method: 'POST', body: formData });
+        const data = await response.json();
 
-if (data.success) {
-localStorage.setItem('uploadedImageData', data.imageData);
-uploadedFilename = data.filename;
+        if (data.success) {
+            localStorage.setItem('uploadedImageData', data.imageData);
+            uploadedFilename = data.filename;
 
-if (data.qualityWarning) {
-// Show warning — don't redirect yet
-qualityWarningText.textContent = data.qualityWarning;
-qualityWarningBanner.style.display = 'block';
-lucide.createIcons();
-statusText.textContent = 'Quality Warning';
-statusDot.style.background = '#D4A64A';
-confirmBtn.innerHTML = '<i data-lucide="arrow-right"></i><span>Continue Anyway</span>';
-lucide.createIcons();
-confirmBtn.disabled = false;
-} else {
-statusText.textContent = 'Uploaded!';
-window.location.href = `/loading?image=${encodeURIComponent(data.filename)}`;
-}
-} else {
-statusText.textContent = 'Upload Failed';
-statusDot.style.background = '#D89575';
-confirmBtn.disabled = false;
-alert('Upload failed: ' + (data.error || 'Unknown error'));
-}
-} catch (error) {
-console.error('Upload error:', error);
-statusText.textContent = 'Error';
-statusDot.style.background = '#D89575';
-confirmBtn.disabled = false;
-alert('Error uploading image');
-}
+            if (data.qualityWarning) {
+                qualityWarningText.textContent = data.qualityWarning;
+                qualityWarningBanner.style.display = 'flex';
+                lucide.createIcons();
+                setStatus('Quality warning', '#facc15');
+                confirmBtn.innerHTML = '<i data-lucide="arrow-right" style="width:16px;height:16px;"></i><span>Continue anyway</span>';
+                lucide.createIcons();
+                confirmBtn.disabled = false;
+            } else {
+                setStatus('Uploaded!', '#4ade80');
+                window.location.href = `/loading?image=${encodeURIComponent(data.filename)}`;
+            }
+        } else {
+            setStatus('Upload failed', '#f87171');
+            confirmBtn.disabled = false;
+            alert('Upload failed: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Upload error:', error);
+        setStatus('Error', '#f87171');
+        confirmBtn.disabled = false;
+        alert('Error uploading image. Please try again.');
+    }
 }
 
 captureBtn.addEventListener('click', captureImage);
@@ -207,9 +281,7 @@ backBtn.addEventListener('click', () => window.location.href = '/');
 
 startCamera();
 
-        window.addEventListener('beforeunload', () => {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-        });
+window.addEventListener('beforeunload', () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+});
 {% endblock %}
