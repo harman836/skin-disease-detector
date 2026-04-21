@@ -12,6 +12,8 @@ import onnxruntime as ort
 import torch
 import torchvision.models as tv_models
 import torchvision.transforms as transforms
+from ultralytics import YOLO
+
 
 # --- ADDED FOR CHATBOT ---
 from google import genai as google_genai
@@ -102,6 +104,42 @@ def _load_resnet_model():
         print(f"--- WARNING: ResNet50 not found at {_RESNET_PATH} ---")
 
 _load_resnet_model()
+
+# Load YOLOv26 (best_model.pt)
+_BEST_MODEL_PATH = os.path.join(os.path.dirname(__file__), 'best_model.pt')
+_best_model = None
+
+def _load_best_model():
+    global _best_model
+    if os.path.exists(_BEST_MODEL_PATH):
+        try:
+            _best_model = YOLO(_BEST_MODEL_PATH)
+            print("--- YOLOv26 model loaded successfully ---")
+        except Exception as e:
+            print(f"--- WARNING: Could not load YOLOv26: {e} ---")
+    else:
+        print(f"--- WARNING: best_model.pt not found at {_BEST_MODEL_PATH} ---")
+
+_load_best_model()
+
+def run_best_model_inference(filepath):
+    """Run YOLOv26 (Ultralytics classification) inference."""
+    if _best_model is None:
+        return None, None, None
+
+    results = _best_model(filepath)[0]
+
+    probs = results.probs.data.cpu().numpy()
+
+    scores = {
+        _class_names[i]: round(float(probs[i]), 4)
+        for i in range(len(_class_names))
+    }
+
+    top_idx = int(np.argmax(probs))
+
+    return scores, _class_names[top_idx], round(float(probs[top_idx]) * 100, 1)
+
 
 # Global dictionary to store task progress
 TASKS = {}
@@ -322,6 +360,11 @@ def process_image(filename):
             yolo_scores, _, _ = run_onnx_inference(filepath)
 
         resnet_scores = None
+        best_scores = None
+        if _best_model is not None:
+            TASKS[task_id].update({'status': 'Running YOLOv26 analysis...', 'progress': 45})
+            best_scores, _, _ = run_best_model_inference(filepath)
+
         if _resnet_model is not None:
             TASKS[task_id].update({'status': 'Running ResNet50 analysis...', 'progress': 38})
             resnet_scores, _, _ = run_resnet50_inference(filepath)
@@ -365,15 +408,16 @@ def process_image(filename):
             resnet_heatmap = generate_heatmap(filepath, model='resnet', progress_callback=resnet_progress)
 
         result_data = {
-            'primary_diagnosis': top_idx,
-            'confidence': confidence,
-            'top3': top3,
-            'scores': ensemble_scores,
-            'yolo_scores': yolo_scores,
-            'resnet_scores': resnet_scores,
-            'ensemble_scores': ensemble_scores,
-            'yolo_heatmap': yolo_heatmap,
-            'resnet_heatmap': resnet_heatmap,
+             'primary_diagnosis': top_idx,
+        'confidence': confidence,
+        'top3': top3,
+        'scores': ensemble_scores,
+        'yolo_scores': yolo_scores,
+        'resnet_scores': resnet_scores,
+        'best_scores': best_scores, 
+        'ensemble_scores': ensemble_scores,
+        'yolo_heatmap': yolo_heatmap,
+        'resnet_heatmap': resnet_heatmap,
         }
 
         TASKS[task_id].update({'status': 'Almost done...', 'progress': 97})
